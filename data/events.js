@@ -296,9 +296,9 @@ var ALIGN = { min: -300, max: 300,
   /* 타협도에 따른 특별 사건이 나올 확률 */ eventChance: 0.08 };
 /* 적이 어느 편인가: jp = 일제 관헌·협력자 · kr = 민족 측 · jpciv = 일본인 민간인 · 없으면 중립 */
 /* 관헌: 처음 상대가 관헌이면 그 전투에서는 총성·도주·항복·처치 감시도가 붙지 않고, 대신 관헌을 쓰러뜨릴 때마다 +OFFICIAL_HEAT */
-var OFFICIALS = ['junsa', 'hyungsa', 'kenpei', 'tokko', 'kibyeong', 'gocho'];
+var OFFICIALS = ['junsa', 'hbojo', 'hyungsa', 'kenpei', 'tokko', 'kibyeong', 'gocho'];
 var OFFICIAL_HEAT = 1;
-var ENEMY_SIDE = { junsa: 'jp', hyungsa: 'jp', kenpei: 'jp', tokko: 'jp', kibyeong: 'jp', gocho: 'jp', recruiter: 'jp', youth: 'kr', ronin: 'jpciv' };
+var ENEMY_SIDE = { hbojo: 'jp', junsa: 'jp', hyungsa: 'jp', kenpei: 'jp', tokko: 'jp', kibyeong: 'jp', gocho: 'jp', recruiter: 'jp', youth: 'kr', ronin: 'jpciv' };
 var OPTION_ALIGN = {
   'jn_leaflet|조용히 읽고 지나간다': { kr: 1 },
   'jn_leaflet|한 장 떼어 품에 넣는다': { kr: 3, ok: true },
@@ -602,7 +602,7 @@ var EVENTS = {
     ] },
 
   /* 경성역 */
-  st_check: { title: '역 광장 검문', kind: 'fight',
+  st_check: { title: '역 광장 검문', kind: 'fight', inspector: '헌병',
     text: '경성역 광장. 돔 지붕 아래 시계탑이 정오를 가리킨다.\n광장 한쪽에 나무 차단봉과 탁자로 급히 꾸린 검문소가 섰다. 총검을 꽂은 헌병 둘이 조선인들만 골라 짐을 하나하나 풀어 보게 한다. 일본인들은 그 옆으로 아무렇지 않게 지나간다.\n앞줄의 노인이 보따리에서 굴비 두름을 꺼내 보이며 연신 허리를 굽힌다.\n“다음!” 헌병의 눈이 이쪽을 향한다.',
     options: [
       { label: '도민증을 내민다', check: { stat: 'edu', diff: 'normal', align: 'jp' },

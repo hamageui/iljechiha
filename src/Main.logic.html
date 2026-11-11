@@ -2,6 +2,9 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<!-- 휴대폰: 기기 폭에 맞춰 보여 준다 (없으면 980px 데스크톱 화면을 축소해서 보여 준다) -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E1B16">
 <title>일제치하</title>
 <script src="./support.js"></script>
 </head>
@@ -222,10 +225,10 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <div class="ks-bar" style="height: 10px; background: #DCCFB4; border: 1px solid #1E1B16"><div style="height: 100%; width: {{p.hpPct}}%; background: {{accent}}; transition: width .3s"></div></div>
 </div>
 <div style="flex: {{L.hudBar}}; min-width: 120px; display: flex; flex-direction: column; gap: 4px">
-<div style="display: flex; justify-content: space-between; font-size: 13px"><span style="font-weight: 700">감시도 · {{p.cityName}}</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-weight: 700">{{p.heat}} / 10</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 13px"><span style="font-weight: 700">감시도 · {{p.cityName}}</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-weight: 700">{{p.heat}} / {{p.heatMax}}</span></div>
 <div style="display: flex; gap: 2px">
-<sc-for list="{{p.heatCells}}" as="c" hint-placeholder-count="10">
-<div style="flex: 1; height: 10px; border: 1px solid #1E1B16; background: {{c.bg}}"></div>
+<sc-for list="{{p.heatCells}}" as="c" hint-placeholder-count="20">
+<div style="flex: 1; min-width: 0; height: 10px; border: 1px solid #1E1B16; background: {{c.bg}}"></div>
 </sc-for>
 </div>
 </div>
@@ -840,6 +843,8 @@ class Component extends DCLogic {
       });
       OPTION_ALIGN._applied = true;
     }
+    /* 개발자 탭(devtool.js)이 이 게임을 찾을 수 있게 */
+    if (typeof window !== 'undefined') window.__iljeGame = this;
     this.state = this.fresh();
     this.state.device = this.deviceOf(typeof window !== 'undefined' && window.innerWidth ? window.innerWidth : 1280);
     this._timer = null;
@@ -957,6 +962,26 @@ class Component extends DCLogic {
     fn(life, base);
     this.setState(Object.assign({ life: life, base: base, copyBuf: null, copyKind: null, copyMsg: '' }, this.saveLife(life, base)));
   }
+  /* 개발자 탭의 '시험해 보기': 진행 중인 게임에서 그 사건을 바로 띄운다 */
+  devOpen(table, id) {
+    var P = { EVENTS: EVENTS, LINK_EVENTS: LINK_EVENTS, ALIGN_EVENTS: ALIGN_EVENTS, QUEST_EVENTS: QUEST_EVENTS }[table];
+    var src = P && P[id];
+    if (!src) return '없는 사건입니다';
+    if (!this.state.player || ['title', 'origin', 'editor', 'end'].indexOf(this.state.screen) >= 0) return '먼저 게임을 시작(탄생)한 뒤에 시험할 수 있습니다';
+    if (this.state.rolling || this.state.qte) return '주사위·반응 판정이 끝난 뒤에 시험하세요';
+    var d = this.draft(), ev = table === 'EVENTS' ? src : Object.assign({ id: id }, src);
+    if (table === 'QUEST_EVENTS') {
+      Object.keys(QUESTS).forEach(function (qid) {
+        var Q = QUESTS[qid];
+        if (Q.start === id || Object.keys(Q.stages || {}).some(function (k) { return Q.stages[k].event === id; })) ev.quest = ev.quest || qid;
+      });
+    }
+    if (ev.loc && LOCS[ev.loc]) d.loc = ev.loc;
+    d.combat = null; d.outcome = null; d.travel = null; d.event = ev; d.screen = 'event'; d.tip = null;
+    this.log(d, '개발자 시험 — ' + (ev.title || id), 'sys');
+    this.commit(d);
+    return true;
+  }
   openEditor() { this.setState({ screen: 'editor', edStage: 0, raw: {} }); }
   closeEditor() { this.setState({ screen: 'title', raw: {} }); }
   /* 태생 화면 → 메인 화면 (이번 태생은 버린다) */
@@ -1052,7 +1077,7 @@ class Component extends DCLogic {
       if (k === 'days') { var wk = Math.max(1, Math.round(v / 7)); self.addDays(d, wk); parts.push(wk + '주 경과'); return; }
       p[k] = (p[k] || 0) + v;
       if (k === 'hp') p.hp = Math.min(p.maxHp, p.hp);
-      if (k === 'heat') p.heat = Math.max(0, Math.min(10, p.heat));
+      if (k === 'heat') p.heat = Math.max(0, Math.min(HEAT_MAX, p.heat));
       if (p[k] < 0 && k !== 'hp' && k !== 'jp' && k !== 'kr') p[k] = 0;
       if (STAT_KEYS.indexOf(k) >= 0) p[k] = Math.max(STAT_MIN, Math.min(STAT_MAX, p[k]));
       if (k === 'jp' || k === 'kr') { p[k] = Math.max(ALIGN.min, Math.min(ALIGN.max, p[k])); if (SHOW_ALIGN) parts.push((k === 'jp' ? '일제' : '민족') + ' ' + (v > 0 ? '+' : '') + v); return; }
@@ -1120,7 +1145,7 @@ class Component extends DCLogic {
       originDesc: '유년 ' + pickName('child') + ' · 결점 ' + pickName('flaw'),
       hp: maxHpOf(st.con), maxHp: maxHpOf(st.con),
       str: st.str, agi: st.agi, int: st.int, edu: st.edu, acc: st.acc, con: st.con,
-      ammo: bg.ammo, money: bg.money, medkit: bg.medkit, heat: Math.min(10, bg.heat), flags: bg.flags, daysLived: 1,
+      ammo: bg.ammo, money: bg.money, medkit: bg.medkit, heat: Math.min(HEAT_MAX, bg.heat), flags: bg.flags, daysLived: 1,
       /* 태생 기록: tags = { '태그': 횟수 }, background = { 단계id: 항목id (청소년기는 배열) } */
       tags: bg.tags, background: bg.picks,
       skills: [], loadout: [], skillBag: {}, weapons: {}, equip: { melee: 'fist', gun: null }, jp: 0, kr: 0,
@@ -1395,8 +1420,9 @@ class Component extends DCLogic {
     if (ev.noHarass) return null;
     var p = d.player, ch = (HARASS.chance + (p.heat || 0) * HARASS.perHeat) * this.harassMult(p);
     if (Math.random() >= ch) return null;
-    var nm = (ev.title || '').replace(/의 불심검문$/, '').replace(/ 둘$/, '').replace(/ 검문$/, '') || '순사';
-    if (/역 광장/.test(ev.title || '')) nm = '헌병';
+    /* 트집 잡는 사람: 사건에 inspector(무단통치기면 inspectorE1)가 있으면 그것, 없으면 불심검문 제목에서 ('순사의 불심검문' → 순사) */
+    var nm = ev.inspector ? ((this.eraOf(d.date).id === 'e1' && ev.inspectorE1) || ev.inspector)
+      : ((ev.title || '').replace(/의 불심검문$/, '').replace(/ 둘$/, '') || '순사');
     var kind = p.money > 0 && Math.random() < 0.5 ? 'rob' : 'beat';
     var txt = this.pick(HARASS_TEXT[kind]).replace(/\{nm\}/g, nm).replace('{iga}', josaIGa(nm));
     if (kind === 'rob') {
@@ -1558,14 +1584,15 @@ class Component extends DCLogic {
   makePatrol(d) {
     var era = this.eraOf(d.date), heat = d.player.heat || 0;
     var foe = this.pickPatrolFoe(heat);
-    /* 무단통치기: 헌병경찰 시대라 순사·형사 대신 헌병 (특고·체포조도 아직 없다) */
-    if (era.id === 'e1' && ['junsa', 'hyungsa', 'tokko'].indexOf(foe) >= 0) foe = 'kenpei';
-    if (era.id === 'e1' && foe === 'chepo_squad') foe = 'kenpei_squad';
+    /* 무단통치기: 헌병경찰 시대 — 순사·형사 자리에 헌병보조원 (PATROL_E1) */
+    if (era.id === 'e1' && PATROL_E1[foe]) foe = PATROL_E1[foe];
     var nm = ENCOUNTERS[foe] ? ENCOUNTERS[foe].name || ENEMIES[ENCOUNTERS[foe].foes[0]].name + ' 둘' : ENEMIES[foe].name, spec = foe, pair = false;
     if (foe === 'patrol_pair') nm = '순사 둘';
+    if (foe === 'hbojo_pair') nm = '헌병보조원 둘';
     /* 둘이 짝을 지어 다니는 검문: 감시도 2 이상에서 PATROL_PAIR 확률 */
-    if (!ENCOUNTERS[foe] && heat >= 2 && Math.random() < PATROL_PAIR) {
+    if (!ENCOUNTERS[foe] && heat >= PATROL_PAIR_FROM && Math.random() < PATROL_PAIR) {
       if (foe === 'junsa') { spec = 'patrol_pair'; pair = true; }
+      else if (foe === 'hbojo') { spec = 'hbojo_pair'; pair = true; }
       else if (foe === 'kenpei') { spec = 'kenpei_pair'; pair = true; }
     }
     var foe0 = foe; foe = spec;
@@ -1859,8 +1886,49 @@ class Component extends DCLogic {
     var exTxt = exits.map(function (x) { return (x.at < px ? '왼쪽 ' : '오른쪽 ') + self.fmtM(x.at - px) + ' ' + x.name + (self.pathCost(d.combat, d.player, x.at).blocked ? '(적이 막음)' : ''); });
     this.log(d, '빠져나갈 길 ' + exits.length + '곳 — ' + exTxt.join(' · ') + (covers.length ? ' · 엄폐물 ' + covers.map(function (cv) { return cv.name; }).join('·') : '') + (veils.length ? ' · 시야를 가리는 것 ' + veils.map(function (v) { return v.name; }).join('·') : ''), 'sys');
     if (d.combat.alarm) this.log(d, '호루라기 소리! 증원이 ' + d.combat.alarm + '합 뒤 도착한다.', 'bad');
+    /* 관헌의 태세: 모두 '생포'로 시작, 격화도는 감시도에서 (STANCE) */
+    var heat0 = d.player.heat || 0;
+    foes.forEach(function (f) { if (self.isOfficial(f)) { f.mode = 'capture'; f.esc = Math.min(STANCE.cap, heat0 * STANCE.heat); } });
     this.planAll(d.combat, d.player);
     d.combat.feedSplit = -1; d.combat.feedStale = true;
+  }
+  /* 격화: 관헌 모두(또는 한 명)의 esc 를 올린다 */
+  escalate(c, n, only) {
+    (c.foes || []).forEach(function (f) { if (f.mode && !f.out && f.hp > 0 && (!only || f.uid === only)) f.esc = Math.min(STANCE.cap, (f.esc || 0) + n); });
+  }
+  /* 매 차례: 생포 태세의 관헌이 esc% 확률로 근접/사격으로 바뀐다 · 근접 총잡이는 멀어지면 총을 뽑기도 */
+  stanceTick(d, e) {
+    var c = d.combat; if (!e.mode) return false;
+    var dist = this.distOf(c, e), hasGun = e.t.style === 'gun', nm = e.name + josaIGa(e.name);
+    if (e.mode === 'capture' && Math.random() * 100 < (e.esc || 0)) {
+      e.mode = hasGun && (c.shot || dist > STANCE.shootDist) ? 'shoot' : 'melee';
+      this.log(d, e.mode === 'shoot' ? nm + ' 포승을 내던지고 총을 뽑아 든다 — 이제 쏘려 한다!' : nm + ' 포승을 집어넣고 곤봉을 고쳐 쥔다 — 생포할 생각이 없다.', 'bad');
+      return true;
+    }
+    if (e.mode === 'melee' && hasGun && dist > STANCE.shootDist && Math.random() < STANCE.switchShoot) {
+      e.mode = 'shoot'; this.log(d, nm + ' 거리가 벌어지자 총을 뽑아 든다!', 'bad'); return true;
+    }
+    return false;
+  }
+  /* 생포 태세의 판단 */
+  decideCapture(c, p, e) {
+    var T = e.t, P = PERSONALITY[e.pers] || PERSONALITY.cautious, C = STANCE.capture, dist = this.distOf(c, e), roll = Math.random;
+    var A = function (type) { return { type: type }; }, al = this.alive(c), side = Math.sign(e.x - c.px) || 1;
+    if (c.held === e.uid) return A(p.hp <= p.maxHp * C.bindHp || (c.heldTurns || 0) >= C.bindTurns ? 'bind' : 'subdue');
+    if (e.morale < P.flee) return A('flee');
+    if (T.whistle && c.alarm === null && !e.whistled && roll() < 0.35) return A('whistle');
+    var lead = al[0];
+    if (lead && lead.uid === e.uid && !c.offered && roll() < (P.offer || 0) + C.offerPlus) return A('offer');
+    if (!c.held && dist <= TACTIC.grabReach && roll() < C.grab + (P.grabPlus || 0)) return A('grab');
+    if (dist <= T.reach) return A('subdue');
+    var nx = this.nearExit(c, p), exitOpen = !!nx && !this.pathCost(c, p, nx.at).blocked;
+    if (exitOpen && Math.sign(nx.at - c.px) === side && Math.abs(nx.at - c.px) < dist && roll() < (P.block || 0) + C.blockPlus) return A('blockExit');
+    return A('closein');
+  }
+  /* 포박: 생포 태세 관헌에게 묶여 끌려간다 — 항복과 같은 손해 + ARREST.jailWeeks 주 */
+  arrest(d, e) {
+    var extra = this.applyFx(d, { days: ARREST.jailWeeks });
+    this.surrenderEnd(d, '포박', e.name + '의 포승에 손목이 묶였다. 주재소 유치장에서 이레를 보내고, 몸수색 끝에 풀려났다.', extra, e.name + '에게 포박당했다.');
   }
   makeFoe(id, x, uid) {
     var E = ENEMIES[id] || ENEMIES.junsa, T = Object.assign({}, FOE_TACTICS._default, FOE_TACTICS[id] || {});
@@ -1954,6 +2022,8 @@ class Component extends DCLogic {
     var hpR = e.hp / e.maxHp, pHpR = p.hp / p.maxHp, side = Math.sign(e.x - c.px) || 1;
     var roll = Math.random, A = function (type) { return { type: type }; };
     if (e.stun > 0) return A('stunned');
+    /* 관헌의 태세: 생포는 따로 판단 · 근접은 총잡이라도 붙어서 때린다 · 사격은 원래 총잡이 방식 */
+    if (e.mode === 'capture') return this.decideCapture(c, p, e);
     if (c.held === e.uid) return A('attack');
     /* 사기가 꺾이면 달아난다 */
     if (e.morale < P.flee) return A('flee');
@@ -1976,7 +2046,7 @@ class Component extends DCLogic {
     var nx = this.nearExit(c, p), exitSide = nx ? Math.sign(nx.at - c.px) : 0;
     var exitOpen = !!nx && !this.pathCost(c, p, nx.at).blocked;
     if (exitOpen && exitSide === side && Math.abs(nx.at - c.px) < Math.abs(e.x - c.px) && roll() < P.block) return A('blockExit');
-    if (T.style === 'melee') {
+    if (T.style === 'melee' || e.mode === 'melee') {
       if (dist <= T.reach) return A('attack');
       return A(P.charge ? 'charge' : 'approach');
     }
@@ -2049,19 +2119,22 @@ class Component extends DCLogic {
     if (this.distOf(c, e) > TACTIC.grabReach) { this.log(d, e.name + '의 손이 허공을 움켜쥐었다.', 'sys'); return; }
     var t = this.enemyHitChance(c, p, e);
     if (this.check(t).success) {
-      c.held = e.uid; c.inCover = false;
+      c.held = e.uid; c.inCover = false; c.heldTurns = 0;
       p.hp -= 1;
       this.log(d, e.name + '에게 멱살을 잡혔다! 체력 -1 · 움직일 수 없다 · 다음 공격은 피할 수 없다', 'bad');
     } else this.log(d, e.name + '의 손을 뿌리치듯 피했다.', 'sys');
   }
-  foeAttack(d, e) {
+  foeAttack(d, e, soft) {
     var c = d.combat, p = d.player;
     var t = this.enemyHitChance(c, p, e);
     var forced = c.held === e.uid, melee = this.distOf(c, e) <= e.t.reach;
-    if (forced) { c.held = null; }
+    /* soft: 생포 태세의 제압 — 피해가 줄고, 붙잡은 손은 놓지 않는다 */
+    if (forced && !soft) { c.held = null; }
     if (forced || this.check(t).success) {
-      var dmg = this.rollSpec(e.dmg) + (e.backup ? TACTIC.backup.dmg : 0);
-      p.hp -= dmg; this.log(d, e.name + '의 공격 — ' + (forced ? '붙잡힌 채 그대로 맞았다' : '명중') + ', 체력 -' + dmg, 'foe');
+      var dmg = Math.max(1, this.rollSpec(e.dmg) + (e.backup ? TACTIC.backup.dmg : 0) - (soft ? STANCE.capture.softDmg : 0));
+      if (soft) dmg = Math.min(dmg, Math.max(0, p.hp - 1));
+      p.hp -= dmg;
+      if (soft && p.hp <= p.maxHp * STANCE.capture.bindHp) c.arrestBy = e.uid; this.log(d, e.name + (soft ? '의 곤봉 — ' : '의 공격 — ') + (forced ? '붙잡힌 채 그대로 맞았다' : '명중') + ', 체력 -' + dmg, 'foe');
       if (melee && c.inCover) { c.inCover = false; this.log(d, e.name + josaIGa(e.name) + ' 엄폐물 뒤로 파고들어 나를 끌어냈다 — 엄폐가 풀렸다.', 'bad'); }
     } else this.log(d, e.name + '의 공격 — 빗나감' + (!melee && this.coverFaces(c, e) ? ' (엄폐물에 맞았다)' : ''), 'sys');
     e.aim = 0;
@@ -2144,6 +2217,8 @@ class Component extends DCLogic {
     }
     if (target === null) return;
     var moved = Math.abs(target - c.px);
+    /* 달아나려는 기색: 출구로 가거나 표적에게서 멀어지면 관헌이 생포를 포기하기 쉬워진다 */
+    if (/^exit/.test(kind) || Math.abs(c.enemy.x - target) > Math.abs(c.enemy.x - c.px) + 0.05) this.escalate(c, STANCE.flee);
     /* 내가 움직이면 붙잡고 있던 손을 놓는다 */
     var me = this; c.foes.forEach(function (f) { if (f.grabbed > 0 && !f.out) { f.grabbed = 0; me.log(d, f.name + '을(를) 붙잡고 있던 손을 놓았다.', 'sys'); } });
     c.px = Math.max(0, Math.min(c.arena.len, target)); c.inCover = false; c.crouch = false;
@@ -2183,23 +2258,9 @@ class Component extends DCLogic {
       });
     } else if (kind === 'surrender') {
       if (!c0.offer) return;
-      var ds = this.draft(), pl = ds.player, partsS = [];
-      var hl = this.rollSpec(TACTIC.surrenderHp); pl.hp -= hl; partsS.push('체력 -' + hl);
-      var lost = Math.ceil(pl.money * TACTIC.surrenderMoney); if (lost) { pl.money -= lost; partsS.push('소지금 -' + lost + '원'); }
-      /* 불법 물품 압수는 관헌 앞에서 항복할 때만 (관헌과 시작한 전투이거나, 남은 적 중에 관헌이 있을 때) */
-      var byOfficial = !!ds.combat.official || this.alive(ds.combat).some(function (f) { return OFFICIALS.indexOf(f.id) >= 0; });
-      if (byOfficial) {
-        var conf = carriedGuns(pl).map(function (id) { return WEAPONS[id].name; });
-        var w2 = Object.assign({}, pl.weapons || {});
-        Object.keys(w2).forEach(function (id) { if (WEAPONS[id] && WEAPONS[id].contraband) { if (WEAPONS[id].slot !== 'gun') conf.push(WEAPONS[id].name); delete w2[id]; } });
-        pl.weapons = w2; pl.equip = this.equipOf(pl); pl.flags.gun = carriedGuns(pl).length > 0;
-        if (pl.ammo) { conf.push('탄환 ' + pl.ammo + '발'); pl.ammo = 0; }
-        if (conf.length) partsS.push('압수: ' + conf.join(', '));
-      }
-      partsS = partsS.concat(this.combatHeat(ds, 1)).concat(this.officialHeat(ds));
-      this.log(ds, '두 손을 들었다.', 'bad');
-      var missed = !!ds.travel; ds.travel = null;
-      this.endCombat(ds, '항복', '무릎을 꿇었다. 약속대로 실컷 얻어맞고, 가진 것을 빼앗긴 뒤 골목에 버려졌다.' + (missed ? '\n' + TRAIN_TEXT.missed : ''), partsS);
+      var ds = this.draft();
+      var offS = !!ds.combat.official || this.alive(ds.combat).some(function (f) { return OFFICIALS.indexOf(f.id) >= 0; });
+      this.surrenderEnd(ds, '항복', offS ? '두 손을 들었다. 몸을 샅샅이 뒤진 끝에 불법 소지품을 빼앗고, 훈계 몇 마디와 함께 풀어 주었다.' : '무릎을 꿇었다. 주머니를 털린 뒤 골목에 버려졌다.', [], '두 손을 들었다.');
       this.commit(ds);
     } else if (kind === 'crouch') {
       if (c0.crouch) return;
@@ -2253,6 +2314,7 @@ class Component extends DCLogic {
       });
     } else if (kind === 'flee') {
       this.roll('도주', this.fleeChance(c0, p), function (d, res) {
+        self.escalate(d.combat, STANCE.fleeAct);
         if (res.success) {
           var parts = self.combatHeat(d, 1).concat(self.officialHeat(d));
           self.log(d, '추격을 따돌렸다.', 'sys');
@@ -2260,6 +2322,25 @@ class Component extends DCLogic {
         } else { self.log(d, '도주 실패! 길이 막혔다.', 'bad'); self.spendAp(d, 1); }
       });
     }
+  }
+  /* 항복·포박의 공통 손해: 체력 · 돈 절반 · (관헌 앞이면) 불법 소지품 압수 */
+  surrenderEnd(ds, title, text, pre, logText) {
+    var pl = ds.player, partsS = (pre || []).slice();
+    /* 관헌 앞(관헌과 시작한 전투이거나 남은 적 중에 관헌이 있을 때): 불법 소지품만 압수 · 그 밖의 상대: 돈 절반을 털림 */
+    var byOfficial = !!ds.combat.official || this.alive(ds.combat).some(function (f) { return OFFICIALS.indexOf(f.id) >= 0; });
+    if (!byOfficial) { var lost = Math.ceil(pl.money * TACTIC.surrenderMoney); if (lost) { pl.money -= lost; partsS.push('소지금 -' + lost + '원'); } }
+    if (byOfficial) {
+      var conf = carriedGuns(pl).map(function (id) { return WEAPONS[id].name; });
+      var w2 = Object.assign({}, pl.weapons || {});
+      Object.keys(w2).forEach(function (id) { if (WEAPONS[id] && WEAPONS[id].contraband) { if (WEAPONS[id].slot !== 'gun') conf.push(WEAPONS[id].name); delete w2[id]; } });
+      pl.weapons = w2; pl.equip = this.equipOf(pl); pl.flags.gun = carriedGuns(pl).length > 0;
+      if (pl.ammo) { conf.push('탄환 ' + pl.ammo + '발'); pl.ammo = 0; }
+      if (conf.length) partsS.push('압수: ' + conf.join(', '));
+    }
+    partsS = partsS.concat(this.combatHeat(ds, 1)).concat(this.officialHeat(ds));
+    this.log(ds, logText, 'bad');
+    var missed = !!ds.travel; ds.travel = null;
+    this.endCombat(ds, title, text + (missed ? '\n' + TRAIN_TEXT.missed : ''), partsS);
   }
   /* 도주: 가장 가까운 적과의 거리 · 가장 빠른 추격자 · 포위 여부 */
   /* 설득: 일제 쪽 상대는 일제 타협도, 그 밖(조선인)은 민족 타협도가 통한다 */
@@ -2293,12 +2374,18 @@ class Component extends DCLogic {
         this.log(d, e.name + '의 상처에서 피가 흐른다. 체력 -' + e.bleedDmg, 'good');
         if (e.hp <= 0) { this.log(d, e.name + '이(가) 쓰러졌다.', 'good'); continue; }
       }
+      /* 태세가 바뀌면 이번 차례 행동도 새로 정한다 */
+      if (this.stanceTick(d, e)) e.intent = this.planIntent(c, p, e);
       var it = e.intent || this.planIntent(c, p, e), dist = this.distOf(c, e);
       var reach = T.reach, P = PERSONALITY[e.pers] || PERSONALITY.cautious;
       var self2 = this, sideNow = Math.sign(e.x - c.px) || 1;
       if (e.stun > 0) {
         e.stun--;
         this.log(d, e.name + '은(는) 몸을 가누지 못한다.', 'good');
+      } else if (c.held === e.uid && e.mode === 'capture') {
+        if (it.type === 'bind') { this.arrest(d, e); return; }
+        this.foeAttack(d, e, true);
+        if (c.arrestBy === e.uid) { this.arrest(d, e); return; }
       } else if (c.held === e.uid) {
         this.foeAttack(d, e);
       } else if (e.grabbed > 0) {
@@ -2323,6 +2410,10 @@ class Component extends DCLogic {
         this.log(d, e.name + '이(가) 뒤로 물러선다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe');
       } else if (it.type === 'grab' && !c.held && dist <= TACTIC.grabReach) {
         this.foeGrab(d, e);
+      } else if (e.mode === 'capture' && (it.type === 'subdue' || it.type === 'closein' || it.type === 'grab' || it.type === 'bind')) {
+        /* 생포: 닿으면 곤봉으로 제압, 아니면 붙잡을 거리까지 다가온다 (이동과 공격은 한 번에 하나) */
+        if (it.type === 'subdue' && dist <= T.reach) { this.foeAttack(d, e, true); if (c.arrestBy === e.uid) { this.arrest(d, e); return; } }
+        else { this.foeMove(c, e, TACTIC.grabReach * 0.9); e.inCover = false; this.log(d, e.name + josaIGa(e.name) + ' 포승을 쥐고 다가온다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe'); }
       } else if (it.type === 'flank' && dist <= T.speed + 2) {
         var nx = c.px - sideNow * 1.2;
         if (nx >= 0 && nx <= c.arena.len && !this.alive(c).some(function (f) { return f.uid !== e.uid && Math.abs(f.x - nx) < 0.5; })) {
@@ -2339,7 +2430,7 @@ class Component extends DCLogic {
         var cv = this.foeCoverSpot(c, e);
         if (cv) { e.x = cv.at; e.inCover = true; this.log(d, e.name + '이(가) ' + cv.name + ' 뒤로 몸을 숨긴다. (내 사격 명중 -' + TACTIC.foeCover + ')', 'foe'); }
         else this.foeAttack(d, e);
-      } else if (T.style === 'melee') {
+      } else if (T.style === 'melee' || e.mode === 'melee') {
         if (dist > reach) {
           var spd = T.speed + (it.type === 'charge' ? 1 : 0);
           var keep = T.speed; T.speed = spd; this.foeMove(c, e, reach); T.speed = keep; e.inCover = false;
@@ -2378,6 +2469,7 @@ class Component extends DCLogic {
       }
     }
     if (this.checkFoes(d)) return;
+    if (c.held) c.heldTurns = (c.heldTurns || 0) + 1; else c.heldTurns = 0;
     Object.keys(c.cd).forEach(function (k) { if (c.cd[k] > 0) c.cd[k]--; });
     c.round++; c.crouch = false;
     c.shaken = c.shakenNext ? TACTIC.shaken : 0; c.shakenNext = false;
@@ -2397,7 +2489,7 @@ class Component extends DCLogic {
   /* 선제공격: 기선을 잡는다 */
   applyAmbush(d) {
     var c = d.combat; if (!c) return;
-    c.free = (c.free || 0) + AMBUSH.ap; c.ambush = true; c.attacked = true;
+    c.free = (c.free || 0) + AMBUSH.ap; c.ambush = true; c.attacked = true; this.escalate(c, STANCE.ambush);
     if (AMBUSH.prone && c.enemy) c.enemy.prone = true;
     var parts = [];
     if (c.foes.some(function (f) { return ENEMY_SIDE[f.id] === 'jp'; })) parts = this.applyFx(d, { jp: AMBUSH.jp });
@@ -2646,6 +2738,7 @@ class Component extends DCLogic {
     this.roll(sk.name, this.tgt(this.skillTarget(sk, p, s.combat.enemy, s.combat) + grade.bonus), function (d, res) {
       var en = d.combat.enemy, cc = d.combat;
       cc.attacked = true;
+      self.escalate(cc, sk.group === 'gun' ? STANCE.shot : STANCE.attack);
       /* 잡아 둔 적: 이번 공격은 반드시 맞는다 (잡기 자체로 다시 잡는 경우는 제외) */
       if (en.grabbed > 0 && id !== 'grab') {
         en.grabbed = 0;
@@ -2656,7 +2749,7 @@ class Component extends DCLogic {
         if (!cc.shot) {
           cc.shot = true;
           var hh = cc.official ? 0 : 2 + (cc.arena && cc.arena.crowd ? 1 : 0);
-          d.player.heat = Math.min(10, d.player.heat + hh); self.log(d, '총성이 울렸다' + (cc.arena && cc.arena.crowd ? ' — 군중이 비명을 지르며 흩어진다' : '') + (hh ? '. 감시도 +' + hh : '.'), 'bad');
+          d.player.heat = Math.min(HEAT_MAX, d.player.heat + hh); self.log(d, '총성이 울렸다' + (cc.arena && cc.arena.crowd ? ' — 군중이 비명을 지르며 흩어진다' : '') + (hh ? '. 감시도 +' + hh : '.'), 'bad');
           self.alive(cc).forEach(function (f) { f.morale = (f.morale || 0) - MORALE.shot; });
           if (cc.alarm === null && !cc.backup) { cc.alarm = TACTIC.shotAlarm; self.log(d, '총성을 듣고 경찰이 몰려온다. 증원까지 ' + cc.alarm + '합.', 'bad'); }
           else if (cc.alarm !== null) { cc.alarm = Math.max(1, cc.alarm - 1); }
@@ -2673,7 +2766,8 @@ class Component extends DCLogic {
           if (res.crit) dmg *= 2;
           en.hp -= dmg; parts.push(en.name + '에게 ' + dmg + ' 피해' + (res.crit ? ' (대성공 2배)' : '') + (en.hp <= 0 ? ' — 쓰러졌다!' : ''));
           en.morale = (en.morale || 0) - dmg / en.maxHp * MORALE.hit;
-          if (en.hp <= 0) self.alive(cc).forEach(function (f) { f.morale = (f.morale || 0) - MORALE.ally; });
+          if (en.hp > 0) self.escalate(cc, STANCE.hurt, en.uid);
+          if (en.hp <= 0) { self.alive(cc).forEach(function (f) { f.morale = (f.morale || 0) - MORALE.ally; }); self.escalate(cc, STANCE.ally); }
         }
         (sk.effects || []).forEach(function (ef) {
           if (ef.minTier === 'hard' && !res.hard) return;
@@ -3079,7 +3173,7 @@ class Component extends DCLogic {
     var era = this.eraOf(s.date);
     function odds(t) { return showOdds ? (Math.round(t * 10) / 10) + '%' : ''; }
 
-    var pv = { name: '', originName: '', title: '', hp: 0, maxHp: 1, hpPct: 0, stats: [], money: 0, medkit: 0, gunText: '', heat: 0, heatCells: [], daysLived: 0, skillText: '', cityName: '', awayOn: false, awayText: '' };
+    var pv = { name: '', originName: '', title: '', hp: 0, maxHp: 1, hpPct: 0, stats: [], money: 0, medkit: 0, gunText: '', heat: 0, heatMax: 20, heatCells: [], daysLived: 0, skillText: '', cityName: '', awayOn: false, awayText: '' };
     if (p) {
       pv = { name: p.name, originName: p.originName, title: p.title, originDesc: p.originDesc || '', hp: p.hp, maxHp: p.maxHp,
         skillText: this.loadoutOf(p).map(function (id) { return SKILLS[id] ? SKILLS[id].name : id; }).join(' · ') || '없음',
@@ -3093,7 +3187,8 @@ class Component extends DCLogic {
         gunText: (function (eq) { return WEAPONS[eq.melee].name + '\n' + (eq.gun ? WEAPONS[eq.gun].name + ' ' + (UNLOCK_ALL_WEAPONS ? '탄 무한' : p.ammo + '발') : '총 없음'); })(this.equipOf(p)), daysLived: p.daysLived,
         stats: STAT_KEYS.map(function (k) { var c = STAT_COLOR[k] || '#1E1B16'; return { label: STAT_LABEL[k], val: p[k], c: c, bg: c + '14', bd: c + '59' }; }),
         awayOn: Object.keys(p.heatBy || {}).some(function (id) { return p.heatBy[id] > 0; }),
-        heatCells: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (i) { return { bg: i < p.heat ? (i >= 5 ? '#9E2B20' : '#C27A3A') : 'transparent' }; }) };
+        heatMax: HEAT_MAX,
+        heatCells: Array.apply(null, Array(HEAT_MAX)).map(function (x, i) { return { bg: i < p.heat ? (i >= 14 ? '#5E1A12' : i >= 8 ? '#9E2B20' : '#C27A3A') : 'transparent' }; }) };
     }
 
     var gpl = p ? placeById(s.goPlace) : null;
@@ -3197,6 +3292,7 @@ class Component extends DCLogic {
         return { label: g.label + (gw ? ' · ' + gw.name : ''), skills: list };
       }).filter(function (g) { return g.skills.length; });
       var status = [];
+      if (e.mode) status.push({ tipIn: tipH('stance').in, tipTap: tipH('stance').tap, text: '태세 · ' + STANCE.label[e.mode] + ' — ' + STANCE.text[e.mode] + (showOdds && e.mode === 'capture' ? ' (격화 ' + Math.round(e.esc || 0) + '%)' : '') });
       if (e.stun > 0) status.push({ tipIn: tipH('stun').in, tipTap: tipH('stun').tap, text: (e.prone ? '넘어짐' : '기절') + ' ' + e.stun + '합' });
       if (e.prone) status.push({ tipIn: tipH('prone').in, tipTap: tipH('prone').tap, text: '빈틈 · 다음 공격 명중 +20' });
       if (e.inCover) status.push({ tipIn: tipH('foeCover').in, tipTap: tipH('foeCover').tap, text: '엄폐 중 · 내 사격 명중 -' + TACTIC.foeCover + ' · 근접 공격으로 끌어낼 수 있다' });
@@ -3209,7 +3305,7 @@ class Component extends DCLogic {
       var acts = [
         { label: '엄폐', tag: cvHere ? cvHere.name + ' 뒤 · 위협이 큰 쪽 적 명중 -' + TACTIC.cover + '% · 행동력 1' : '', k: 'cover', hide: !cvHere || cmb.inCover, off: false },
         { label: '뿌리치기', tag: '근력 판정 · 성공하면 풀려난다 · 행동력 1', t: cmb.held ? this.breakChance(cmb, p) : undefined, k: 'break', hide: !cmb.held, off: false },
-        { label: '항복한다', tag: '매를 맞고 돈·불법 소지품을 빼앗긴다 · 전투 종료', k: 'surrender', hide: !cmb.offer },
+        { label: '항복한다', tag: (cmb.official || this.alive(cmb).some(function (f) { return OFFICIALS.indexOf(f.id) >= 0; }) ? '불법 소지품을 빼앗긴다' : '돈의 절반을 털린다') + ' · 전투 종료', k: 'surrender', hide: !cmb.offer },
         { label: '구급약', tag: '최대 체력의 (2d6×5)% · 남은 ' + p.medkit + '개 · 행동력 1', k: 'medkit', hide: p.medkit < 1 || p.hp >= p.maxHp, off: false }
       ];
       var nAlive = this.alive(cmb).length;
@@ -3237,7 +3333,7 @@ class Component extends DCLogic {
       var foeList = this.alive(cmb).map(function (f) {
         var on = f.uid === cmb.target, fd = self.distOf(cmb, f);
         return { uid: f.uid, name: f.name + (f.backup ? ' (증원)' : ''), hp: Math.max(0, f.hp) + '/' + f.maxHp, hpPct: Math.max(0, Math.round(f.hp / f.maxHp * 100)),
-          where: (f.x > cmb.px ? '→ ' : '← ') + self.fmtM(fd) + (f.inCover ? ' · 엄폐 중' : ''), intent: f.intent ? f.intent.text + (f.intent.read && f.intent.read.pers ? ' · ' + f.intent.read.pers : '') : '',
+          where: (f.x > cmb.px ? '→ ' : '← ') + self.fmtM(fd) + (f.inCover ? ' · 엄폐 중' : '') + (f.mode ? ' · ' + STANCE.label[f.mode] : ''), intent: f.intent ? f.intent.text + (f.intent.read && f.intent.read.pers ? ' · ' + f.intent.read.pers : '') : '',
           hit: showOdds ? (Math.round(self.enemyHitChance(cmb, p, f) * 10) / 10) + '%' : '',
           on: on, border: on ? '#E3B04B' : '#4A443A', btn: on ? '표적' : '표적으로', pick: guard('foe:' + f.uid, function () { self.setTarget(f.uid); }), tipIn: tipH('foe:' + f.uid).in };
       });
@@ -3313,7 +3409,7 @@ class Component extends DCLogic {
         statLine: (showOdds ? '명중률 ' + e.hit + '% · 회피 ' + e.evade + ' · ' : '') + '피해 ' + this.specLabel(e.dmg) + ' · ' + (e.t.style === 'gun' ? '총 · 선호 거리 ' + e.t.pref + 'm' : '근접 · ' + e.t.reach + 'm'),
         actions: acts.filter(function (a) { return !a.hide; }).map(function (a) {
           var has = showOdds && a.t !== undefined;
-          var apm = /행동력 (\d)/.exec(a.tag || ''); var short = a.k === 'surrender' ? '전투 종료 · 매·소지품 잃음' : (a.k === 'talk' || a.k === 'plea' ? '지능 판정 · ' : a.k === 'demand' ? '근력·지능 + 운 · ' : a.k === 'break' ? '근력 판정 · ' : a.k === 'medkit' ? '체력 회복 · ' : a.k === 'cover' ? '적 명중 -' + TACTIC.cover + '% · ' : '') + (apm ? '행동력 ' + apm[1] : '');
+          var apm = /행동력 (\d)/.exec(a.tag || ''); var short = a.k === 'surrender' ? '전투 종료 · ' + a.tag.split(' · ')[0] : (a.k === 'talk' || a.k === 'plea' ? '지능 판정 · ' : a.k === 'demand' ? '근력·지능 + 운 · ' : a.k === 'break' ? '근력 판정 · ' : a.k === 'medkit' ? '체력 회복 · ' : a.k === 'cover' ? '적 명중 -' + TACTIC.cover + '% · ' : '') + (apm ? '행동력 ' + apm[1] : '');
           return { label: a.label, short: short, tag: a.tag, hasChance: has, chanceText: has ? odds(a.t) : '', disabled: (rolling || !!s.qte || !!a.off) && !s.infoMode, choose: guard('act:' + a.k, function () { self.act(a.k); }), tipIn: tipH('act:' + a.k).in };
         }) };
     }

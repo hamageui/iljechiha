@@ -38,7 +38,7 @@ var STASH_SPOTS = [
    조사에 순응해 걸린 게 없어도, chance + 감시도×perHeat 확률로 트집을 잡힌다.
    돈이 있으면 rob(돈 뜯김) / beat(끌려가 맞음) 중 무작위, 돈이 없으면 beat.
    rob: 가진 돈의 robFrac(올림, 최소 1원) · beat: 체력 -(beatDmg 주사위), 시간대가 beatTime 만큼 흐른다(밤이면 그대로) */
-var HARASS = { chance: 0.2, perHeat: 0.03, robFrac: 0.5, beatDmg: { n: 1, s: 4, b: 1 }, beatTime: 1 };
+var HARASS = { chance: 0.2, perHeat: 0.015, robFrac: 0.5, beatDmg: { n: 1, s: 4, b: 1 }, beatTime: 1 };
 var HARASS_TEXT = {
   rob: [
     '“가 봐.” 하더니 다시 불러 세운다. “잠깐, 이거 무슨 돈이냐? 출처가 수상하군.” 지갑이 {nm}의 주머니로 들어갔다.',
@@ -61,7 +61,7 @@ var HARASS_TEXT = {
    · 증원 호루라기는 늦게(alarm 무시) · 일제 쪽 상대(ENEMY_SIDE 'jp')가 있으면 일제 타협도 jp 만큼 변화 */
 var AMBUSH = { ap: 1, prone: true, jp: -10 };
 /* 몸을 사린다: 한 시간대를 숨어 지내며 감시도 -heat */
-var LIE_LOW = { heat: 1 };
+var LIE_LOW = { heat: 2 };
 var LIE_LOW_TEXT = ['셋방 문을 걸어 잠그고 숨을 죽였다. 골목을 지나는 구둣발 소리가 멀어진다.', '사람 많은 곳을 피해 뒷골목만 골라 다녔다. 아무 일도 일어나지 않았다.',
   '하루 종일 장독대 뒤에서 짚신을 삼았다. 바깥 일에는 귀를 막았다.', '모자를 눌러쓰고 조용히 지냈다. 눈에 띄지 않는 것도 기술이다.'];
 var PLACES = [

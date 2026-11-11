@@ -34,6 +34,10 @@ var ENEMIES = {
     hp: 7, hit: 48, evade: 10, dmg: { n: 1, s: 4, b: 1 }, chase: 20, talk: -10,
     talkText: '“…태수를 위해서라도, 오늘은 그냥 간다.” 청년이 주먹을 풀었다.',
     reward: { money: 1 }, winText: '청년들이 이를 갈며 물러났다.' },
+  /* 헌병보조원: 무단통치기 헌병 밑에서 검문을 도맡던 조선인 보조원. 순사 수준 */
+  hbojo: { name: '헌병보조원', title: '완장을 찬 조선인 헌병보조원', desc: '같은 조선 사람이지만 헌병의 끄나풀이다. 칼보다 곤봉과 포승을 먼저 꺼낸다.',
+    hp: 8, hit: 50, evade: 10, dmg: { n: 1, s: 4, b: 1 }, chase: 15, reward: { money: 2 }, heat: 2,
+    winText: '보조원이 완장을 떨어뜨리고 나뒹군다. 헌병이 오기 전에 자리를 떠야 한다.' },
   /* ── 감시도가 오를수록 나오는 강한 적 (PATROL_TIERS 참고) ──
      여럿이 몰려오는 경우(순사 둘·체포조·헌병 분대)는 ENCOUNTERS 에서 개별 적을 묶는다 */
   tokko: { name: '특고 형사', title: '특별고등경찰 사상계 형사', desc: '사상범만 쫓는 자. 이미 당신의 이름과 하숙집을 알고 있다.',
@@ -51,16 +55,20 @@ var ENEMIES = {
    PATROL_POOL 의 각 줄: foe(적 id 또는 ENCOUNTERS id) · from(이 감시도부터 후보) · w(그때의 가중치) · per(감시도 1당 가중치 증감) · min(최소 가중치)
    가중치 = max(min, w + per × (감시도 − from)) — 가중치 비율대로 무작위 하나
    순사·헌병은 감시도 2부터 PATROL_PAIR 확률로 둘이 된다 · 무단통치기(1910년대)는 순사·형사 대신 헌병 */
+/* 감시도 0~HEAT_MAX(20) 기준 */
 var PATROL_POOL = [
-  { foe: 'junsa',        from: 0, w: 10, per: -0.7, min: 3 },
-  { foe: 'hyungsa',      from: 3, w: 2,  per: 1,    min: 0 },
-  { foe: 'kenpei',       from: 5, w: 1.5, per: 1,   min: 0 },
-  { foe: 'tokko',        from: 5, w: 1,  per: 1,    min: 0 },
-  { foe: 'kibyeong',     from: 7, w: 0.8, per: 0.8, min: 0 },
-  { foe: 'chepo_squad',  from: 7, w: 0.8, per: 0.8, min: 0 },
-  { foe: 'kenpei_squad', from: 9, w: 0.8, per: 1,   min: 0 },
-  { foe: 'gocho_hunt',   from: 9, w: 0.6, per: 1,   min: 0 }
+  { foe: 'junsa',        from: 0,  w: 10,  per: -0.35, min: 2 },
+  { foe: 'hyungsa',      from: 4,  w: 2,   per: 0.5,   min: 0 },
+  { foe: 'kenpei',       from: 8,  w: 1.5, per: 0.5,   min: 0 },
+  { foe: 'tokko',        from: 10, w: 1,   per: 0.5,   min: 0 },
+  { foe: 'kibyeong',     from: 13, w: 0.8, per: 0.4,   min: 0 },
+  { foe: 'chepo_squad',  from: 13, w: 0.8, per: 0.4,   min: 0 },
+  { foe: 'kenpei_squad', from: 16, w: 0.8, per: 0.5,   min: 0 },
+  { foe: 'gocho_hunt',   from: 17, w: 0.6, per: 0.5,   min: 0 }
 ];
+/* 무단통치기(1910년대): 헌병경찰 시대 — 순사·형사·특고 자리에 헌병보조원, 체포조 자리에 헌병 분대.
+   감시도가 낮을 땐 보조원이 대부분이고, 높아질수록 진짜 헌병이 섞인다 */
+var PATROL_E1 = { junsa: 'hbojo', hyungsa: 'hbojo', tokko: 'kenpei', chepo_squad: 'kenpei_squad', patrol_pair: 'hbojo_pair' };
 /* (예전 단계식 표 — 지금은 쓰지 않음) */
 var PATROL_TIERS = [
   { from: 0, foes: ['junsa'] },
@@ -75,13 +83,15 @@ var PATROL_TIERS_EASY = [
   { from: 4, foes: ['hyungsa'] },
   { from: 6, foes: ['kenpei'] }
 ];
-var PATROL_PAIR = 0.35;
-/* 불심검문이 나올 확률 = base + (감시도 + 밤이면 night) × perHeat, 최대 max (일제 타협도가 낮으면 따로 가산) */
-var PATROL_ENC = { base: 0.04, perHeat: 0.03, night: 1, max: 0.35 };
+var PATROL_PAIR = 0.35, PATROL_PAIR_FROM = 4; /* 감시도 PATROL_PAIR_FROM 이상이면 PATROL_PAIR 확률로 둘이 다닌다 */
+/* 불심검문이 나올 확률 = base + (감시도 + 밤이면 night) × perHeat, 최대 max (일제 타협도가 낮으면 따로 가산)
+   감시도 10 → 15%, 20 → 27% (예전: 감시도 10 → 34%) */
+var PATROL_ENC = { base: 0.03, perHeat: 0.012, night: 2, max: 0.3 };
 var PATROL_TEXT = {
   junsa: '“이봐, 거기 조선인. 이리 와 봐.” 순사가 곤봉으로 손짓한다.',
   hyungsa: '중절모를 쓴 사내가 어깨를 잡는다. “잠깐, 경찰서까지 같이 좀 가 주셔야겠소.”',
   patrol_pair: '앞뒤로 순사 둘이 길을 막는다. “너, 요즘 이 동네에서 자주 보이더라.”',
+  hbojo: '완장을 찬 헌병보조원이 곤봉으로 앞을 막는다. “어이, 거기. 어디 사는 누구야.” 같은 조선말인데 말투가 차갑다.',
   kenpei: '총검을 꽂은 헌병 둘이 길을 막는다. 수배 전단과 당신 얼굴을 번갈아 본다.',
   tokko: '등 뒤에서 낮은 목소리. “{home} 셋방 사는 자네 맞지? 사상계에서 좀 보자는군.”',
   kibyeong: '말발굽 소리가 골목을 메운다. 기마헌병이 군도 끝으로 당신을 가리킨다.',
@@ -156,7 +166,8 @@ var TACTIC = { ap: 3, step: 2, stepAgi: 40, attacks: 1, cover: 35, coverRange: 1
   grabHold: 3,
   /* 위협당하면 다음 합 내 명중 -shaken · 적이 엄폐하면 내 사격 명중 -foeCover */
   shaken: 10, foeCover: 30,
-  /* 항복: 체력 -surrenderHp(주사위), 돈 surrenderMoney 비율 압수, 총·탄환·칼 압수, 감시도 +1 */
+  /* 항복: 관헌 앞이면 불법 소지품(총·탄환·칼)만 압수 · 관헌이 아닌 상대(왈패·낭인 등)에게는 돈 surrenderMoney 비율을 털린다
+     surrenderHp: 예전의 매질 피해 (지금은 쓰지 않음) */
   surrenderHp: { n: 1, s: 4, b: 1 }, surrenderMoney: 0.5 };
 /* ───── 적의 성격 ─────
    적이 나타날 때 PERSONA_BY_FOE 가중치로 하나를 뽑는다.
@@ -171,6 +182,7 @@ var PERSONALITY = {
 };
 var PERSONA_BY_FOE = {
   junsa: { aggressive: 3, cautious: 4, cunning: 2, coward: 1 },
+  hbojo: { cautious: 4, coward: 3, aggressive: 2, cunning: 1 },
   kenpei: { aggressive: 2, cautious: 5, cunning: 3 },
   hyungsa: { cautious: 4, cunning: 6 },
   ronin: { aggressive: 7, cunning: 2, coward: 1 },
@@ -190,12 +202,12 @@ var MORALE = { hit: 60, ally: 25, shot: 10 };
 var INTENT_TEXT = {
   stunned: '정신을 못 차리고 있다', attack: '덤벼들려 한다', approach: '다가오려 한다', charge: '곧장 달려들려 한다',
   grab: '멱살을 잡으려 한다', flank: '옆으로 돌아 반대편을 노린다', blockExit: '출구 쪽을 막으려 한다',
-  retreat: '뒤로 물러서려 한다', flee: '달아나려 한다', takeCover: '엄폐물 뒤로 숨으려 한다', aim: '숨을 고르며 겨누려 한다',
+  retreat: '뒤로 물러서려 한다', flee: '달아나려 한다', subdue: '곤봉으로 제압하려 한다', bind: '포승으로 묶으려 한다', closein: '붙잡으려 다가온다', takeCover: '엄폐물 뒤로 숨으려 한다', aim: '숨을 고르며 겨누려 한다',
   shift: '자리를 옮기려 한다 (이번엔 쏘지 않는다)', shoot: '총을 쏘려 한다', intimidate: '겁을 주려 한다', offer: '항복을 권하려 한다', whistle: '호루라기로 증원을 부르려 한다'
 };
 var INTENT_HINT = {
   attack: '몸에 힘이 들어간다', approach: '발끝이 이쪽을 향한다', charge: '어깨가 앞으로 쏠린다', grab: '손을 뻗을 듯 어깨가 들썩인다',
-  flank: '눈길이 내 옆쪽으로 흐른다', blockExit: '출구 쪽을 힐끗 본다', retreat: '무게가 뒤로 실린다', flee: '뒷걸음질 칠 기색이다',
+  subdue: '곤봉을 고쳐 쥔다', bind: '포승을 푼다', closein: '포승을 쥐고 거리를 잰다', flank: '눈길이 내 옆쪽으로 흐른다', blockExit: '출구 쪽을 힐끗 본다', retreat: '무게가 뒤로 실린다', flee: '뒷걸음질 칠 기색이다',
   takeCover: '주변 엄폐물을 살핀다', aim: '숨이 가라앉는다', shift: '발을 옮길 기색이다', shoot: '방아쇠에 손가락이 걸려 있다',
   intimidate: '입을 열려 한다', offer: '말을 걸려 한다', whistle: '가슴팍의 무언가를 더듬는다'
 };
@@ -209,6 +221,7 @@ var ENCOUNTERS = {
   wangpae_gang: { foes: ['wangpae', 'jolgae', 'jolgae'], form: 'random' },
   ronin_gang:   { foes: ['ronin', 'ronin'], form: 'line' },
   kenpei_pair:  { foes: ['kenpei', 'kenpei'], form: 'line' },
+  hbojo_pair:   { foes: ['hbojo', 'hbojo'], form: 'random' },
   /* 강한 상대 (감시도 높을 때 불심검문) — name: 사건 제목에 쓰는 이름 */
   chepo_squad:  { name: '체포조', foes: ['tokko', 'hyungsa', 'hyungsa'], form: 'random' },
   kenpei_squad: { name: '헌병 분대', foes: ['kenpei', 'kenpei', 'kenpei'], form: 'line' },
@@ -223,6 +236,7 @@ var ENCOUNTERS = {
    reach: 근접 공격 거리 · speed: 한 합 이동 거리 · start: 시작 거리 · whistle: 호루라기로 증원을 부름 */
 var FOE_TACTICS = {
   junsa:     { style: 'melee', reach: 1.5, speed: 4, start: 4, whistle: true, grab: 0.3 },
+  hbojo:     { style: 'melee', reach: 1.5, speed: 4, start: 4, whistle: true, grab: 0.35 },
   kenpei:    { style: 'gun', pref: 10, reach: 2, speed: 3, start: 8 },
   hyungsa:   { style: 'gun', pref: 5, reach: 1.5, speed: 3, start: 5, whistle: true, grab: 0.3 },
   ronin:     { style: 'melee', reach: 2, speed: 4, start: 3 },
@@ -313,7 +327,7 @@ var WEAPONS = {
   club:     { name: '박달나무 몽둥이', slot: 'melee', reach: 2, ap: 1, dmg: 2, hit: 0, desc: '묵직하고 느리다. 대신 맞히기는 쉽다.',
               qte: { dur: 1500, scale: 1.4, shape: 'sweep', cmd: 'tap' } },
   knife:    { name: '단도', slot: 'melee', reach: 1.2, ap: 1, dmg: 1, hit: 5, contraband: true, desc: '품에 숨기기 좋다. 손이 빨라야 한다.',
-              qte: { dur: 750, scale: 0.8, shape: 'sweep', cmd: 'tap' } },
+              qte: { dur: 750, scale: 0.8, shape: 'pingpong', cmd: 'tap' } },
   saber:    { name: '순사 칼', slot: 'melee', reach: 2.2, ap: 1, dmg: 3, hit: -5, contraband: true, desc: '순사에게서 빼앗은 칼. 휘두를 때마다 무게가 되돌아온다.',
               qte: { dur: 1200, scale: 1, shape: 'pingpong', cmd: 'tap' } },
   browning: { name: '브라우닝 권총', slot: 'gun', ap: 1, range: [{ m: 0, hit: -10 }, { m: 3, hit: 0 }, { m: 10, hit: 0 }, { m: 18, hit: -15, dmg: -1 }, { m: 30, hit: -40, dmg: -3 }], dmg: 0, hit: 0, contraband: true, desc: '흔한 호신용 권총.',
@@ -349,6 +363,7 @@ var START_WEAPONS = [
 /* 적을 이기면 확률로 떨어뜨리는 무기 */
 var WEAPON_DROPS = {
   junsa: { weapon: 'saber', chance: 0.25 },
+  hbojo: { weapon: 'club', chance: 0.25 },
   hyungsa: { weapon: 'nambu', chance: 0.3 },
   kenpei: { weapon: 'rifle', chance: 0.2 },
   ronin: { weapon: 'knife', chance: 0.3 },
@@ -405,8 +420,8 @@ var SKILL_DROP_POOL = ['combo', 'headbutt', 'throw', 'vital', 'grab', 'trip', 's
 /* ───── 관헌에게 무고 주장 (내가 공격하기 전에만) ─────
    확률 = 지능 + foe[적] + 일제 타협도 보정 − 불법 소지품 contraband − 감시도×heat − 실패 횟수×fail − (머릿수−1)×crowd
    성공하면 전투 없이 풀려난다 (감시도 변화 없음) · 행동력 ap */
-var PLEA = { ap: 2, contraband: 20, heat: 5, fail: 15, crowd: 5,
-  foe: { junsa: -10, hyungsa: -15, kenpei: -10, tokko: -35, kibyeong: -15, gocho: -40 },
+var PLEA = { ap: 2, contraband: 20, heat: 2.5, fail: 15, crowd: 5,
+  foe: { hbojo: -5, junsa: -10, hyungsa: -15, kenpei: -10, tokko: -35, kibyeong: -15, gocho: -40 },
   ok: {
     junsa: '“…됐다. 가 봐. 다음엔 눈에 띄지 마라.” 순사가 턱짓으로 길을 내준다.',
     hyungsa: '형사가 수첩과 얼굴을 한참 번갈아 보더니 혀를 찬다. “사람을 잘못 봤나. 꺼져.”',
@@ -427,3 +442,22 @@ var DEMAND = { ap: 1, base: 10, str: 0.6, int: 0.4, pivot: 30, statMul: 0.5, sta
   pers: { coward: 20, cautious: 5, cunning: -5, aggressive: -15 },
   okLines: ['무기를 내던지고 두 손을 들었다.', '무릎을 꿇고 고개를 떨군다.', '“알, 알았다! 그만!” 뒷걸음질 치며 손을 든다.'],
   failLines: ['“웃기지 마라!”', '“누가 누구한테 항복하라는 거냐.”', '코웃음을 친다.', '대꾸 없이 자세를 고쳐 잡는다.'] };
+
+/* ───── 관헌의 태세 (전투 AI) ─────
+   관헌(OFFICIALS)은 태세 하나를 지니고 그에 따라 움직인다: capture 생포 · melee 근접 · shoot 사격
+   - 시작은 모두 '생포' — 포승과 곤봉으로 붙잡아 끌고 가려 한다 (총을 쏘지 않는다)
+   - 격화(esc, 0~100): 매 차례 esc% 확률로 생포를 포기하고 근접/사격 태세로 바뀐다 (한번 바뀌면 생포로 돌아가지 않는다)
+     시작 esc = 감시도 × heat · 선공 ambush · 내가 공격할 때마다 attack · 총을 쏘면 shot · 그 관헌을 맞히면 hurt
+     동료가 쓰러지면 ally · 출구 쪽으로/멀어지게 움직이면 flee · 도주 판정을 시도하면 fleeAct · 최대 cap
+   - 바뀔 때: 총이 있는 관헌(총잡이)은 내가 총을 쐈거나 거리가 shootDist 보다 멀면 사격, 아니면 근접
+     근접 태세의 총잡이도 내가 멀어지면(shootDist 초과) switchShoot 확률로 총을 뽑는다
+   capture: grab 붙잡으려 할 확률 · offerPlus 항복 권유 가산 · blockPlus 출구 막기 가산 · softDmg 제압 피해 감소
+            붙잡은 채 내 체력이 bindHp 비율 이하이거나 bindTurns 합 넘게 붙잡혀 있으면 포박(전투 끝, 끌려감)
+            생포 태세의 제압은 사람을 죽이지 않는다: 체력이 bindHp 비율 이하로 떨어지면 그 자리에서 포박 */
+var STANCE = { heat: 2.5, ambush: 45, attack: 6, shot: 35, hurt: 12, ally: 25, flee: 12, fleeAct: 25, cap: 95,
+  shootDist: 3, switchShoot: 0.3,
+  capture: { grab: 0.6, offerPlus: 0.25, blockPlus: 0.2, softDmg: 2, bindHp: 0.35, bindTurns: 2 },
+  label: { capture: '생포', melee: '근접', shoot: '사격' },
+  text: { capture: '포승과 곤봉으로 붙잡으려 한다', melee: '때려눕히려 한다', shoot: '쏘려 한다' } };
+/* 포박: 생포 태세의 관헌에게 묶여 끌려가면 — 항복과 같은 손해에 더해 jailWeeks 주가 흐른다 */
+var ARREST = { jailWeeks: 1 };
