@@ -8,13 +8,13 @@
 <title>일제치하</title>
 <script src="support.js?v=a098be6b14"></script>
 <!-- 데이터: core · combat · world · events · cities · stories · devtool -->
-<script src="data/core.js?v=015d3ef073"></script>
+<script src="data/core.js?v=b7b90ab542"></script>
 <script src="data/combat.js?v=ccd5776ac5"></script>
-<script src="data/world.js?v=4b9bafce04"></script>
+<script src="data/world.js?v=e1d6d48e6a"></script>
 <script src="data/events.js?v=10a8d9f70e"></script>
 <script src="data/cities.js?v=e8a1aca81c"></script>
 <script src="data/stories.js?v=b10fbb0187"></script>
-<script src="data/devtool.js?v=d0f7b0568a"></script>
+<script src="data/devtool.js?v=d0a68b5cbc"></script>
 </head>
 <body>
 <x-dc>
@@ -49,6 +49,11 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 .ks-stamp{color:var(--tone,#9E2B20);border:2px solid var(--tone,#9E2B20) !important;background:#FBF7EE;transform:rotate(-1.2deg)}
 .ks-seal{flex:none;display:inline-flex;flex-direction:column;align-items:center;gap:1px;padding:5px 5px;background:var(--accent,#9E2B20);color:#F6EFDF;font-family:'Song Myung',serif;line-height:1;border-radius:3px;transform:rotate(-4deg);box-shadow:inset 0 0 0 1.5px rgba(246,239,223,.55)}
 .ks-hud{border-bottom:3px double #1E1B16 !important}
+.ks-mhud{background:#F6EFDF;border-bottom:3px double #1E1B16;box-shadow:0 6px 14px rgba(70,50,25,.18)}
+.ks-mchip{display:flex;align-items:baseline;gap:5px;padding:3px 8px;border:1px solid;font-size:12px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.ks-mchip b{font-family:'Nanum Gothic Coding',monospace;font-size:13.5px;overflow:hidden;text-overflow:ellipsis}
+.ks-mhud-btn{flex:none;width:40px;height:40px;border:1.5px solid #1E1B16;background:#1E1B16;color:#F6EFDF;font-size:18px;line-height:1;cursor:pointer;padding:0}
+.ks-mhud-btn:focus-visible{outline:3px solid #2C4A5C;outline-offset:2px}
 .ks-bar{box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
 .choice:disabled{opacity:.42;cursor:not-allowed}
 .choice:focus-visible{outline:3px solid #2C4A5C;outline-offset:2px}
@@ -206,13 +211,63 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 
 <sc-if value="{{isPlaying}}" hint-placeholder-val="{{ true }}">
 <div ref="{{playRef}}" class="{{L.playClass}}" style="flex: 1 1 auto; min-height: 0; padding: 8px; box-sizing: border-box; overflow-y: {{L.playOverflow}}; display: flex; flex-direction: {{L.playDir}}; flex-wrap: nowrap; gap: {{L.playGap}}; align-items: {{L.playAlign}}">
+<!-- 휴대폰: 프로필을 화면 맨 위에 늘 붙여 둔다 (체력 · 돈 · 구급약 · 무기). ▾ 단추로 이름 · 날짜 · 감시도 · 능력치를 펼친다 -->
+<sc-if value="{{hudMobile}}" hint-placeholder-val="{{ false }}">
+<div class="ks-mhud" style="order: -1; position: sticky; top: -8px; z-index: 30; margin: -8px -8px 0; padding: 8px 10px 9px; display: flex; flex-direction: column; gap: 7px">
+<div style="display: flex; align-items: center; gap: 10px">
+<div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px">
+<div style="display: flex; justify-content: space-between; font-size: 12px"><span style="font-weight: 700">체력</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-weight: 700">{{p.hp}} / {{p.maxHp}}</span></div>
+<div class="ks-bar" style="height: 9px; background: #DCCFB4; border: 1px solid #1E1B16"><div style="height: 100%; width: {{p.hpPct}}%; background: {{accent}}; transition: width .3s"></div></div>
+</div>
+<button type="button" class="ks-mhud-btn" onClick="{{toggleHud}}" aria-expanded="{{hudOpen}}" aria-label="{{hudBtnLabel}}" title="{{hudBtnLabel}}">{{hudBtn}}</button>
+</div>
+<div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap">
+<span class="ks-mchip" style="background: #7E5A121A; border-color: #7E5A1240"><span style="color: #7E5A12">돈</span><b>{{p.money}}원</b></span>
+<span class="ks-mchip" style="background: #3F5E2F1A; border-color: #3F5E2F40"><span style="color: #3F5E2F">구급약</span><b>{{p.medkit}}</b></span>
+<span class="ks-mchip" style="background: #4A5A661A; border-color: #4A5A6640; min-width: 0"><span style="color: #4A5A66">무기</span><b style="font-size: 11.5px">{{p.gunLine}}</b></span>
+<span style="flex: 1 1 0"></span>
+<button class="choice" type="button" disabled="{{invLocked}}" onClick="{{openInventory}}" style="min-height: 32px; padding: 4px 9px; background: #FBF7EE; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 12.5px; font-weight: 800">소지품</button>
+<button class="choice" type="button" disabled="{{invLocked}}" onClick="{{openPlaces}}" style="min-height: 32px; padding: 4px 9px; background: #FBF7EE; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 12.5px; font-weight: 800">행동</button>
+</div>
+<sc-if value="{{hudOpen}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px solid #CDBF9F">
+<div style="display: flex; align-items: center; gap: 6px 10px; flex-wrap: wrap">
+<span class="ks-seal" style="font-size: 11px" aria-hidden="true"><sc-for list="{{p.cityChars}}" as="ch" hint-placeholder-count="2"><span>{{ch}}</span></sc-for></span>
+<span style="font-family: 'Song Myung', serif; font-size: 19px; line-height: 1.1">{{p.name}}</span>
+<span style="font-size: 12px; color: #5B5246">{{era.name}} · {{p.cityName}}에서 {{p.daysLived}}주째</span>
+</div>
+<sc-if value="{{showTopBar}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; gap: 6px; align-items: center; font-size: 12px; flex-wrap: wrap">
+<span style="border: 1.5px solid #1E1B16; padding: 2px 8px; font-weight: 700">{{timeLabel}}</span>
+<span style="background: #1E1B16; color: #F6EFDF; padding: 3px 10px; font-weight: 700">{{locName}}</span>
+</div>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 3px">
+<div style="display: flex; justify-content: space-between; font-size: 12px"><span style="font-weight: 700">감시도 · {{p.cityName}}</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-weight: 700">{{p.heat}} / {{p.heatMax}}</span></div>
+<div style="display: flex; gap: 2px">
+<sc-for list="{{p.heatCells}}" as="c" hint-placeholder-count="20">
+<div style="flex: 1; min-width: 0; height: 9px; border: 1px solid #1E1B16; background: {{c.bg}}"></div>
+</sc-for>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px">
+<sc-for list="{{p.stats}}" as="st" hint-placeholder-count="6">
+<span style="display: flex; justify-content: space-between; align-items: baseline; gap: 4px; border: 1px solid {{st.bd}}; background: {{st.bg}}; padding: 3px 8px; font-size: 12.5px"><span>{{st.label}}</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-weight: 700; font-size: 14px; color: {{st.c}}">{{st.val}}%</span></span>
+</sc-for>
+</div>
+<sc-if value="{{p.awayOn}}" hint-placeholder-val="{{ false }}"><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 11.5px; color: #5B5246">다른 도시 감시도 · {{p.awayText}}</span></sc-if>
+<sc-if value="{{p.alignOn}}" hint-placeholder-val="{{ false }}"><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 11.5px; color: #8A7E6A">타협도 · 일제 {{p.jp}} · 민족 {{p.kr}}</span></sc-if>
+</div>
+</sc-if>
+</div>
+</sc-if>
 
 
 <main style="order: 2; flex: {{L.mainFlex}}; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: 16px">
 
 <section ref="{{mainRef}}" class="ks-card" style="flex: {{L.secFlex}}; min-height: 0; overflow: {{L.secOverflow}}; background: #F6EFDF; border: 1.5px solid #1E1B16; padding: {{L.secPad}}; display: flex; flex-direction: column; gap: 18px; box-sizing: border-box">
-<!-- 프로필: 인물 정보는 진행 칸 맨 위에 (게임 화면처럼) -->
-<sc-if value="{{hasPlayer}}" hint-placeholder-val="{{ true }}">
+<!-- 프로필: 인물 정보는 진행 칸 맨 위에 (게임 화면처럼) · 휴대폰은 위의 ks-mhud 로 대신 -->
+<sc-if value="{{hudFull}}" hint-placeholder-val="{{ true }}">
 <div class="ks-hud" style="flex: none; display: flex; flex-direction: column; gap: 10px; padding-bottom: 14px">
 <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
 <div style="display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; min-width: 0">
@@ -381,7 +436,7 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 10px 0; border-bottom: 1px solid #B9AB8E">
 <span style="flex: 0 0 116px; font-size: 13px; font-weight: 700; color: #5B5246">{{b.label}}</span>
 <span style="flex: 0 0 52px; font-family: 'Nanum Gothic Coding', monospace; font-size: 15px; font-weight: 700; color: #2C4A5C">{{b.r}}</span>
-<span style="flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap"><span style="font-size: 16px; font-weight: 800">{{b.name}}</span><sc-if value="{{b.special}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.1em; background: #E3B04B; color: #1E1B16; padding: 2px 7px">특별 태생</span></sc-if></span><span style="font-size: 13px; line-height: 1.6; color: #3A342B">{{b.desc}}</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 11px; color: #8A7E6A">{{b.tagText}}</span></span>
+<span style="flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap"><span style="font-size: 16px; font-weight: 800">{{b.name}}</span><sc-if value="{{b.special}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.1em; background: #E3B04B; color: #1E1B16; padding: 2px 7px">특별 태생</span></sc-if></span><span style="font-size: 13px; line-height: 1.6; color: #3A342B">{{b.desc}}</span><sc-if value="{{b.showTag}}" hint-placeholder-val="{{ false }}"><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 11px; color: #8A7E6A">{{b.tagText}}</span></sc-if></span>
 <span style="flex: 0 1 auto; font-family: 'Nanum Gothic Coding', monospace; font-size: 13px; font-weight: 700; color: {{b.color}}">{{b.mods}}</span>
 </div>
 </sc-for>
@@ -841,7 +896,10 @@ class Component extends DCLogic {
       Object.keys(OPTION_ALIGN).forEach(function (key) {
         var cut = key.indexOf('|'), eid = key.slice(0, cut), lab = key.slice(cut + 1), a = OPTION_ALIGN[key];
         pools.forEach(function (P) {
-          (P[eid] && P[eid].options || []).forEach(function (o) {
+          /* 이어지는 장면(steps)의 선택지까지 */
+          var opts = (P[eid] && P[eid].options || []).slice();
+          Object.keys(P[eid] && P[eid].steps || {}).forEach(function (k) { opts = opts.concat(P[eid].steps[k].options || []); });
+          opts.forEach(function (o) {
             if (o.label === lab) {
               if (a.ok) o.alignOk = { jp: a.jp || 0, kr: a.kr || 0 }; else if (a.jp || a.kr) o.align = { jp: a.jp || 0, kr: a.kr || 0 };
               if (a.fail) o.alignNg = { jp: a.fail.jp || 0, kr: a.fail.kr || 0 };
@@ -1406,7 +1464,8 @@ class Component extends DCLogic {
       if (eraPool.length && Math.random() < 0.25) ev = EVENTS[this.pick(eraPool)];
     }
     if (!ev) {
-      var self3 = this, base = Math.random() < 0.45 ? L.work : L.events;
+      /* 그 거리의 사건 + 어디서나 나오는 공통 사건 (COMMON) */
+      var self3 = this, base = Math.random() < 0.45 ? (L.work || []).concat(COMMON.work) : (L.events || []).concat(COMMON.events);
       var pool = base.filter(function (id) { return self3.tagsOk(d.player, EVENTS[id]); });
       ev = EVENTS[this.pick(pool.length ? pool : base)];
     }
@@ -1746,7 +1805,10 @@ class Component extends DCLogic {
       d.outcome = null; d.screen = 'event';
       return;
     }
-    d.outcome = { title: ev.title, text: out.text, summary: parts.join(' · '), fight: out.fight || null, dist: out.dist, alarm: !!out.alarm, questFight: out.questFight || null, ambush: !!out.ambush };
+    /* 이어지는 장면: 결과 글을 보여 준 뒤 같은 사건의 다음 장면(글 + 선택지)으로. 싸움이 있으면 장면은 무시 */
+    var nst = !out.fight && out.step && ev.steps && ev.steps[out.step];
+    var next = nst ? Object.assign({}, ev, { title: nst.title || ev.baseTitle || ev.title, baseTitle: ev.baseTitle || ev.title, text: nst.text || '', options: nst.options || [], scene: out.step }) : null;
+    d.outcome = { title: ev.title, text: out.text, summary: parts.join(' · '), fight: out.fight || null, dist: out.dist, alarm: !!out.alarm, questFight: out.questFight || null, ambush: !!out.ambush, next: next };
     d.event = null; d.screen = 'outcome';
     this.log(d, out.text, out.fight ? 'bad' : (good ? 'story' : 'sys'));
   }
@@ -1757,6 +1819,7 @@ class Component extends DCLogic {
       if (o.questFight) d.combat.quest = o.questFight;
       if (o.ambush) this.applyAmbush(d);
     }
+    else if (o && o.next) { d.event = o.next; d.screen = 'event'; }
     else if (d.travel) this.doTravel(d);
     else this.nextInto(d);
     this.commit(d);
@@ -3267,7 +3330,7 @@ class Component extends DCLogic {
     var outv = { title: o.title || '', text: String(o.text || '').replace(/\{name\}/g, (p && p.name) || ''), summary: o.summary || '', hasSummary: !!o.summary,
       tone: TONE_COLOR[tone], toneText: { good: '얻은 것', bad: '잃은 것', mixed: '얻고 잃은 것', none: '지나간 일' }[tone],
       color: o.fight ? KIND_COLOR.fight : TONE_COLOR[tone],
-      btn: o.fight ? '전투 개시' : '다음으로', btnBg: o.fight ? accent : '#1E1B16', cont: function () { self.cont(); },
+      btn: o.fight ? '전투 개시' : o.next ? '계속' : '다음으로', btnBg: o.fight ? accent : '#1E1B16', cont: function () { self.cont(); },
       canStash: !o.fight };
 
     var cbv = { tabs: [], tabSkill: false, tabMove: false, tabAct: false, noActions: false, detail: false, detailText: '', toggleDetail: function () {}, stepText: '', name: '', title: '', desc: '', hp: 0, maxHp: 1, hpPct: 0, statLine: '', round: 0, guard: false, actions: [], groups: [], status: [], hasStatus: false,
@@ -3300,7 +3363,8 @@ class Component extends DCLogic {
         return { label: g.label + (gw ? ' · ' + gw.name : ''), skills: list };
       }).filter(function (g) { return g.skills.length; });
       var status = [];
-      if (e.mode) status.push({ tipIn: tipH('stance').in, tipTap: tipH('stance').tap, text: '태세 · ' + STANCE.label[e.mode] + ' — ' + STANCE.text[e.mode] + (showOdds && e.mode === 'capture' ? ' (격화 ' + Math.round(e.esc || 0) + '%)' : '') });
+      /* 적의 태세(생포·근접·사격)는 내부 상태라 숨긴다 (showOdds 를 켜면 보임) */
+      if (e.mode && showOdds) status.push({ tipIn: tipH('stance').in, tipTap: tipH('stance').tap, text: '태세 · ' + STANCE.label[e.mode] + ' — ' + STANCE.text[e.mode] + (showOdds && e.mode === 'capture' ? ' (격화 ' + Math.round(e.esc || 0) + '%)' : '') });
       if (e.stun > 0) status.push({ tipIn: tipH('stun').in, tipTap: tipH('stun').tap, text: (e.prone ? '넘어짐' : '기절') + ' ' + e.stun + '합' });
       if (e.prone) status.push({ tipIn: tipH('prone').in, tipTap: tipH('prone').tap, text: '빈틈 · 다음 공격 명중 +20' });
       if (e.inCover) status.push({ tipIn: tipH('foeCover').in, tipTap: tipH('foeCover').tap, text: '엄폐 중 · 내 사격 명중 -' + TACTIC.foeCover + ' · 근접 공격으로 끌어낼 수 있다' });
@@ -3341,7 +3405,7 @@ class Component extends DCLogic {
       var foeList = this.alive(cmb).map(function (f) {
         var on = f.uid === cmb.target, fd = self.distOf(cmb, f);
         return { uid: f.uid, name: f.name + (f.backup ? ' (증원)' : ''), hp: Math.max(0, f.hp) + '/' + f.maxHp, hpPct: Math.max(0, Math.round(f.hp / f.maxHp * 100)),
-          where: (f.x > cmb.px ? '→ ' : '← ') + self.fmtM(fd) + (f.inCover ? ' · 엄폐 중' : '') + (f.mode ? ' · ' + STANCE.label[f.mode] : ''), intent: f.intent ? f.intent.text + (f.intent.read && f.intent.read.pers ? ' · ' + f.intent.read.pers : '') : '',
+          where: (f.x > cmb.px ? '→ ' : '← ') + self.fmtM(fd) + (f.inCover ? ' · 엄폐 중' : '') + (f.mode && showOdds ? ' · ' + STANCE.label[f.mode] : ''), intent: f.intent ? f.intent.text + (f.intent.read && f.intent.read.pers ? ' · ' + f.intent.read.pers : '') : '',
           hit: showOdds ? (Math.round(self.enemyHitChance(cmb, p, f) * 10) / 10) + '%' : '',
           on: on, border: on ? '#E3B04B' : '#4A443A', btn: on ? '표적' : '표적으로', pick: guard('foe:' + f.uid, function () { self.setTarget(f.uid); }), tipIn: tipH('foe:' + f.uid).in };
       });
@@ -3448,6 +3512,10 @@ class Component extends DCLogic {
       embersOn: !!(this.props.embers ?? true), embers: this._embers || [],
       startCityName: cityDef(p && p.city).name,
       hasPlayer: !!s.player,
+      /* 휴대폰은 화면 위에 붙는 작은 프로필(hudMobile), 그 밖은 진행 칸 맨 위의 큰 프로필(hudFull) */
+      hudMobile: !!s.player && this.layoutVals().isMobile, hudFull: !!s.player && !this.layoutVals().isMobile,
+      hudOpen: !!s.hudOpen, hudBtn: s.hudOpen ? '▴' : '▾', hudBtnLabel: s.hudOpen ? '능력치 접기' : '능력치 · 감시도 · 날짜 펼치기',
+      toggleHud: function () { self.setState({ hudOpen: !self.state.hudOpen }); },
       helpOpen: !!s.helpOpen, creditOpen: !!s.creditOpen,
       openHelp: function () { self.setState({ helpOpen: true }); }, closeHelp: function () { self.setState({ helpOpen: false }); },
       stopProp: function (ev) { if (ev && ev.stopPropagation) ev.stopPropagation(); },
@@ -3462,7 +3530,8 @@ class Component extends DCLogic {
       isInventory: s.screen === 'inventory', inv: this.inventoryVals(),
       isPlaces: s.screen === 'places', places: this.placesVals(), openPlaces: function () { self.openPlaces(); }, closePlaces: function () { self.closePlaces(); },
       invLocked: !this.canOpenInventory(), openInventory: function () { self.openInventory(); }, closeInventory: function () { self.closeInventory(); },
-      bgRows: (s.bg || []).map(function (b) { return Object.assign({}, b, { color: b.mods === '변화 없음' ? '#5B5246' : b.mods.indexOf('-') >= 0 ? (b.mods.indexOf('+') >= 0 ? '#7A5A12' : '#9E2B20') : '#3F5E2F' }); }),
+      /* 태그는 내부 판단용이라 숨긴다 (Tweaks 의 showOdds 를 켜면 제작 확인용으로 보임) */
+      bgRows: (s.bg || []).map(function (b) { return Object.assign({}, b, { showTag: !!(self.props.showOdds ?? false) && !!b.tagText, color: b.mods === '변화 없음' ? '#5B5246' : b.mods.indexOf('-') >= 0 ? (b.mods.indexOf('+') >= 0 ? '#7A5A12' : '#9E2B20') : '#3F5E2F' }); }),
       beginLife: function () { self.askName(); },
       nameOpen: !!s.nameOpen, nameDraft: s.nameDraft || '', nameMax: NAME_MAX,
       nameChange: function (ev) { self.setState({ nameDraft: String(ev && ev.target ? ev.target.value : '').slice(0, NAME_MAX) }); },

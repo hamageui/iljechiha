@@ -130,7 +130,7 @@ var HEAT_MAX = 20; /* 감시도 최대치 (도시마다 따로) */
 var SAVE_KEY = 'ilje.save.v1', SAVE_VER = 1; /* SAVE_KEY: 예전 한 칸 저장 (있으면 1번 칸으로 옮김) */
 var SAVE_SLOTS = 3, SAVE_SLOT_KEY = 'ilje.save.slot'; /* 저장 칸 수 · 칸별 키 = SAVE_SLOT_KEY + 번호 */
 var SAVE_SKIP = ['life', 'base', 'edStage', 'raw', 'importText', 'saveMsg', 'saveOk', 'dice', 'rolling', 'qte', 'tip', 'infoMode',
-  'nameOpen', 'nameDraft', 'rerollWarn', 'helpOpen', 'creditOpen', 'resumeOpen', 'invMsg', 'slotDel'];
+  'nameOpen', 'nameDraft', 'rerollWarn', 'helpOpen', 'creditOpen', 'resumeOpen', 'invMsg', 'slotDel', 'hudOpen'];
 /* 편집기에서 숫자로 고칠 수 있는 칸 */
 var ED_NUMS = [
   { k: 'str', kind: 'mod', label: '근력' }, { k: 'agi', kind: 'mod', label: '민첩' }, { k: 'int', kind: 'mod', label: '지능' },
