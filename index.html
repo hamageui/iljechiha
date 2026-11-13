@@ -8,13 +8,13 @@
 <title>일제치하</title>
 <script src="support.js?v=a098be6b14"></script>
 <!-- 데이터: core · combat · world · events · cities · stories · devtool -->
-<script src="data/core.js?v=b7b90ab542"></script>
+<script src="data/core.js?v=697b44b551"></script>
 <script src="data/combat.js?v=ccd5776ac5"></script>
 <script src="data/world.js?v=e1d6d48e6a"></script>
 <script src="data/events.js?v=10a8d9f70e"></script>
-<script src="data/cities.js?v=e8a1aca81c"></script>
+<script src="data/cities.js?v=9e109b5225"></script>
 <script src="data/stories.js?v=b10fbb0187"></script>
-<script src="data/devtool.js?v=d0a68b5cbc"></script>
+<script src="data/devtool.js?v=6d4824da85"></script>
 </head>
 <body>
 <x-dc>
@@ -442,6 +442,18 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 </sc-for>
 </div>
 <div style="font-size: 14px; color: #5B5246">최종 능력치와 소지품은 위쪽 인물 정보에 반영되어 있다.</div>
+<!-- 시드: 같은 시드면 같은 태생 (게임 진행은 매번 다름) -->
+<div class="ks-seed" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 12px; border: 1px dashed #8A7E6A; background: #FBF7EE">
+<span style="font-size: 13px; font-weight: 800; color: #5B5246" title="같은 시드를 넣으면 같은 태생(능력치 · 소지품 · 첫 기술)이 나온다. 시대 · 날짜와 게임 진행은 매번 다르다.">시드</span>
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 16px; font-weight: 700; letter-spacing: 0.08em; padding: 2px 10px; border: 1.5px solid #1E1B16; background: #FFFDF7; user-select: all">{{seedText}}</span>
+<button class="choice" type="button" onClick="{{copySeed}}" style="min-height: 36px; padding: 4px 12px; background: #FBF7EE; color: #1E1B16; border: 1px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 13px; font-weight: 800">복사</button>
+<span style="flex: 1 1 12px"></span>
+<div style="flex: 1 1 220px; min-width: 0; max-width: 340px; display: flex; gap: 8px">
+<input type="text" value="{{seedDraft}}" onChange="{{seedChange}}" onKeyDown="{{seedKey}}" maxLength="30" placeholder="시드 입력" autocapitalize="characters" spellcheck="false" aria-label="시드 입력" style="box-sizing: border-box; flex: 1 1 120px; min-width: 0; min-height: 36px; padding: 4px 10px; border: 1.5px solid #8A7E6A; background: #FFFDF7; font-family: 'Nanum Gothic Coding', monospace; font-size: 15px; letter-spacing: 0.06em">
+<button class="choice" type="button" onClick="{{rerollSeed}}" style="min-height: 36px; padding: 4px 12px; background: #1E1B16; color: #F6EFDF; border: none; font-family: 'Nanum Myeongjo', serif; font-size: 13px; font-weight: 800; white-space: nowrap" title="입력한 시드로 다시 태어난다">시드로 태어나기</button>
+</div>
+<sc-if value="{{seedMsgOn}}" hint-placeholder-val="{{ false }}"><span style="flex-basis: 100%; font-size: 12.5px; color: #2C4A5C">{{seedMsg}}</span></sc-if>
+</div>
 </div>
 <div style="flex: none; position: sticky; bottom: 0; background: #F6EFDF; padding: 10px 0 2px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
 <button class="choice" type="button" onClick="{{beginLife}}" style="min-height: 52px; padding: 14px 28px; background: #1E1B16; color: #F6EFDF; border: none; font-family: 'Nanum Myeongjo', serif; font-size: 17px; font-weight: 800">{{startCityName}}에서 눈을 뜬다</button>
@@ -824,7 +836,7 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <div style="position: fixed; inset: 0; z-index: 50; background: rgba(30,27,22,0.55); display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box" role="dialog" aria-modal="true" aria-label="저장된 삶">
 <div class="ks-scroll" style="width: 100%; max-width: 480px; max-height: calc(100dvh - 32px); background: #F6EFDF; border: 2px solid #1E1B16; box-shadow: 0 0 0 5px #F6EFDF, 0 0 0 6.5px #1E1B16; padding: 22px 20px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; font-family: 'Nanum Myeongjo', serif; color: #1E1B16">
 <div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 13px; letter-spacing: 0.3em; color: {{accent}}; font-weight: 800">저장된 삶</span><button type="button" onClick="{{resumeClose}}" aria-label="닫기" style="width: 34px; height: 34px; border: 1px solid #8A7E6A; background: transparent; cursor: pointer; font-size: 16px; color: #5B5246">✕</button></div>
-<sc-for list="{{slots}}" as="sl" hint-placeholder-count="3">
+<sc-for list="{{slots}}" as="sl" hint-placeholder-count="5">
 <div style="background: #FBF7EE; border: 1.5px solid #1E1B16; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
 <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap"><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 12px; font-weight: 700; color: #F6EFDF; background: #1E1B16; padding: 2px 7px">{{sl.label}}</span><span style="font-family: 'Song Myung', serif; font-size: 21px">{{sl.name}}</span></div>
 <span style="font-size: 14px; color: #3A342B">{{sl.line1}}</span>
@@ -965,6 +977,7 @@ class Component extends DCLogic {
       btnAlign: M ? 'stretch' : 'flex-start', nextMin: M ? '0' : '280px' };
   }
   componentWillUnmount() {
+    this.holdWatch(false);
     if (this._ro) { try { this._ro.disconnect(); } catch (err) {} }
     if (this._timer) { clearInterval(this._timer); clearTimeout(this._timer); }
     if (this._qteTimer) clearTimeout(this._qteTimer);
@@ -1079,7 +1092,9 @@ class Component extends DCLogic {
       blur: function () { var r = Object.assign({}, self.state.raw); delete r[key]; self.setState({ raw: r }); }
     };
   }
-  rand(n) { return 1 + Math.floor(Math.random() * n); }
+  /* _seedRng: 태생을 굴리는 동안만 시드 난수를 쓴다 (applyBackground) — 그 밖에는 늘 Math.random */
+  rnd() { return this._seedRng ? this._seedRng() : Math.random(); }
+  rand(n) { return 1 + Math.floor(this.rnd() * n); }
   pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   rollSpec(sp) { var t = sp.b || 0; for (var i = 0; i < sp.n; i++) t += this.rand(sp.s); return t; }
   specLabel(sp) { return sp.n + 'd' + sp.s + (sp.b ? '+' + sp.b : ''); }
@@ -1199,10 +1214,29 @@ class Component extends DCLogic {
     var d = this.draft();
     d.rerollWarn = null;
     d.rerolls = (d.rerolls || 0) + 1;
+    d.seedMsg = '';
     this.applyBackground(d);
     this.setState(d);
   }
-  applyBackground(d) {
+  /* 입력한 시드로 다시 태어나기 */
+  rerollSeed(typed) {
+    if (this.state.screen !== 'origin') return;
+    var sd = cleanSeed(typed != null ? typed : this.state.seedDraft);
+    if (!sd) { this.setState({ seedMsg: '시드를 입력하세요 (영문 · 숫자)' }); return; }
+    var d = this.draft();
+    d.rerollWarn = null; d.rerolls = (d.rerolls || 0) + 1;
+    this.applyBackground(d, sd);
+    d.seedDraft = ''; d.seedMsg = '시드 ' + seedLabel(sd) + ' 로 태어났다';
+    this.setState(d);
+  }
+  applyBackground(d, seed) {
+    /* 태생 굴림 전체를 시드 난수로 (끝나면 반드시 되돌림) */
+    seed = cleanSeed(seed) || newSeed();
+    this._seedRng = seedRng(seed);
+    try { this.applyBackgroundInner(d); } finally { this._seedRng = null; }
+    d.seed = seed; d.player.seed = seed;
+  }
+  applyBackgroundInner(d) {
     var bg = this.rollBackground();
     var st = bg.stats;
     var pickName = function (id) { return bg.rows.filter(function (r) { return r.stage === id; })[0].name; };
@@ -1240,7 +1274,7 @@ class Component extends DCLogic {
     var pool = SKILL_DROP_POOL.filter(function (id) { return SKILLS[id]; });
     if (!pool.length) return null;
     var w = pool.map(function (id) { return SKILLS[id].group === fav ? START_SKILL_BONUS : 1; });
-    var total = w.reduce(function (a, b) { return a + b; }, 0), x = Math.random() * total, i = 0;
+    var total = w.reduce(function (a, b) { return a + b; }, 0), x = this.rnd() * total, i = 0;
     while (i < pool.length - 1 && x >= w[i]) { x -= w[i]; i++; }
     var favLabel = SKILL_GROUPS.filter(function (g) { return g.id === fav; })[0].label;
     return { id: pool[i], favor: favLabel, r: '—' };
@@ -1686,6 +1720,39 @@ class Component extends DCLogic {
      needTag: 모두 있어야 · anyTag: 하나라도 있으면 · hideTag: 하나라도 있으면 숨김
      예) { label: '영어로 말을 건다', needTag: 'lang:en', ... } · { title: '임정 밀사', anyTag: ['near_kpg', 'kpg'] } */
   hasTag(p, t) { return !!(p && p.tags && p.tags[t]); }
+  /* 조건 검사 (COND 설명은 core.js) · d = 지금 상태(도시·시간·날짜) · withChance = 확률 조건도 굴린다 (고를 때만) */
+  condOk(p, c, d, withChance) {
+    if (!c || !p) return true;
+    var self = this, arr = function (v) { return v == null ? [] : (Array.isArray(v) ? v : [v]); }, st = d || this.state;
+    if (arr(c.tags).some(function (t) { return !self.hasTag(p, t); })) return false;
+    if (arr(c.anyTags).length && !arr(c.anyTags).some(function (t) { return self.hasTag(p, t); })) return false;
+    if (arr(c.noTags).some(function (t) { return self.hasTag(p, t); })) return false;
+    if (arr(c.flags).some(function (f) { return !(p.flags && p.flags[f]); })) return false;
+    if (arr(c.noFlags).some(function (f) { return p.flags && p.flags[f]; })) return false;
+    var val = function (k) { return k === 'heat' ? (p.heat || 0) : (p[k] || 0); };
+    if (Object.keys(c.min || {}).some(function (k) { return val(k) < c.min[k]; })) return false;
+    if (Object.keys(c.max || {}).some(function (k) { return val(k) > c.max[k]; })) return false;
+    if (c.weapon) {
+      var w = ownedWeapons(p), ids = Object.keys(w).filter(function (id) { return w[id] && WEAPONS[id] && id !== 'fist'; });
+      var ok = arr(c.weapon).some(function (x) {
+        if (x === 'gun') return ids.some(function (id) { return WEAPONS[id].slot === 'gun'; });
+        if (x === 'melee') return ids.some(function (id) { return WEAPONS[id].slot === 'melee'; });
+        if (x === 'none') return !ids.length;
+        return ids.indexOf(x) >= 0;
+      });
+      if (!ok) return false;
+    }
+    if (arr(c.city).length && arr(c.city).indexOf(p.city || START_CITY) < 0) return false;
+    if (arr(c.time).length && st && arr(c.time).indexOf(st.time) < 0) return false;
+    if (c.years && st && st.date && (st.date.y < c.years[0] || st.date.y > c.years[1])) return false;
+    if (c.chance != null && withChance && Math.random() >= c.chance) return false;
+    return true;
+  }
+  /* 고를 때: 조건부 결과(alt) 중 맞는 첫 줄 */
+  altOf(opt, p, d) {
+    var self = this;
+    return (opt.alt || []).filter(function (a) { return self.condOk(p, a.when, d, true); })[0] || null;
+  }
   tagsOk(p, o) {
     if (!o) return true;
     var self = this, arr = function (v) { return v ? (Array.isArray(v) ? v : [v]) : []; };
@@ -1701,6 +1768,7 @@ class Component extends DCLogic {
       if (o.hideIf && p.flags[o.hideIf]) return false;
       if (o.hideWeapon && (ownedWeapons(p)[o.hideWeapon] || (p.stash && p.stash.weapons && p.stash.weapons[o.hideWeapon]))) return false;
       if (o.needFlag && !p.flags[o.needFlag]) return false;
+      if (o.show && !self.condOk(p, o.show, null, false)) return false;
       return self.tagsOk(p, o);
     });
   }
@@ -1718,11 +1786,13 @@ class Component extends DCLogic {
       this.commit(db);
       return;
     }
-    if (opt.check) {
+    /* 조건부 결과: 조건이 맞으면 그 줄의 결과로 (check: false 면 판정 없이 바로) */
+    var alt = this.altOf(opt, s.player, s), okR = alt ? (alt.ok || opt.ok) : opt.ok, ngR = alt ? (alt.ng || opt.ng) : opt.ng;
+    if (opt.check && !(alt && alt.check === false)) {
       this.roll(STAT_LABEL[opt.check.stat], this.tgt(diffTarget(s.player[opt.check.stat], opt.check.diff) + this.alignBonus(s.player, opt.check)), function (d, res) {
-        self.resolveOpt(d, ev, opt, res.success ? opt.ok : opt.ng, res.success);
+        self.resolveOpt(d, ev, opt, res.success ? okR : ngR, res.success);
       });
-    } else { var d = this.draft(); this.resolveOpt(d, ev, opt, opt.ok, true); this.commit(d); }
+    } else { var d = this.draft(); this.resolveOpt(d, ev, opt, okR, true); this.commit(d); }
   }
   /* ───── 몸수색 (SEARCH 참고) ───── */
   bribeChance(p) { var B = SEARCH.bribe; return Math.max(B.min, Math.min(B.max, B.chance + ((p && p.jp) || 0) / B.alignDiv)); }
@@ -1782,7 +1852,15 @@ class Component extends DCLogic {
     var parts = [];
     var cost = this.costOf(ev, opt, d.player);
     if (cost) { var neg = {}; Object.keys(cost).forEach(function (k) { neg[k] = -cost[k]; }); parts = parts.concat(this.applyFx(d, neg)); }
-    if (out.flag) d.player.flags[out.flag] = true;
+    var arrOf = function (v) { return v == null ? [] : (Array.isArray(v) ? v : [v]); };
+    arrOf(out.flag).forEach(function (f) { d.player.flags[f] = true; });
+    /* 태그 얻기·잃기 (조건에 쓰인다) */
+    if (out.tag || out.untag) {
+      var tg = Object.assign({}, d.player.tags || {});
+      arrOf(out.tag).forEach(function (t) { tg[t] = (tg[t] || 0) + 1; });
+      arrOf(out.untag).forEach(function (t) { delete tg[t]; });
+      d.player.tags = tg;
+    }
     if (out.weapon) { var wg = this.giveWeapon(d, out.weapon); if (wg) parts.push(wg); }
     if (out.quest) this.setQuest(d, out.quest);
     var al = { jp: 0, kr: 0 };
@@ -2748,11 +2826,21 @@ class Component extends DCLogic {
     return QTE.late;
   }
   /* hold 명령: 누르는 순간부터 표시가 움직인다 */
-  qteHoldStart() {
+  qteHoldStart(viaPointer) {
     var self = this, q = this.state.qte; if (!q || q.done || this._qteDone || q.cmd !== 'hold' || q.started) return;
     this.setState({ qte: Object.assign({}, q, { started: true, start: this.now() }) });
+    /* 손가락·마우스로 눌렀으면, 단추 밖에서 떼도 떼는 것으로 친다 (휴대폰에서 손가락이 단추를 벗어나는 경우) */
+    if (viaPointer) this.holdWatch(true);
     if (this._qteTimer) clearTimeout(this._qteTimer);
     this._qteTimer = setTimeout(function () { self.qteResolve(null); }, q.total + 120);
+  }
+  /* 화면 어디서든 손을 떼면(또는 터치가 취소되면) 한 번만 발사 */
+  holdWatch(on) {
+    var self = this, evs = ['pointerup', 'pointercancel', 'touchend', 'touchcancel', 'mouseup'];
+    if (this._holdUp) { evs.forEach(function (n) { window.removeEventListener(n, self._holdUp, true); }); this._holdUp = null; }
+    if (!on || typeof window === 'undefined' || !window.addEventListener) return;
+    this._holdUp = function () { self.holdWatch(false); self.qtePress(); };
+    evs.forEach(function (n) { window.addEventListener(n, self._holdUp, true); });
   }
   qtePress() {
     var q = this.state.qte; if (!q || q.done || this._qteDone || !q.started) return;
@@ -2763,6 +2851,7 @@ class Component extends DCLogic {
   qteResolve(pos) {
     var self = this, q = this.state.qte; if (!q || this._qteDone) return;
     this._qteDone = true;
+    this.holdWatch(false);
     if (this._qteTimer) { clearTimeout(this._qteTimer); this._qteTimer = null; }
     if (this._trackTimer) { clearInterval(this._trackTimer); this._trackTimer = null; }
     if (q.shape === 'track') {
@@ -3237,8 +3326,13 @@ class Component extends DCLogic {
       if (ev.preventDefault) ev.preventDefault();
       if (qcmd === 'hold') self.qtePress();
     };
-    qv.down = function () { if (qcmd === 'hold') self.qteHoldStart(); };
-    qv.up = function () { if (qcmd === 'hold') self.qtePress(); };
+    qv.down = function (ev) {
+      if (qcmd !== 'hold') return;
+      /* 손가락이 단추를 벗어나도 떼는 순간을 받도록 포인터를 붙잡아 둔다 */
+      try { if (ev && ev.currentTarget && ev.currentTarget.setPointerCapture && ev.pointerId != null) ev.currentTarget.setPointerCapture(ev.pointerId); } catch (err) {}
+      self.qteHoldStart(true);
+    };
+    qv.up = function () { if (qcmd === 'hold') { self.holdWatch(false); self.qtePress(); } };
     qv.ref = function (el) { self._qteBtn = el; };
     var L = LOCS[s.loc];
     var era = this.eraOf(s.date);
@@ -3544,6 +3638,15 @@ class Component extends DCLogic {
       rerollConfirm: function () { self.reroll(true); },
       rerollCancel: function () { self.setState({ rerollWarn: null }); },
       toTitle: function () { self.toTitle(); },
+      seedText: s.seed ? seedLabel(s.seed) : '—', seedDraft: s.seedDraft || '', seedMsg: s.seedMsg || '', seedMsgOn: !!s.seedMsg,
+      seedChange: function (ev) { self.setState({ seedDraft: String(ev && ev.target ? ev.target.value : '').slice(0, 30) }); },
+      seedKey: function (ev) { if (ev && ev.key === 'Enter') { self.rerollSeed(ev.target && ev.target.value); } },
+      rerollSeed: function () { self.rerollSeed(); },
+      copySeed: function () {
+        var t = self.state.seed ? seedLabel(self.state.seed) : '';
+        var ok = function () { self.setState({ seedMsg: '시드 ' + t + ' 를 복사했다' }); };
+        try { navigator.clipboard.writeText(t).then(ok, function () { self.setState({ seedMsg: '복사가 막혔다 · 시드 글자를 길게 눌러 직접 복사하자' }); }); } catch (err) { self.setState({ seedMsg: '복사가 막혔다 · 시드 글자를 직접 복사하자' }); }
+      },
       rerollText: s.rerolls ? '다시 태어난 횟수 ' + s.rerolls + '번' : '시대와 날짜는 그대로, 태생만 새로 굴린다',
       timeLabel: this.dateLabel(s.date) + ' · ' + TIMES[s.time], locName: L.name,
       era: { name: era.name, range: era.range, desc: era.desc },

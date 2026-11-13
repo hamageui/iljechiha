@@ -128,9 +128,33 @@ var LIFE_STORE_KEY = 'kyungsung.lifeTables.v4';
    SAVE_SKIP: 저장하지 않는 화면용 값 (태생 표 편집본은 LIFE_STORE_KEY 에 따로 저장) */
 var HEAT_MAX = 20; /* 감시도 최대치 (도시마다 따로) */
 var SAVE_KEY = 'ilje.save.v1', SAVE_VER = 1; /* SAVE_KEY: 예전 한 칸 저장 (있으면 1번 칸으로 옮김) */
-var SAVE_SLOTS = 3, SAVE_SLOT_KEY = 'ilje.save.slot'; /* 저장 칸 수 · 칸별 키 = SAVE_SLOT_KEY + 번호 */
+var SAVE_SLOTS = 5, SAVE_SLOT_KEY = 'ilje.save.slot'; /* 저장 칸 수 · 칸별 키 = SAVE_SLOT_KEY + 번호 */
 var SAVE_SKIP = ['life', 'base', 'edStage', 'raw', 'importText', 'saveMsg', 'saveOk', 'dice', 'rolling', 'qte', 'tip', 'infoMode',
-  'nameOpen', 'nameDraft', 'rerollWarn', 'helpOpen', 'creditOpen', 'resumeOpen', 'invMsg', 'slotDel', 'hudOpen'];
+  'nameOpen', 'nameDraft', 'rerollWarn', 'helpOpen', 'creditOpen', 'resumeOpen', 'invMsg', 'slotDel', 'hudOpen', 'seedDraft', 'seedMsg'];
+/* ───── 조건 (선택지 보이기 show · 조건부 결과 alt.when) ─────
+   { tags: [모두 있어야], anyTags: [하나라도], noTags: [하나도 없어야], flags: [표식 모두], noFlags: [표식 없어야],
+     min: { int: 40, money: 5, heat: 3, jp: 50, … }, max: { … }   ← 능력치·돈·체력·구급약·탄환·감시도·일제(jp)·민족(kr)
+     weapon: 'rifle' | 'gun'(총 아무거나) | 'melee'(맨손 말고 근접 무기) | 'none'(무기 없음),
+     city: ['gyeongseong', …], time: [0 오전, 1 오후, 2 밤], years: [1919, 1925], chance: 0.3 (조건부 결과에서만) }
+   선택지: show = 이 조건이 맞아야 화면에 보임 · alt = [{ when, ok, ng?, check: false? }] = 고를 때 맞는 첫 줄의 결과를 쓴다
+   결과: flag / tag (문자열이나 배열) = 표식·태그를 얻음 · untag = 태그를 잃음 */
+var COND_TIME = ['오전', '오후', '밤'];
+/* ───── 태생 시드 ─────
+   같은 시드 = 같은 태생 굴림(단계별 항목 · 능력치 · 소지품 · 첫 기술 · 시작 도시).
+   시대 · 날짜와 게임 진행(사건 · 판정 · 전투)은 시드와 상관없이 매번 무작위.
+   태생 표를 고치면(개발자 탭 태생 편집) 같은 시드라도 결과가 달라진다. */
+var SEED_LEN = 8, SEED_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; /* 헷갈리는 0·O·1·I 는 뺌 */
+function newSeed() { var s = ''; for (var i = 0; i < SEED_LEN; i++) s += SEED_CHARS[Math.floor(Math.random() * SEED_CHARS.length)]; return s; }
+function cleanSeed(v) { return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24); }
+function seedLabel(s) { return s.length > 4 ? s.slice(0, 4) + '-' + s.slice(4) : s; }
+/* 시드 문자열 → 0~1 난수 함수 (cyrb53 해시 + mulberry32) */
+function seedRng(str) {
+  var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (var i = 0; i < str.length; i++) { var c = str.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  var a = h1 >>> 0;
+  return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
 /* 편집기에서 숫자로 고칠 수 있는 칸 */
 var ED_NUMS = [
   { k: 'str', kind: 'mod', label: '근력' }, { k: 'agi', kind: 'mod', label: '민첩' }, { k: 'int', kind: 'mod', label: '지능' },
@@ -154,34 +178,34 @@ var LIFE_STAGES = [
   ] },
   { id: 'child', label: '유년 활동', times: 1, table: [
     {max: 1, special: true, id: "herbshop", name: "한약방 심부름", desc: "한약방에서 일하면서 한약을 만드는 법을 배웠다.", tags: ["herbal", "medicine"], mod: {int: 30}, fx: {medkit: 4}},
-    {max: 7, id: "reading", name: "독서", desc: "책을 많이 읽었다. 구한말 소설부터 신문 연재까지 닥치는 대로.", tags: ["bookish"], mod: {int: 40}},
-    {max: 14, id: "play", name: "운동", desc: "친구들과 골목을 누비며 뛰어놀았다.", tags: ["athletic"], mod: {agi: 40}},
-    {max: 21, id: "labor", name: "노동", desc: "어려서부터 가족 일을 도우며 지게를 졌다.", tags: ["laborer"], mod: {str: 40}},
-    {max: 28, id: "stone", name: "돌 던지기", desc: "연못에 돌을 던지며 놀았다. 물수제비 실력이 일품이다.", tags: ["thrower"], mod: {acc: 40}},
-    {max: 35, id: "newsboy", name: "신문판매", desc: "길거리를 돌아다니면서 신문을 팔았다.", tags: ["street_kid", "newspaper"], mod: {agi: 30}, fx: {money: 30}},
-    {max: 42, id: "crafting", name: "물건 만들기", desc: "뭔가를 뚝딱뚝딱 만들면서 지냈다.", tags: ["crafter"], mod: {int: 20, acc: 20}},
-    {max: 48, id: "stories", name: "이야기 듣기", desc: "마을 어른에게서 옛이야기를 많이 들었다.", tags: ["folklore"], mod: {int: 20, con: 20}},
-    {max: 54, id: "farmwork", name: "농사일 돕기", desc: "농사일을 도우며 땡볕에서 일했다.", tags: ["farming", "laborer"], mod: {str: 20, con: 20}},
-    {max: 60, id: "glutton", name: "먹보", desc: "잘 먹고 튼튼하게 컸다.", tags: ["hearty"], mod: {con: 40}},
-    {max: 66, id: "hiking", name: "등산", desc: "산을 타면서 모험을 했다.", tags: ["mountain"], mod: {str: 20, agi: 20}},
-    {max: 67, special: true, id: "trading", name: "장사 참여", desc: "특출난 장사 수완으로 돈을 많이 벌었다.", tags: ["trader", "merchant_culture"], mod: {int: 25}, fx: {money: 60}},
-    {max: 100, id: "schooled", name: "교육을 받음", desc: "어려서부터 서당이나 학교 문턱을 드나들며 글을 깨쳤다. 배움의 길이 열려 있다.", tags: ["schooled"]}
+    {max: 10, id: "reading", name: "독서", desc: "책을 많이 읽었다. 구한말 소설부터 신문 연재까지 닥치는 대로.", tags: ["bookish"], mod: {int: 40}},
+    {max: 21, id: "play", name: "운동", desc: "친구들과 골목을 누비며 뛰어놀았다.", tags: ["athletic"], mod: {agi: 40}},
+    {max: 32, id: "labor", name: "노동", desc: "어려서부터 가족 일을 도우며 지게를 졌다.", tags: ["laborer"], mod: {str: 40}},
+    {max: 43, id: "stone", name: "돌 던지기", desc: "연못에 돌을 던지며 놀았다. 물수제비 실력이 일품이다.", tags: ["thrower"], mod: {acc: 40}},
+    {max: 53, id: "newsboy", name: "신문판매", desc: "길거리를 돌아다니면서 신문을 팔았다.", tags: ["street_kid", "newspaper"], mod: {agi: 30}, fx: {money: 30}},
+    {max: 63, id: "crafting", name: "물건 만들기", desc: "뭔가를 뚝딱뚝딱 만들면서 지냈다.", tags: ["crafter"], mod: {int: 20, acc: 20}},
+    {max: 72, id: "stories", name: "이야기 듣기", desc: "마을 어른에게서 옛이야기를 많이 들었다.", tags: ["folklore"], mod: {int: 20, con: 20}},
+    {max: 81, id: "farmwork", name: "농사일 돕기", desc: "농사일을 도우며 땡볕에서 일했다.", tags: ["farming", "laborer"], mod: {str: 20, con: 20}},
+    {max: 90, id: "glutton", name: "먹보", desc: "잘 먹고 튼튼하게 컸다.", tags: ["hearty"], mod: {con: 40}},
+    {max: 99, id: "hiking", name: "등산", desc: "산을 타면서 모험을 했다.", tags: ["mountain"], mod: {str: 20, agi: 20}},
+    {max: 100, special: true, id: "trading", name: "장사 참여", desc: "특출난 장사 수완으로 돈을 많이 벌었다.", tags: ["trader", "merchant_culture"], mod: {int: 25}, fx: {money: 60}}
+
   ] },
-  /* rolls: 이 단계의 굴림 방식. 위에서부터 조건(ifTag)이 맞는 첫 줄을 쓴다. die = 주사위 면 수, add = 더하는 값
-     유년 활동 '교육을 받음'(child:schooled)이 있으면 d40+60, 없으면 d60 */
-  { id: 'edu', label: '교육', times: 1, rolls: [{ifTag: "child:schooled", die: 40, add: 60}, {die: 60, add: 0}], table: [
+  /* rolls: 단계의 굴림 방식을 바꿀 때 쓴다 (위에서부터 조건 ifTag 가 맞는 첫 줄 · die = 주사위 면 수, add = 더하는 값). 없으면 d100
+     교육: 예전엔 유년 '교육을 받음'에 따라 d40+60/d60 → 지금은 모두 d100. 교육 항목은 지능을 올리지 않는다 (교육 수치만) */
+  { id: 'edu', label: '교육', times: 1, table: [
     {max: 30, id: "none", name: "다니지 않음", desc: "학교 문턱을 넘어 본 적이 없다. 이름 석 자 쓰는 것도 버겁다.", tags: ["illiterate"], mod: {edu: 10}},
     {max: 40, id: "night", name: "야학 교육", desc: "일을 마친 밤마다 야학에서 한글과 셈을 익혔다.", tags: ["literate", "hangul", "night_school"], mod: {edu: 20}, fx: {heat: 1}},
     {max: 55, id: "seodang", name: "서당 교육", desc: "훈장 앞에서 천자문과 소학을 외웠다. 한문은 읽지만 신학문은 모른다.", tags: ["literate", "hanmun"], mod: {edu: 30}},
     {max: 64, id: "simple", name: "간이학교 교육", desc: "2년제 간이학교에서 일본어와 산술 기초를 배웠다.", tags: ["literate", "lang:ja"], mod: {edu: 35}},
     {max: 70, id: "primary_drop", name: "보통학교 중퇴", desc: "보통학교에 다니다 집안 형편 때문에 그만두었다.", tags: ["literate", "lang:ja", "dropout"], mod: {edu: 50}},
-    {max: 75, id: "vocational_drop", name: "실업학교 중퇴", desc: "상업학교에 들어갔다가 끝을 보지 못했다. 손재주는 남았다.", tags: ["literate", "lang:ja", "vocational", "dropout"], mod: {int: 10, edu: 55}},
-    {max: 76, id: "primary", name: "보통학교 졸업", desc: "보통학교에서 조선어와 일본어, 산술을 배웠다.", tags: ["literate", "lang:ja"], mod: {int: 5, edu: 55}},
-    {max: 90, id: "vocational", name: "실업학교 졸업", desc: "농업·상업학교를 마치고 장부와 기계를 다룰 줄 안다.", tags: ["literate", "lang:ja", "vocational"], mod: {int: 10, edu: 65}},
-    {max: 91, id: "secondary_drop", name: "고등보통학교 중퇴", desc: "고보에 다니다 동맹휴학에 휘말려 학교를 떠났다.", tags: ["literate", "lang:ja", "dropout", "student_strike"], mod: {int: 20, edu: 65}},
-    {max: 96, special: true, id: "secondary", name: "고등보통학교 졸업", desc: "고등보통학교까지 마쳤다. 동네에서 손꼽히는 인텔리다.", tags: ["literate", "lang:ja", "intelligentsia"], mod: {int: 20, edu: 75}},
-    {max: 99, special: true, id: "college", name: "전문학교 학생", desc: "연희·보성 같은 전문학교에 다니는 수재. 신학문과 새 사상에 밝아 일경이 눈여겨본다.", tags: ["literate", "lang:ja", "intelligentsia", "student"], mod: {int: 20, edu: 85}, flag: "edu_college"},
-    {max: 100, special: true, id: "imperial", name: "경성제국대학 학생", desc: "조선인 입학생이 손에 꼽히는 경성제국대학의 학생. 사각모 하나로 대접이 달라진다.", tags: ["literate", "lang:ja", "intelligentsia", "student", "elite"], mod: {int: 20, edu: 90}, flag: "edu_imperial"}
+    {max: 75, id: "vocational_drop", name: "실업학교 중퇴", desc: "상업학교에 들어갔다가 끝을 보지 못했다. 손재주는 남았다.", tags: ["literate", "lang:ja", "vocational", "dropout"], mod: {edu: 55}},
+    {max: 76, id: "primary", name: "보통학교 졸업", desc: "보통학교에서 조선어와 일본어, 산술을 배웠다.", tags: ["literate", "lang:ja"], mod: {edu: 55}},
+    {max: 90, id: "vocational", name: "실업학교 졸업", desc: "농업·상업학교를 마치고 장부와 기계를 다룰 줄 안다.", tags: ["literate", "lang:ja", "vocational"], mod: {edu: 65}},
+    {max: 91, id: "secondary_drop", name: "고등보통학교 중퇴", desc: "고보에 다니다 동맹휴학에 휘말려 학교를 떠났다.", tags: ["literate", "lang:ja", "dropout", "student_strike"], mod: {edu: 65}},
+    {max: 96, special: true, id: "secondary", name: "고등보통학교 졸업", desc: "고등보통학교까지 마쳤다. 동네에서 손꼽히는 인텔리다.", tags: ["literate", "lang:ja", "intelligentsia"], mod: {edu: 75}},
+    {max: 99, special: true, id: "college", name: "전문학교 학생", desc: "연희·보성 같은 전문학교에 다니는 수재. 신학문과 새 사상에 밝아 일경이 눈여겨본다.", tags: ["literate", "lang:ja", "intelligentsia", "student"], mod: {edu: 85}, flag: "edu_college"},
+    {max: 100, special: true, id: "imperial", name: "경성제국대학 학생", desc: "조선인 입학생이 손에 꼽히는 경성제국대학의 학생. 사각모 하나로 대접이 달라진다.", tags: ["literate", "lang:ja", "intelligentsia", "student", "elite"], mod: {edu: 90}, flag: "edu_imperial"}
   ] },
   { id: 'link', label: '연줄', times: 1, table: [
     {max: 1, special: true, id: "kimjwajin", name: "독립군 사령관", desc: "만주 독립군 부대의 사령관이 집안 어른이다. 그 이름 하나로 목숨이 오간다.", tags: ["kimjwajin"], fx: {heat: 3}, flag: "link_commander"},

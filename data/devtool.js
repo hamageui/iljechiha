@@ -302,6 +302,12 @@ var DEV_TOOL = (function () {
     '효과': '결과로 바뀌는 수치. ‘이름 숫자’를 쉼표로 잇습니다.\n예: 돈 +10, 감시도 +1, 체력 -3\n쓸 수 있는 이름: 돈 · 체력 · 탄환 · 구급약 · 감시도 · 지난주 · 일제타협 · 민족타협 · 근력 · 민첩 · 지능 · 교육 · 정확 · 건강',
     '싸움': '적으면 결과 글 다음에 전투가 시작됩니다.\n칸을 누르면 목록이 뜹니다. 예: patrol_pair(순사 둘)',
     '싸움 거리': '전투가 시작될 때 적과의 거리.\n1.5 = 코앞 · 4 = 멀리서',
+    '보이는 조건': '이 조건이 맞을 때만 선택지가 화면에 보입니다. 비우면 늘 보입니다.\n쉼표로 여러 개 = 모두 맞아야 함\n태그:lang:ja · 태그없음:poor · 아무태그:a|b\n표식:met_kim · 표식없음:met_kim\n지능>=40 · 돈<=3 · 감시도>=5 · 일제타협>=50 · 민족타협<=-20 · 체력 · 구급약 · 탄환\n무기:총 · 무기:근접 · 무기:없음 · 무기:rifle\n도시:평양|부산 · 시간:밤 · 연도:1919-1925',
+    '조건부 결과': '선택지를 고를 때 조건이 맞으면, 위의 결과 대신 이 결과가 나옵니다.\n여러 줄이면 위에서부터 맞는 첫 줄을 씁니다.',
+    '조건': '이 결과가 나올 조건. ‘보이는 조건’과 같은 방식에 더해 확률:30% 도 쓸 수 있습니다.',
+    '판정 없이 바로': '체크하면 조건이 맞을 때 주사위 판정 없이 바로 이 결과가 나옵니다.',
+    '＋ 조건부 결과': '태그·능력치·표식 등 조건에 따라 다른 결과를 만듭니다.\n예: 평양 출신(태그:region:northwest)이면 주인이 외상을 해 준다',
+    '얻는 표식·태그': '이 결과가 나오면 주인공에게 붙는 표식·태그. 나중 사건의 조건에 쓸 수 있습니다.\n예: 표식:met_kim, 태그:debtor, 태그빼기:debtor',
     '이어지는 장면': '한 사건 안에서 선택을 여러 번 하게 합니다.\n결과에서 장면을 고르면, 결과 글을 보여 준 뒤 그 장면의 글과 선택지가 이어서 나옵니다. 시간은 흐르지 않습니다.\n장면은 이 사건 아래 ‘이어지는 장면’에서 만듭니다. 싸움이 있는 결과에는 쓸 수 없습니다.',
     '장면 이름': '장면을 가리키는 이름 (영문 소문자 · 숫자 · _).\n선택지 결과의 ‘이어지는 장면’에 이 이름이 뜹니다.',
     '장면 제목': '이 장면에서 화면 맨 위에 나올 제목. 비우면 사건 제목 그대로.',
@@ -327,7 +333,7 @@ var DEV_TOOL = (function () {
     '이 사건을 붙일 단계 (선택)': '적으면 그 단계가 이 사건으로 이어집니다. 비우면 사건만 만듭니다.',
     '태생 단계 이름': '탄생 화면에 나오는 이 단계의 이름 (예: 유년 활동).',
     '굴림 횟수': '이 단계에서 주사위를 몇 번 굴릴지. 청소년기 사건은 5번입니다.',
-    '굴림 방식': '조건에 따라 주사위를 바꿉니다. 위에서부터 조건(ifTag)이 맞는 첫 줄을 씁니다.\ndie = 주사위 면 수, add = 더하는 값\n예: 교육은 ‘교육을 받음’이면 d40+60, 아니면 d60\n비우면 d100',
+    '굴림 방식': '조건에 따라 주사위를 바꿉니다. 위에서부터 조건(ifTag)이 맞는 첫 줄을 씁니다.\ndie = 주사위 면 수, add = 더하는 값\n예: [ { "ifTag": "child:reading", "die": 40, "add": 60 }, { "die": 100 } ] = 유년 ‘독서’면 d40+60, 아니면 d100\n비우면 d100',
     '항목 (d100 범위)': '주사위 숫자가 들어가는 범위에 따라 항목이 정해집니다.\n위에서 아래로 ‘범위 끝’이 커져야 하고, 마지막은 100입니다.\n막대 위에 마우스를 올리면 각 구간의 확률이 보입니다.',
     '범위 끝': '이 항목 범위의 마지막 숫자. 앞 항목의 끝 다음 숫자부터 여기까지가 이 항목입니다.\n예: 앞 항목이 10이고 여기가 20이면 11~20 (10%)',
     '항목 id': '항목을 구별하는 영문 이름. 자동 태그 ‘단계id:항목id’로도 쓰입니다.\n예: 연줄 단계의 friend → 태그 link:friend\n바꾸면 그 태그를 쓰는 사건이 안 나올 수 있습니다.',
@@ -367,6 +373,79 @@ var DEV_TOOL = (function () {
     if (bad.length) throw new Error(what + ': 알 수 없는 항목 “' + bad.join('”, “') + '” — 예: 돈 +10, 감시도 +1');
     return Object.keys(out).length ? out : null;
   }
+  /* ── 조건 글 ⇄ 조건 객체 (core.js 의 COND) ──
+     예: 태그:lang:ja, 지능>=40, 돈<=3, 표식:met_kim, 표식없음:x, 태그없음:poor, 아무태그:a|b, 무기:총, 도시:평양|부산, 시간:밤, 연도:1919-1925, 확률:30% */
+  var CONDK = { '돈': 'money', '체력': 'hp', '구급약': 'medkit', '탄환': 'ammo', '감시도': 'heat', '일제타협': 'jp', '민족타협': 'kr' };
+  STAT_KEYS.forEach(function (k) { CONDK[STAT_LABEL[k]] = k; });
+  var CONDK_R = {}; Object.keys(CONDK).forEach(function (k) { CONDK_R[CONDK[k]] = k; });
+  var WPN_K = { '총': 'gun', '근접': 'melee', '없음': 'none' }, WPN_R = { gun: '총', melee: '근접', none: '없음' };
+  function cityKey(n) { var hit = Object.keys(CITIES).filter(function (c) { return CITIES[c].name === n || c === n; })[0]; return hit || null; }
+  function condStr(c) {
+    if (!c) return '';
+    var out = [], arr = function (v) { return v == null ? [] : (Array.isArray(v) ? v : [v]); };
+    arr(c.tags).forEach(function (t) { out.push('태그:' + t); });
+    if (arr(c.anyTags).length) out.push('아무태그:' + arr(c.anyTags).join('|'));
+    arr(c.noTags).forEach(function (t) { out.push('태그없음:' + t); });
+    arr(c.flags).forEach(function (t) { out.push('표식:' + t); });
+    arr(c.noFlags).forEach(function (t) { out.push('표식없음:' + t); });
+    Object.keys(c.min || {}).forEach(function (k) { out.push((CONDK_R[k] || k) + '>=' + c.min[k]); });
+    Object.keys(c.max || {}).forEach(function (k) { out.push((CONDK_R[k] || k) + '<=' + c.max[k]); });
+    if (c.weapon) out.push('무기:' + arr(c.weapon).map(function (w) { return WPN_R[w] || w; }).join('|'));
+    if (arr(c.city).length) out.push('도시:' + arr(c.city).map(function (x) { return (CITIES[x] && CITIES[x].name) || x; }).join('|'));
+    if (arr(c.time).length) out.push('시간:' + arr(c.time).map(function (x) { return COND_TIME[x]; }).join('|'));
+    if (c.years) out.push('연도:' + c.years[0] + '-' + c.years[1]);
+    if (c.chance != null) out.push('확률:' + Math.round(c.chance * 100) + '%');
+    return out.join(', ');
+  }
+  function parseCond(str, what, allowChance) {
+    str = String(str || '').trim();
+    if (!str) return null;
+    var c = {}, push = function (k, v) { (c[k] = c[k] || []).push(v); };
+    str.split(/[,，\n]/).forEach(function (tok) {
+      tok = tok.trim(); if (!tok) return;
+      var m = tok.match(/^([^<>=:]+?)\s*(>=|<=)\s*(-?\d+)$/);
+      if (m) {
+        var k = CONDK[m[1].trim()] || (STAT_KEYS.indexOf(m[1].trim()) >= 0 ? m[1].trim() : null);
+        if (!k) throw new Error(what + ': “' + m[1] + '”은(는) 비교할 수 없는 이름입니다');
+        var g = m[2] === '>=' ? 'min' : 'max'; (c[g] = c[g] || {})[k] = Number(m[3]); return;
+      }
+      var i = tok.indexOf(':'); if (i < 0) throw new Error(what + ': “' + tok + '”을(를) 알 수 없습니다 — 예: 태그:lang:ja, 지능>=40');
+      var key = tok.slice(0, i).trim(), v = tok.slice(i + 1).trim(), parts = v.split('|').map(function (x) { return x.trim(); }).filter(Boolean);
+      if (!v) throw new Error(what + ': “' + tok + '” 뒤에 값이 없습니다');
+      if (key === '태그') push('tags', v);
+      else if (key === '태그없음') push('noTags', v);
+      else if (key === '아무태그') c.anyTags = (c.anyTags || []).concat(parts);
+      else if (key === '표식') push('flags', v);
+      else if (key === '표식없음') push('noFlags', v);
+      else if (key === '무기') { c.weapon = parts.map(function (x) { return WPN_K[x] || x; }); c.weapon.forEach(function (w) { if (['gun', 'melee', 'none'].indexOf(w) < 0 && !WEAPONS[w]) throw new Error(what + ': 없는 무기 “' + w + '” (총 · 근접 · 없음 또는 무기 id)'); }); if (c.weapon.length === 1) c.weapon = c.weapon[0]; }
+      else if (key === '도시') c.city = parts.map(function (x) { var k = cityKey(x); if (!k) throw new Error(what + ': 없는 도시 “' + x + '”'); return k; });
+      else if (key === '시간') c.time = parts.map(function (x) { var t = COND_TIME.indexOf(x); if (t < 0) throw new Error(what + ': 시간은 오전 · 오후 · 밤'); return t; });
+      else if (key === '연도') { var ym = v.match(/^(\d{4})\s*-\s*(\d{4})$/); if (!ym) throw new Error(what + ': 연도는 1919-1925 처럼'); c.years = [Number(ym[1]), Number(ym[2])]; }
+      else if (key === '확률') {
+        if (!allowChance) throw new Error(what + ': 확률 조건은 ‘조건부 결과’에서만 쓸 수 있습니다 (보이는 조건에 쓰면 화면이 깜빡입니다)');
+        var pm = v.match(/^(\d+(?:\.\d+)?)\s*%?$/); if (!pm) throw new Error(what + ': 확률은 30% 처럼'); c.chance = Math.min(1, Number(pm[1]) / 100);
+      }
+      else throw new Error(what + ': “' + key + '” 조건은 없습니다 — 태그 · 태그없음 · 아무태그 · 표식 · 표식없음 · 무기 · 도시 · 시간 · 연도 · 확률 · 능력치>=숫자');
+    });
+    return Object.keys(c).length ? c : null;
+  }
+  /* 결과로 얻는 표식·태그: 표식:x, 태그:y, 태그빼기:z */
+  function gainStr(r) {
+    var arr = function (v) { return v == null ? [] : (Array.isArray(v) ? v : [v]); };
+    return arr(r.flag).map(function (x) { return '표식:' + x; }).concat(arr(r.tag).map(function (x) { return '태그:' + x; })).concat(arr(r.untag).map(function (x) { return '태그빼기:' + x; })).join(', ');
+  }
+  function parseGain(str, what) {
+    var o = {};
+    String(str || '').split(/[,，\n]/).forEach(function (tok) {
+      tok = tok.trim(); if (!tok) return;
+      var i = tok.indexOf(':'), k = i > 0 ? tok.slice(0, i).trim() : '', v = i > 0 ? tok.slice(i + 1).trim() : '';
+      var key = { '표식': 'flag', '태그': 'tag', '태그빼기': 'untag' }[k];
+      if (!key || !v) throw new Error(what + ': “' + tok + '” — 표식:이름, 태그:이름, 태그빼기:이름 으로 적어 주세요');
+      (o[key] = o[key] || []).push(v);
+    });
+    Object.keys(o).forEach(function (k) { if (o[k].length === 1) o[k] = o[k][0]; });
+    return o;
+  }
   function parseRest(s, what) {
     s = String(s || '').trim();
     if (!s) return {};
@@ -384,13 +463,14 @@ var DEV_TOOL = (function () {
     var q = r.quest || {};
     return { text: r.text || '', fx: fxStr(r.fx), qid: q.id || '', qstage: q.stage || '', qwait: q.wait == null ? '' : String(q.wait),
       qrest: omit(q, ['id', 'stage', 'wait']), fight: r.fight || '', dist: r.dist == null ? '' : String(r.dist), step: r.step || '',
-      rest: restStr(omit(r, ['text', 'fx', 'quest', 'fight', 'dist', 'step'])) };
+      gain: gainStr(r), rest: restStr(omit(r, ['text', 'fx', 'quest', 'fight', 'dist', 'step', 'flag', 'tag', 'untag'])) };
   }
   function resBuild(m, what, steps) {
     var r = parseRest(m.rest, what + ' · 기타');
     if (m.text) r.text = m.text;
     var fx = parseFx(m.fx, what + ' · 효과'); if (fx) r.fx = fx;
     if (m.fight) r.fight = m.fight.trim();
+    Object.assign(r, parseGain(m.gain, what + ' · 얻는 표식·태그'));
     if (m.dist !== '' && m.dist != null) { if (isNaN(Number(m.dist))) throw new Error(what + ': 거리는 숫자로'); r.dist = Number(m.dist); }
     if (m.qid || m.qstage) {
       if (!m.qid || !m.qstage) throw new Error(what + ': 이야기 진행은 이야기와 단계를 둘 다 적어야 합니다');
@@ -408,15 +488,16 @@ var DEV_TOOL = (function () {
   function optModel(o, al) {
     var a = al[o.label] || {};
     var ck = o.check || {};
-    var orest = omit(o, ['label', 'check', 'ok', 'ng', 'cost']);
+    var orest = omit(o, ['label', 'check', 'ok', 'ng', 'cost', 'show', 'alt']);
     var crest = omit(ck, ['stat', 'diff']);
     if (Object.keys(crest).length) orest.check = crest;
     return { label: o.label || '', stat: ck.stat || '', diff: ck.diff || 'normal', cost: fxStr(o.cost), rest: restStr(orest),
       ajp: a.jp ? String(a.jp) : '', akr: a.kr ? String(a.kr) : '', aok: !!a.ok,
       afjp: a.fail && a.fail.jp ? String(a.fail.jp) : '', afkr: a.fail && a.fail.kr ? String(a.fail.kr) : '',
-      ok: resModel(o.ok), hasNg: !!o.ng, ng: resModel(o.ng) };
+      ok: resModel(o.ok), hasNg: !!o.ng, ng: resModel(o.ng), show: condStr(o.show),
+      alts: (o.alt || []).map(function (a) { return { when: condStr(a.when), skip: a.check === false, ok: resModel(a.ok), hasNg: !!a.ng, ng: resModel(a.ng) }; }) };
   }
-  function newOpt() { return { label: '', stat: '', diff: 'normal', cost: '', rest: '', ajp: '', akr: '', aok: false, afjp: '', afkr: '', ok: resModel(), hasNg: false, ng: resModel() }; }
+  function newOpt() { return { label: '', stat: '', diff: 'normal', cost: '', rest: '', ajp: '', akr: '', aok: false, afjp: '', afkr: '', ok: resModel(), hasNg: false, ng: resModel(), show: '', alts: [] }; }
   function toModel(t, id) {
     var ev = pure(TABLES[t][id]) || {}, al = t === 'QUESTS' ? {} : alignOf(id);
     var m = { t: t, id: id, title: ev.title || '', kind: ev.kind || '', loc: ev.loc || '', needTag: ev.needTag || '',
@@ -443,8 +524,19 @@ var DEV_TOOL = (function () {
     else if (Object.keys(crest).length) out.check = crest;
     var cost = parseFx(o.cost, what + ' · 비용'); if (cost) out.cost = cost;
     Object.assign(out, op);
+    var show = parseCond(o.show, what + ' · 보이는 조건', false); if (show) out.show = show;
     out.ok = resBuild(o.ok, what + (out.check ? ' · 성공' : ' · 결과'), steps);
     if (out.check && o.hasNg) out.ng = resBuild(o.ng, what + ' · 실패', steps);
+    if ((o.alts || []).length) {
+      out.alt = o.alts.map(function (a, ai) {
+        var aw = what + ' · 조건부 결과 ' + (ai + 1), when = parseCond(a.when, aw + ' · 조건', true);
+        if (!when) throw new Error(aw + ': 조건을 적어 주세요');
+        var x = { when: when, ok: resBuild(a.ok, aw + (out.check && !a.skip ? ' · 성공' : ''), steps) };
+        if (out.check && a.skip) x.check = false;
+        if (out.check && !a.skip && a.hasNg) x.ng = resBuild(a.ng, aw + ' · 실패', steps);
+        return x;
+      });
+    }
     var jp = num(o.ajp, what + ' · 일제타협'), kr = num(o.akr, what + ' · 민족타협');
     var fjp = num(o.afjp, what + ' · 실패 일제타협'), fkr = num(o.afkr, what + ' · 실패 민족타협');
     if (jp || kr || fjp || fkr) {
@@ -761,6 +853,7 @@ var DEV_TOOL = (function () {
         field('효과', inp(r.fx, function (v) { r.fx = v; mark(); }, { placeholder: '예: 돈 +10, 감시도 +1' })),
         field('싸움', inp(r.fight, function (v) { r.fight = v; mark(); }, { list: 'ijd-fights', placeholder: '없음' })),
         field('싸움 거리', inp(r.dist, function (v) { r.dist = v; mark(); }, { placeholder: '예: 1.5', inputmode: 'decimal' })),
+        field('얻는 표식·태그', inp(r.gain, function (v) { r.gain = v; mark(); }, { placeholder: '예: 표식:met_kim, 태그:debtor', autocapitalize: 'off', spellcheck: 'false' })),
         field('이어지는 장면', sel(r.step, [['', stepKeys.length ? '(여기서 사건 끝)' : '(장면 없음 · 사건 끝)']].concat(stepKeys.map(function (k) { return [k, '→ ' + k]; })), function (v) { r.step = v; mark(); }, { class: 'ijd-stepsel' }))
       ]),
       h('div', { class: 'ijd-grid' }, [
@@ -796,9 +889,11 @@ var DEV_TOOL = (function () {
         o.stat ? field('실패 시 일제', inp(o.afjp, function (v) { o.afjp = v; mark(); }, { inputmode: 'numeric', placeholder: '0' })) : null,
         o.stat ? field('실패 시 민족', inp(o.afkr, function (v) { o.afkr = v; mark(); }, { inputmode: 'numeric', placeholder: '0' })) : null
       ]),
+      field('보이는 조건', inp(o.show, function (v) { o.show = v; mark(); }, { placeholder: '비우면 늘 보임 · 예: 태그:lang:ja, 지능>=40', autocapitalize: 'off', spellcheck: 'false' }), null, true),
       resEditor(o.ok, o.stat ? '성공했을 때' : '고르면', qid, m),
       o.stat ? (o.hasNg ? resEditor(o.ng, '실패했을 때', qid, m) : h('button', { type: 'button', class: 'ijd-btn', tip: '판정에 실패했을 때 나올 글과 효과를 따로 씁니다', onclick: function () { o.hasNg = true; mark(); render(); }, text: '＋ 실패 결과 쓰기' })) : null,
       o.stat && o.hasNg ? h('button', { type: 'button', class: 'ijd-link', onclick: function () { o.hasNg = false; mark(); render(); }, text: '실패 결과 빼기 (실패하면 “아무 일도 일어나지 않았다.”만 나옴)' }) : null,
+      altsEditor(m, o, qid),
       h('details', { class: 'ijd-adv' + (o.rest ? ' has' : '') }, [h('summary', { tip: TIPS['선택지 기타 설정 (JSON)'], text: '선택지 기타 설정 (JSON)' + (o.rest ? ' · 있음' : '') }),
         ta(o.rest, function (v) { o.rest = v; mark(); }, { class: 'mono', rows: 2, placeholder: '예: { "needTag": "link:press" }', spellcheck: 'false' })])
     ]);
@@ -818,6 +913,24 @@ var DEV_TOOL = (function () {
       keys.forEach(function (k) { el.appendChild(h('option', { value: k, text: '→ ' + k })); });
       el.value = cur;
     });
+  }
+  /* 조건부 결과: 고를 때 조건이 맞으면 위의 결과 대신 이 결과 (위에서부터 맞는 첫 줄) */
+  function altsEditor(m, o, qid) {
+    return h('div', { class: 'ijd-alts' }, [
+      o.alts.length ? subHead('조건부 결과') : null,
+      h('div', {}, o.alts.map(function (a, ai) {
+        return h('div', { class: 'ijd-alt' }, [
+          h('div', { class: 'ijd-grid' }, [
+            field('조건', inp(a.when, function (v) { a.when = v; mark(); }, { placeholder: '예: 태그:region:northwest, 확률:30%', autocapitalize: 'off', spellcheck: 'false' })),
+            o.stat ? h('label', { class: 'ijd-f ijd-chk' }, [h('input', { type: 'checkbox', checked: a.skip, onchange: function (e) { a.skip = e.target.checked; mark(); render(); } }), h('span', { class: 'has-tip', tip: TIPS['판정 없이 바로'], text: '판정 없이 바로' })]) : null,
+            h('button', { type: 'button', class: 'ijd-mini bad', tip: '이 조건부 결과를 지웁니다 (두 번 눌러야 지워짐)', onclick: function () { if (a._del) { o.alts.splice(ai, 1); mark(); render(); } else { a._del = true; toast('한 번 더 누르면 조건부 결과 ' + (ai + 1) + '을(를) 지웁니다', true); } }, text: '✕' })
+          ]),
+          resEditor(a.ok, o.stat && !a.skip ? '조건이 맞고 성공하면' : '조건이 맞으면', qid, m),
+          o.stat && !a.skip ? (a.hasNg ? resEditor(a.ng, '조건이 맞고 실패하면', qid, m) : h('button', { type: 'button', class: 'ijd-link', onclick: function () { a.hasNg = true; mark(); render(); }, text: '＋ 실패 결과도 따로 쓰기 (안 쓰면 위의 실패 결과)' })) : null
+        ]);
+      })),
+      h('button', { type: 'button', class: 'ijd-btn', tip: TIPS['＋ 조건부 결과'], onclick: function () { o.alts.push({ when: '', skip: false, ok: resModel(), hasNg: false, ng: resModel() }); mark(); render(); }, text: '＋ 조건부 결과' })
+    ]);
   }
   /* 이어지는 장면들: 한 사건 안에서 선택을 여러 번 하게 한다 */
   function stepsEditor(m) {
@@ -1104,7 +1217,7 @@ var DEV_TOOL = (function () {
           field('태생 단계 이름', inp(m.label, function (v) { m.label = v; mark(); })),
           field('굴림 횟수', inp(m.times, function (v) { m.times = v; mark(); }, { inputmode: 'numeric' }))]),
         h('details', { class: 'ijd-adv' + (m.rolls ? ' has' : '') }, [h('summary', { tip: TIPS['굴림 방식'], text: '굴림 방식 (JSON)' + (m.rolls ? ' · 있음' : ' · 없음 = d100') }),
-          ta(m.rolls, function (v) { m.rolls = v; mark(); }, { class: 'mono', spellcheck: 'false', placeholder: '[ { "ifTag": "child:schooled", "die": 40, "add": 60 }, { "die": 60, "add": 0 } ]' })]),
+          ta(m.rolls, function (v) { m.rolls = v; mark(); }, { class: 'mono', spellcheck: 'false', placeholder: '[ { "ifTag": "child:reading", "die": 40, "add": 60 }, { "die": 100 } ]' })]),
         subHead('항목 (d100 범위)'),
         lifeBar(m.rows),
         h('div', {}, m.rows.map(function (r, i) {
@@ -1412,6 +1525,7 @@ var DEV_TOOL = (function () {
     '.ijd-range{flex:none;min-width:86px;padding:4px 8px;border:1.5px solid #1E1B16;font-family:"Nanum Gothic Coding",monospace;font-size:12.5px;text-align:center;background:#FFFDF7}.ijd-sp{background:#F3E6C4}',
     '.ijd-tipbox{position:fixed;z-index:2147483002;max-width:320px;padding:8px 11px;background:#1E1B16;color:#F6EFDF;font-family:"Nanum Myeongjo",serif;font-size:13px;line-height:1.55;box-shadow:0 4px 14px rgba(0,0,0,.25);pointer-events:none;white-space:pre-line;display:none}',
     '.ijd .has-tip{text-decoration:underline dotted #8F8268;text-underline-offset:3px;cursor:help}',
+    '.ijd-alt{border:1.5px dashed #7E5A12;background:#F7EEDC;padding:10px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px}',
     '.ijd-step{border:1.5px dashed #2C4A5C;padding:12px;margin-bottom:12px;display:flex;flex-direction:column;gap:10px;background:#F1EDE2}',
     '.ijd-pass{position:fixed;inset:0;z-index:2147483001;background:rgba(30,27,22,.5);display:flex;align-items:center;justify-content:center;padding:16px}',
     '.ijd-pbox{display:flex;gap:8px;background:#F6EFDF;border:1.5px solid #1E1B16;padding:14px;width:100%;max-width:340px}',
