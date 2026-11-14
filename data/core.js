@@ -37,12 +37,15 @@ var GLOSSARY = {
   veil:      { kind: '지형', title: '시야 방해물', text: ['연기·빨래·인파처럼 시야를 가리는 것(옅은 줄무늬 띠).', '나와 상대 사이에 있으면 서로 명중 -15 (여럿이면 최대 -30).', '숨을 수는 없고, 보이지 않게 되는 것도 아니다.'], rel: ['coverVeil', 'veilOn'] },
   coverVeil: { kind: '지형', title: '시야를 가리는 엄폐물', text: ['몸을 숨길 수도 있고 시야도 가리는 엄폐물(빗금 친 높은 기둥).', '엄폐는 보통 엄폐물과 같다.', '나와 상대 사이에 있으면 서로 명중 -15.'], rel: ['veil', 'cover', 'act:cover'] },
   veilOn:    { kind: '상태', title: '시야 방해', text: ['지금 표적과 나 사이에 시야를 가리는 것이 있다.', '나도 상대도 명중이 떨어진다. 근접 공격도 마찬가지.'], rel: ['veil', 'coverVeil'] },
-  stance:    { kind: '적', title: '관헌의 태세', text: ['관헌은 태세에 따라 움직인다: 생포(포승·곤봉, 총은 안 쏨) · 근접 · 사격.', '처음엔 모두 생포. 감시도가 높거나, 먼저 덮치거나, 총을 쏘거나, 달아나려 하면 생포를 포기하기 쉬워진다.', '생포 태세에게 붙잡혀 체력이 바닥나면 포박되어 끌려간다.'], rel: ['grab', 'act:surrender'] },
+  stance:    { kind: '적', title: '관헌의 태세', text: ['관헌은 태세에 따라 움직인다: 생포(포승·곤봉, 총은 안 쏨) · 근접 · 사격.', '처음엔 모두 생포. 내가 총을 쏘거나, 한두 명이 쓰러지면 생포를 포기한다.', '생포 태세의 곤봉에 체력이 바닥나면 죽지 않고 포박되어 끌려간다.'], rel: ['grab', 'act:surrender'] },
   wall:      { kind: '지형', title: '전장 끝', text: ['빗금 친 곳은 더 갈 수 없는 막다른 곳이다.', '등 뒤가 막히면 물러날 수 없다.'], rel: ['exit'] },
-  exit:      { kind: '지형', title: '출구', text: ['전장 밖으로 빠져나가는 길(초록 기둥).', '전투마다 1~3곳이 여러 방향에 새로 생긴다.', '닿으면 도주에 성공해 전투가 끝난다. 적이 그 앞을 막고 있으면 지나갈 수 없다.'], rel: ['move:exit', 'surround'] },
+  exit:      { kind: '지형', title: '출구', text: ['전장 밖으로 빠져나가는 길(초록 기둥).', '전장은 끝이 없다 — 멀리 갈수록 새 길목이 계속 생기고, 지나온 곳은 그대로 남는다.', '출구끼리는 30m 넘게 떨어져 있다. 화면 밖 출구는 가장자리 꼬리표로 보인다.', '닿으면 도주에 성공해 전투가 끝난다. 적이 그 앞을 막고 있으면 지나갈 수 없다.'], rel: ['move:exit', 'surround'] },
   cover:     { kind: '지형', title: '엄폐물', text: ['몸을 숨길 수 있는 지형(회색 기둥).', '엄폐물에 닿아 ‘엄폐’를 하면 위협이 큰 쪽 적의 사격 명중이 35% 줄어든다.', '총알만 막는다. 근접 공격은 막지 못한다.'], rel: ['move:cover', 'act:cover'] },
   offscreen: { kind: '지형', title: '화면 밖', text: ['화면 밖의 적과 출구는 가장자리에 화살표 꼬리표로 표시된다.', '적의 꼬리표를 누르면 그 적이 표적이 된다.'], rel: ['target'] },
-  move:      { kind: '행동', title: '이동', text: ['한 번 움직일 때마다 행동력 1. 적이 한 번 움직인다.', '민첩이 높을수록 한 걸음이 길다.', '붙잡히면 움직일 수 없다.'], rel: ['ap', 'held'] },
+  move:      { kind: '행동', title: '이동', text: ['한 번 움직일 때마다 행동력 1. 적이 한 번 움직인다.', '민첩이 높을수록 한 걸음이 길다 (2.2m ~ 3.8m). 실제로 움직이는 거리는 매번 조금씩(±15%) 달라진다.', '붙잡히면 움직일 수 없다.'], rel: ['ap', 'held', 'hurdle'] },
+  temp:      { kind: '지형', title: '잠시 있는 방해물', text: ['인력거·연기·소 떼처럼 잠깐 나타났다 몇 합 뒤 사라지는 것. 이름 옆에 ‘잠시’가 붙는다.', '전투를 시작할 때 있거나, 싸우는 도중에 새로 나타난다.', '엄폐물·시야 방해·이동 방해 성질을 여럿 함께 가질 수도 있다. 사라지면 그 뒤에 숨어 있던 것도 드러난다.'], rel: ['cover', 'veil', 'hurdle'] },
+  hurdle:    { kind: '지형', title: '이동 방해물', text: ['돌담·도랑·철조망처럼 길을 가로막는 것(갈색 낮은 띠).', '넘어가려면 그 방해물마다 정해진 능력치 판정이 필요하다. 실패하면 그 앞에서 멈춘다.', '적은 판정 없이 넘지만, 방해물 앞에서 멈췄다가 넘는 데 한 합을 통째로 쓴다.'], rel: ['move'] },
+  'move:dodge': { kind: '이동', title: '피해 가기', text: ['막아선 적 하나를 지나쳐 그 뒤로 빠져나간다. 판정 없이 행동력 1.', '적 뒤로 얼마나 멀리 떨어지는지는 무작위 — 민첩과 근력이 높을수록 멀리 간다.', '너무 가까이 떨어지면 바로 다시 붙잡힐 수 있다.'], rel: ['move', 'hurdle'] },
   'move:in':    { kind: '이동', title: '다가가기', text: ['표적 쪽으로 한 걸음 다가간다.', '근접 기술의 사거리에 들어가려면 다가가야 한다.'], rel: ['move', 'range'] },
   'move:out':   { kind: '이동', title: '물러나기', text: ['표적 반대쪽으로 한 걸음 물러난다.', '총을 든 쪽은 거리를 벌리는 게 유리할 때가 많다. 등 뒤에 다른 적이 있으면 조심.'], rel: ['move', 'surround'] },
   'move:cover': { kind: '이동', title: '엄폐물로', text: ['가장 가까운 엄폐물 쪽으로 한 걸음씩 간다.', '닿은 뒤 ‘행동’ 탭의 ‘엄폐’로 몸을 숨긴다.'], rel: ['cover', 'act:cover'] },
@@ -74,7 +77,7 @@ var GLOSSARY = {
   weak:      { kind: '효과', title: '위축', text: ['위협 사격 등에 겁을 먹었다.', '그 적의 명중 -20. 겁 많은 적은 달아나기도 한다.'], rel: ['blind'] },
   feed:      { kind: '규칙', title: '이번 합 소식', text: ['방금 내가 한 일(나)과 그사이 적들이 한 일(적)이 짧게 정리된다.', '다음 행동을 하면 새 소식으로 바뀐다.'], rel: ['ap'] },
   'tab:skill': { kind: '규칙', title: '기술', text: ['지금 거리에서 쓸 수 있는 공격과 잔꾀.', '누르면 타이밍 맞추기가 뜬다.'], rel: ['qte', 'range'] },
-  'tab:move':  { kind: '규칙', title: '이동', text: ['다가가기·물러나기·엄폐물로·출구로.', '한 번에 행동력 1.'], rel: ['move'] },
+  'tab:move':  { kind: '규칙', title: '이동', text: ['다가가기·물러나기·피해 가기·엄폐물로·출구로.', '한 번에 행동력 1. 길에 이동 방해물이 있으면 넘기 판정.'], rel: ['move', 'hurdle', 'move:dodge'] },
   'tab:act':   { kind: '규칙', title: '행동', text: ['엄폐, 구급약, 설득, 뿌리치기, 항복처럼 공격도 이동도 아닌 것.', '그때그때 쓸 수 있는 것만 나온다.'], rel: ['act:cover', 'act:medkit'] },
   detail:      { kind: '규칙', title: '자세히', text: ['기술·이동·행동 버튼 아래에 계산식과 설명을 펼친다.'], rel: [] }
 };
@@ -130,7 +133,14 @@ var HEAT_MAX = 20; /* 감시도 최대치 (도시마다 따로) */
 var SAVE_KEY = 'ilje.save.v1', SAVE_VER = 1; /* SAVE_KEY: 예전 한 칸 저장 (있으면 1번 칸으로 옮김) */
 var SAVE_SLOTS = 5, SAVE_SLOT_KEY = 'ilje.save.slot'; /* 저장 칸 수 · 칸별 키 = SAVE_SLOT_KEY + 번호 */
 var SAVE_SKIP = ['life', 'base', 'edStage', 'raw', 'importText', 'saveMsg', 'saveOk', 'dice', 'rolling', 'qte', 'tip', 'infoMode',
-  'nameOpen', 'nameDraft', 'rerollWarn', 'helpOpen', 'creditOpen', 'resumeOpen', 'invMsg', 'slotDel', 'hudOpen', 'seedDraft', 'seedMsg'];
+  'nameOpen', 'nameDraft', 'rerollWarn', 'helpOpen', 'creditOpen', 'resumeOpen', 'invMsg', 'slotDel', 'hudOpen', 'seedDraft', 'seedMsg', 'pickSlot'];
+/* 증명서별 수치 */
+var CERT = { residencePass: 0.2, residenceMiss: 0.1,
+  /* 위조 의심: 몸수색 때(또는 거주증명서를 내보일 때) 지닌 증명서마다 이 확률로 빼앗김 · 고등계 증표는 제외 */
+  forgery: 0.04, forgeryHeat: 1,
+  /* 대서소 발급: 기준 주 수 ± 편차(주) 뒤에 결과가 나온다 · 일본어(lang:ja)를 알아야 신청 가능 */
+  issueTag: 'lang:ja', residencePlea: 5, residenceHarass: 0.8, travelFare: 0.5, peddlerPay: 1, badgeHeat: 1, badgeKr: 4,
+  badgeScare: { wangpae: 0.75, jolgae: 0.85, thief: 0.9, ronin: 0.6 } };
 /* ───── 조건 (선택지 보이기 show · 조건부 결과 alt.when) ─────
    { tags: [모두 있어야], anyTags: [하나라도], noTags: [하나도 없어야], flags: [표식 모두], noFlags: [표식 없어야],
      min: { int: 40, money: 5, heat: 3, jp: 50, … }, max: { … }   ← 능력치·돈·체력·구급약·탄환·감시도·일제(jp)·민족(kr)
@@ -138,15 +148,119 @@ var SAVE_SKIP = ['life', 'base', 'edStage', 'raw', 'importText', 'saveMsg', 'sav
      city: ['gyeongseong', …], time: [0 오전, 1 오후, 2 밤], years: [1919, 1925], chance: 0.3 (조건부 결과에서만) }
    선택지: show = 이 조건이 맞아야 화면에 보임 · alt = [{ when, ok, ng?, check: false? }] = 고를 때 맞는 첫 줄의 결과를 쓴다
    결과: flag / tag (문자열이나 배열) = 표식·태그를 얻음 · untag = 태그를 잃음 */
+/* ───── 물건 (p.items = { 물건id: 개수 }) · 증명서 ─────
+   결과에 item: 'id' (또는 배열) = 얻음 · unitem: 'id' = 잃음 · 조건(COND)에 items: [...] / noItems: [...]
+   증명서의 효과는 게임 곳곳에 붙어 있다 (effect 는 화면에 보이는 설명).
+   얻는 곳: 각 도시의 대서소(행동 목록) · 일부 사건 */
+var ITEMS = {
+  residence: { name: '거주증명서', kind: 'doc', short: '검문에서 가끔 통함',
+    desc: '관청 도장이 찍힌 거주증명서. 이 땅에 주소를 둔 ‘선량한 백성’이라는 종이 한 장.',
+    effect: '불심검문·역 검문에서 내보이면 가끔(20%) 몸수색 없이 통과 · 안 통해도 몸수색이 덜 꼼꼼해 불법 소지품을 놓칠 확률 +10% · 순사의 트집이 조금 줄어듦 · 관헌과의 전투에서 무고 주장 +5' },
+  travel_pass: { name: '여행증명서', kind: 'doc', short: '기차 반값 · 역 검문 없음',
+    desc: '도 경계를 넘나드는 여행을 허가하는 증명서. 목적지와 용무가 적혀 있다.',
+    effect: '도시 사이 기차표 반값 · 기차를 타러 갈 때 역 앞 불심검문을 만나지 않음' },
+  peddler: { name: '행상 허가증', kind: 'doc', short: '일거리 품삯 +1 · 장터 단속 통과',
+    desc: '장터에서 물건을 팔 수 있는 허가증. 목에 걸고 다니면 단속반도 함부로 못 한다.',
+    effect: '일거리로 돈을 벌면 1원 더 · 장터 단속 장면에서 허가증으로 넘어갈 수 있음' },
+  gun_permit: { name: '총포 소지 허가증', kind: 'doc', short: '엽총·권총을 합법으로',
+    desc: '경찰서장 직인이 찍힌 총포 소지 허가증. 수렵용과 호신용 총에 한한다.',
+    effect: '엽총·브라우닝·모제르와 탄환이 불법 소지품이 아님 (몸수색에 안 걸리고 항복해도 빼앗기지 않음) · 군용 소총·기관총·경찰 권총은 해당 없음' },
+  tokko_badge: { name: '고등계 협력 증표', kind: 'doc', short: '관헌 앞 프리패스 · 동포의 눈총',
+    desc: '고등계 형사가 건넨 작은 놋쇠 증표. 보이는 순간 순사들의 태도가 바뀐다. 동포에게 들키면 끝이다.',
+    effect: '검문에서 내보이면 즉시 통과(감시도 -1) · 관헌·왈패와의 전투를 시작하자마자 끝낼 수 있음 · 쓸 때마다 민족 타협도가 내려감' }
+};
+['residence', 'travel_pass', 'peddler', 'gun_permit'].forEach(function (id) { if (ITEMS[id]) ITEMS[id].effect += ' · 몸수색 때 위조로 의심받아 빼앗길 수 있음'; });
+function josaEulReul(w) { w = String(w || ''); var c = w.charCodeAt(w.length - 1) - 0xAC00; return (c >= 0 && c <= 11171 && c % 28) ? '을' : '를'; }
+function hasItem(p, id) { return !!(p && p.items && p.items[id]); }
+function itemName(id) { return (ITEMS[id] && ITEMS[id].name) || id; }
 var COND_TIME = ['오전', '오후', '밤'];
+/* ───── 조건으로 뜬 선택지 아래에 붙는 설명: 태그·표식이 뜻하는 말 ─────
+   여기 없는 태그는 태생 표에서 그 태그가 붙는 항목 이름으로 대신한다 (예: '연줄: 친구'). 새 태그를 만들면 여기에 한 줄 더하면 된다. */
+var TAG_MEANING = {
+  'lang:ja': '일본어를 할 줄 앎', 'lang:en': '영어를 할 줄 앎', 'lang:zh': '중국어를 할 줄 앎', 'lang:ru': '러시아어를 할 줄 앎',
+  'region:northwest': '평안도 쪽 출신', 'region:southeast': '경상도 쪽 출신', 'region:central': '경기·충청 쪽 출신',
+  'region:manchuria': '만주 출신', 'region:china': '중국 땅 출신', 'region:russia': '연해주 출신', 'region:japan': '일본 땅 출신', 'region:abroad': '바다 건너 출신',
+  'home:gyeongseong': '경성 출신', 'home:busan': '부산 출신', 'home:sinuiju': '신의주 출신', 'home:gando': '간도 출신', 'home:shanghai': '상해 출신',
+  'home:gaeseong': '개성 출신', 'home:primorsky': '연해주 출신', 'home:cheonan': '천안 출신', 'home:unsan': '운산 금광촌 출신', 'home:daegu': '대구 출신',
+  'home:america': '미주 출신', 'home:tokyo': '도쿄 출신',
+  abroad: '외국에서 자람', city: '도시에서 자람', rural: '시골에서 자람', capital: '서울내기', port: '항구에서 자람', border: '국경 지방에서 자람',
+  illiterate: '글을 모름', literate: '글을 앎', hangul: '언문을 앎', hanmun: '한문을 앎', night_school: '야학을 다님', vocational: '실업학교를 다님',
+  dropout: '학교를 중퇴함', intelligentsia: '신식 교육을 받은 인텔리', student: '학생 신분', elite: '제국대학 학생', bookish: '책을 많이 읽음',
+  poor: '가난하게 자람', family_ruin: '집안이 몰락함', wealth: '집안이 넉넉함', landlord: '지주 집안과 닿음',
+  herbal: '약초를 앎', medicine: '약 짓는 법을 앎', crafter: '손재주가 있음', blacksmith: '대장일을 해 봄', photographer: '사진관에서 일해 봄', modern: '신문물에 밝음',
+  gambler: '노름판을 드나듦', underworld: '뒷골목에 밝음', pickpocket: '소매치기 패에 있었음', street_kid: '거리에서 자람', street_smart: '장터 눈치가 빠름',
+  laborer: '막일을 해 봄', porter: '짐꾼 일을 해 봄', farming: '농사를 지어 봄', mining: '광산촌에서 자람', hunter: '사냥을 해 봄', mountain: '산을 잘 탐',
+  merchant: '장사하는 친척이 있음', merchant_culture: '장사 수완을 보고 자람', trader: '장사로 돈을 벌어 봄', shop_boy: '일본인 상점 사환을 함', japanese_contact: '일본인과 왕래함',
+  independence: '집안에 독립운동가가 있음', watched: '일경의 눈길을 받음', protest: '만세 운동에 나섬', grudge_police: '순사에게 원한이 있음', student_strike: '동맹휴학에 휘말림',
+  pro_japanese: '친일 경력이 있음', police_contact: '경찰 쪽에 아는 사람이 있음', press: '기자와 안면이 있음', intellectual: '지식인과 왕래함', community: '동네 사람들과 가까움',
+  friend: '기댈 동무가 있음', western: '서양인과 왕래함', missionary: '선교사에게 배움', christ_religion: '교회와 닿음', buddha_religion: '절과 닿음', big_religion: '대종교와 닿음', religion: '산사에서 지내 봄', temple: '산사에서 지내 봄',
+  okada: '오카다와의 연줄', kimgu: '임시정부 요인과 닿음', kimjwajin: '독립군 사령관과 닿음', kimgeushick: '파리 위원부 요인과 닿음', Leesangjae: '교육운동가와 닿음', near_kpg: '임시정부 근처에서 자람',
+  zainichi: '재일 조선인', manchuria_trip: '만주까지 가 봄', runaway: '집을 나가 봄', local_hero: '동네에 이름이 남', wrestler: '씨름판에서 이겨 봄', brawler: '주먹다짐에 익숙함',
+  noodle_debt: '국숫집에 외상이 있음'
+};
+/* 태생 표의 태그 → 화면에 보일 뜻 (출신지 태그는 항목 이름이 이미 말하므로 뺌 · 뜻이 없는 태그도 뺌) */
+function traitWords(tags) {
+  var seen = {}, out = [];
+  (tags || []).forEach(function (t) {
+    if (/^(region|home):/.test(t)) return;
+    var w = TAG_MEANING[t]; if (!w || seen[w]) return;
+    seen[w] = 1; out.push(w);
+  });
+  return out;
+}
+var FLAG_MEANING = {
+  gun: '총을 지님', leaflet: '격문을 지님', bookstall_contact: '헌책 노인과 줄이 닿음', student_contact: '그 학생과 알게 됨', has_photo: '사진을 찍어 둠',
+  bento_boy: '도시락 소년과 알게 됨', py_strike_rumor: '고무공장 쟁의 소문을 들음', py_boat_intel: '놀잇배에서 정보를 엿들음', helped_refugee: '간도 가족을 도움', missionary_contact: '선교사와 알게 됨'
+};
+/* 수치 조건의 말 (타협도는 숨은 수치라 숫자 대신 뜻으로) */
+var COND_WORD = { money: '돈', hp: '체력', medkit: '구급약', ammo: '탄환', heat: '감시도' };
+var COND_ALIGN_WORD = { jp: { min: '일제 쪽 평판이 좋음', max: '일제 쪽 평판이 나쁨' }, kr: { min: '동포 편에 선 마음', max: '동포 편과 거리가 멂' } };
 /* ───── 태생 시드 ─────
    같은 시드 = 같은 태생 굴림(단계별 항목 · 능력치 · 소지품 · 첫 기술 · 시작 도시).
    시대 · 날짜와 게임 진행(사건 · 판정 · 전투)은 시드와 상관없이 매번 무작위.
    태생 표를 고치면(개발자 탭 태생 편집) 같은 시드라도 결과가 달라진다. */
-var SEED_LEN = 8, SEED_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; /* 헷갈리는 0·O·1·I 는 뺌 */
-function newSeed() { var s = ''; for (var i = 0; i < SEED_LEN; i++) s += SEED_CHARS[Math.floor(Math.random() * SEED_CHARS.length)]; return s; }
-function cleanSeed(v) { return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 24); }
-function seedLabel(s) { return s.length > 4 ? s.slice(0, 4) + '-' + s.slice(4) : s; }
+/* 시드 (32자 새 방식)
+   [0] 바탕 길이 L(1~21) · [1..21] 바탕 L자 + 채움 · [22..31] 굴림 10번의 ‘골라 씀’ 표시
+   - 난수는 바탕 L자로만 만든다 → 32자가 아닌 시드(예전 8자 등)는 통째로 바탕이 되어 예전과 똑같이 나온다
+   - 골라 씀: 칸 k 의 글자 = SEED_CHARS[(v + seedKey(바탕, k)) % 32] · v=0 이면 굴린 그대로, v>0 이면 그 단계 표의 (v-1)번째 항목 */
+var SEED_LEN = 32, SEED_BASE = 21, SEED_OVR = 10, SEED_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; /* 헷갈리는 0·O·1·I 는 뺌 */
+function seedIdx(ch) { var i = SEED_CHARS.indexOf(ch); return i >= 0 ? i : String(ch).charCodeAt(0) % 32; }
+/* 골라 씀 칸을 가리는 열쇠: 바탕 글자로 정해지는 0~31 (칸마다 다름) */
+function seedKey(base, k) { var L = base.length; return (seedIdx(base[(k * 7 + 3) % L]) * 5 + k * 11 + seedIdx(base[k % L])) % 32; }
+function seedRand(n) { var s = ''; for (var i = 0; i < n; i++) s += SEED_CHARS[Math.floor(Math.random() * SEED_CHARS.length)]; return s; }
+function encodeSeed(base, ovr) {
+  base = String(base || '').slice(0, SEED_BASE); if (!base) base = seedRand(SEED_BASE);
+  var L = base.length, s = SEED_CHARS[L] + base + seedRand(SEED_BASE - L);
+  for (var k = 0; k < SEED_OVR; k++) s += SEED_CHARS[(((ovr && ovr[k]) || 0) + seedKey(base, k)) % 32];
+  return s;
+}
+function newSeed() { return encodeSeed(seedRand(SEED_BASE), []); }
+function parseSeed(s) {
+  s = String(s || '');
+  if (s.length !== SEED_LEN) return { base: s, ovr: [], legacy: true };
+  var L = SEED_CHARS.indexOf(s[0]);
+  if (L < 1 || L > SEED_BASE) return { base: s, ovr: [], legacy: true };
+  var base = s.slice(1, 1 + L), ovr = [];
+  for (var k = 0; k < SEED_OVR; k++) ovr.push((seedIdx(s[1 + SEED_BASE + k]) - seedKey(base, k) + 64) % 32);
+  return { base: base, ovr: ovr, legacy: false };
+}
+/* 32자 이상이면 새 방식(32자), 아니면 예전처럼 24자까지 */
+function cleanSeed(v) { var s = String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); return s.length >= SEED_LEN ? s.slice(0, SEED_LEN) : s.slice(0, 24); }
+function seedLabel(s) { if (s.length === SEED_LEN) return s.match(/.{1,4}/g).join('-'); return s.length > 4 ? s.slice(0, 4) + '-' + s.slice(4) : s; }
+
+/* ───── 점수 · 태생 선택권 ─────
+   죽으면 그 삶을 점수로 매기고, 점수 구간마다 ‘태생 선택권’ 하나 (단계는 무작위).
+   선택권은 브라우저에 남고(다음 삶에서도), 태생 화면에서 그 단계의 굴림 하나를 원하는 항목으로 바꾼다 — 바꿀 때마다 시드가 새로 생긴다. */
+var SCORE = {
+  per: { weeks: 8, money: 1, kills: 20, medkit: 10, weapons: 25, ammo: 2, quests: 150, questEnds: 40, docs: 15 },
+  label: { weeks: '살아낸 주', money: '소지금', kills: '쓰러뜨린 적', medkit: '구급약', weapons: '무기 종류', ammo: '탄환', quests: '성공한 장기 이야기', questEnds: '그 밖에 끝난 장기 이야기', docs: '증명서' },
+  unit: { weeks: '주', money: '원', kills: '명', medkit: '개', weapons: '종', ammo: '발', quests: '개', questEnds: '개', docs: '장' },
+  success: ['end_success', 'end_freed', 'end_letter'],
+  tiers: [150, 400, 800, 1400, 2200, 3200]
+};
+var META_KEY = 'ilje.meta';
+function loadMeta() { try { var m = JSON.parse(window.localStorage.getItem(META_KEY) || 'null'); if (m && typeof m === 'object') { m.tokens = m.tokens || {}; return m; } } catch (err) {} return { tokens: {}, best: 0 }; }
+function saveMeta(m) { try { window.localStorage.setItem(META_KEY, JSON.stringify(m)); } catch (err) {} }
 /* 시드 문자열 → 0~1 난수 함수 (cyrb53 해시 + mulberry32) */
 function seedRng(str) {
   var h1 = 0xdeadbeef, h2 = 0x41c6ce57;

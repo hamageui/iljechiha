@@ -8,13 +8,13 @@
 <title>일제치하</title>
 <script src="support.js?v=a098be6b14"></script>
 <!-- 데이터: core · combat · world · events · cities · stories · devtool -->
-<script src="data/core.js?v=697b44b551"></script>
-<script src="data/combat.js?v=ccd5776ac5"></script>
-<script src="data/world.js?v=e1d6d48e6a"></script>
-<script src="data/events.js?v=10a8d9f70e"></script>
-<script src="data/cities.js?v=9e109b5225"></script>
+<script src="data/core.js?v=cd898ae11b"></script>
+<script src="data/combat.js?v=22f46411cc"></script>
+<script src="data/world.js?v=01590e996e"></script>
+<script src="data/events.js?v=23756db47c"></script>
+<script src="data/cities.js?v=36c689a5f1"></script>
 <script src="data/stories.js?v=b10fbb0187"></script>
-<script src="data/devtool.js?v=6d4824da85"></script>
+<script src="data/devtool.js?v=089c6eb9ec"></script>
 </head>
 <body>
 <x-dc>
@@ -49,6 +49,8 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 .ks-stamp{color:var(--tone,#9E2B20);border:2px solid var(--tone,#9E2B20) !important;background:#FBF7EE;transform:rotate(-1.2deg)}
 .ks-seal{flex:none;display:inline-flex;flex-direction:column;align-items:center;gap:1px;padding:5px 5px;background:var(--accent,#9E2B20);color:#F6EFDF;font-family:'Song Myung',serif;line-height:1;border-radius:3px;transform:rotate(-4deg);box-shadow:inset 0 0 0 1.5px rgba(246,239,223,.55)}
 .ks-hud{border-bottom:3px double #1E1B16 !important}
+.ks-why{font-size:12px;color:#7E5A12;letter-spacing:.02em}
+.ks-why::before{content:'◇ ';font-size:10px}
 .ks-mhud{background:#F6EFDF;border-bottom:3px double #1E1B16;box-shadow:0 6px 14px rgba(70,50,25,.18)}
 .ks-mchip{display:flex;align-items:baseline;gap:5px;padding:3px 8px;border:1px solid;font-size:12px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .ks-mchip b{font-family:'Nanum Gothic Coding',monospace;font-size:13.5px;overflow:hidden;text-overflow:ellipsis}
@@ -226,8 +228,13 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <span class="ks-mchip" style="background: #3F5E2F1A; border-color: #3F5E2F40"><span style="color: #3F5E2F">구급약</span><b>{{p.medkit}}</b></span>
 <span class="ks-mchip" style="background: #4A5A661A; border-color: #4A5A6640; min-width: 0"><span style="color: #4A5A66">무기</span><b style="font-size: 11.5px">{{p.gunLine}}</b></span>
 <span style="flex: 1 1 0"></span>
+<sc-if value="{{showMenuBtns}}" hint-placeholder-val="{{ true }}">
+<span style="display: flex; gap: 4px; margin-left: auto">
 <button class="choice" type="button" disabled="{{invLocked}}" onClick="{{openInventory}}" style="min-height: 32px; padding: 4px 9px; background: #FBF7EE; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 12.5px; font-weight: 800">소지품</button>
+<button class="choice" type="button" disabled="{{invLocked}}" onClick="{{openSkills}}" style="min-height: 32px; padding: 4px 9px; background: #FBF7EE; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 12.5px; font-weight: 800">기술</button>
 <button class="choice" type="button" disabled="{{invLocked}}" onClick="{{openPlaces}}" style="min-height: 32px; padding: 4px 9px; background: #FBF7EE; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 12.5px; font-weight: 800">행동</button>
+</span>
+</sc-if>
 </div>
 <sc-if value="{{hudOpen}}" hint-placeholder-val="{{ false }}">
 <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 8px; border-top: 1px solid #CDBF9F">
@@ -300,10 +307,13 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <span style="display: flex; align-items: baseline; gap: 6px; padding: 4px 10px; background: #3F5E2F1A; border: 1px solid #3F5E2F40; font-size: 13px; white-space: nowrap"><span style="color: #3F5E2F">구급약</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-weight: 700; font-size: 15px">{{p.medkit}}</span></span>
 <span style="display: flex; align-items: baseline; gap: 6px; padding: 4px 10px; background: #4A5A661A; border: 1px solid #4A5A6640; font-size: 13px; white-space: nowrap"><span style="color: #4A5A66">무기</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-weight: 700; font-size: 12px">{{p.gunLine}}</span></span>
 </div>
+<sc-if value="{{showMenuBtns}}" hint-placeholder-val="{{ true }}">
 <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto">
-<button class="choice" type="button" disabled="{{invLocked}}" onClick="{{openInventory}}" style="min-height: 40px; padding: 8px 14px; background: #FBF7EE; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 14px; font-weight: 800">소지품 · 기술</button>
+<button class="choice" type="button" disabled="{{invLocked}}" onClick="{{openInventory}}" style="min-height: 40px; padding: 8px 14px; background: #FBF7EE; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 14px; font-weight: 800">소지품</button>
+<button class="choice" type="button" disabled="{{invLocked}}" onClick="{{openSkills}}" style="min-height: 40px; padding: 8px 14px; background: #FBF7EE; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 14px; font-weight: 800">기술</button>
 <button class="choice" type="button" disabled="{{invLocked}}" onClick="{{openPlaces}}" style="min-height: 40px; padding: 8px 14px; background: #FBF7EE; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 14px; font-weight: 800">행동</button>
 </div>
+</sc-if>
 </div>
 <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
 <sc-for list="{{p.stats}}" as="st" hint-placeholder-count="6">
@@ -327,6 +337,11 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <div style="font-size: 13px; letter-spacing: 0.3em; color: {{accent}}; font-weight: 700">행동</div>
 <h2 style="margin: 0; font-family: 'Song Myung', serif; font-weight: 400; font-size: {{L.h2}}">무엇을 할 것인가</h2>
 </div>
+<div style="display: flex; gap: 0; margin-right: auto; align-self: flex-end" role="tablist">
+<button class="choice" type="button" role="tab" aria-selected="{{tabItemsOn}}" onClick="{{tabItemsGo}}" style="min-height: 40px; padding: 8px 16px; background: {{tabItemsBg}}; color: {{tabItemsFg}}; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 14px; font-weight: 800">소지품</button>
+<button class="choice" type="button" role="tab" aria-selected="{{tabSkillsOn}}" onClick="{{tabSkillsGo}}" style="min-height: 40px; padding: 8px 16px; background: {{tabSkillsBg}}; color: {{tabSkillsFg}}; border: 1.5px solid #1E1B16; border-left: none; font-family: 'Nanum Myeongjo', serif; font-size: 14px; font-weight: 800">기술</button>
+<button class="choice" type="button" role="tab" aria-selected="{{tabActOn}}" onClick="{{tabActGo}}" style="min-height: 40px; padding: 8px 16px; background: {{tabActBg}}; color: {{tabActFg}}; border: 1.5px solid #1E1B16; border-left: none; font-family: 'Nanum Myeongjo', serif; font-size: 14px; font-weight: 800">행동</button>
+</div>
 <button class="choice" type="button" onClick="{{closePlaces}}" style="min-height: 44px; padding: 10px 20px; background: #1E1B16; color: #F6EFDF; border: none; font-family: 'Nanum Myeongjo', serif; font-size: 15px; font-weight: 800">돌아가기</button>
 </div>
 <div style="font-size: 14px; color: #3A342B">{{places.msg}}</div>
@@ -339,8 +354,8 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px"><span style="font-size: 12px; font-weight: 700; letter-spacing: 0.15em; color: {{accent}}">{{pl.kicker}}</span><span style="font-size: 12px; color: #5B5246">{{pl.where}}</span></div>
 <span style="font-size: 18px; font-weight: 800">{{pl.name}}</span>
 <span style="font-size: 13px; line-height: 1.6; color: #3A342B">{{pl.sub}}</span>
-<span style="font-size: 12px; font-weight: 700; color: #3F5E2F">{{pl.status}}</span>
-<button class="choice" type="button" onClick="{{pl.toggle}}" style="align-self: flex-start; min-height: 38px; padding: 6px 14px; background: {{pl.btnBg}}; color: {{pl.btnFg}}; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 13px; font-weight: 800">{{pl.btn}}</button>
+<span style="font-size: 12px; font-weight: 700; color: {{pl.statusColor}}">{{pl.status}}</span>
+<button class="choice" type="button" disabled="{{pl.locked}}" onClick="{{pl.toggle}}" style="align-self: flex-start; min-height: 38px; padding: 6px 14px; background: {{pl.btnBg}}; color: {{pl.btnFg}}; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 13px; font-weight: 800">{{pl.btn}}</button>
 </div>
 </sc-for>
 </div>
@@ -351,17 +366,35 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <div class="{{L.asideClass}}" style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 18px">
 <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap">
 <div style="display: flex; flex-direction: column; gap: 4px">
-<div style="font-size: 13px; letter-spacing: 0.3em; color: {{accent}}; font-weight: 700">소지품 · 기술</div>
-<h2 style="margin: 0; font-family: 'Song Myung', serif; font-weight: 400; font-size: {{L.h2}}">무엇을 지니고 나설 것인가</h2>
+<div style="font-size: 13px; letter-spacing: 0.3em; color: {{accent}}; font-weight: 700">{{invKicker}}</div>
+<h2 style="margin: 0; font-family: 'Song Myung', serif; font-weight: 400; font-size: {{L.h2}}">{{invTitle}}</h2>
+</div>
+<div style="display: flex; gap: 0; margin-right: auto; align-self: flex-end" role="tablist">
+<button class="choice" type="button" role="tab" aria-selected="{{tabItemsOn}}" onClick="{{tabItemsGo}}" style="min-height: 40px; padding: 8px 16px; background: {{tabItemsBg}}; color: {{tabItemsFg}}; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 14px; font-weight: 800">소지품</button>
+<button class="choice" type="button" role="tab" aria-selected="{{tabSkillsOn}}" onClick="{{tabSkillsGo}}" style="min-height: 40px; padding: 8px 16px; background: {{tabSkillsBg}}; color: {{tabSkillsFg}}; border: 1.5px solid #1E1B16; border-left: none; font-family: 'Nanum Myeongjo', serif; font-size: 14px; font-weight: 800">기술</button>
+<button class="choice" type="button" role="tab" aria-selected="{{tabActOn}}" onClick="{{tabActGo}}" style="min-height: 40px; padding: 8px 16px; background: {{tabActBg}}; color: {{tabActFg}}; border: 1.5px solid #1E1B16; border-left: none; font-family: 'Nanum Myeongjo', serif; font-size: 14px; font-weight: 800">행동</button>
 </div>
 <button class="choice" type="button" onClick="{{closeInventory}}" style="min-height: 44px; padding: 10px 20px; background: #1E1B16; color: #F6EFDF; border: none; font-family: 'Nanum Myeongjo', serif; font-size: 15px; font-weight: 800">돌아가기</button>
 </div>
 
+<sc-if value="{{invTabItems}}" hint-placeholder-val="{{ true }}">
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px">
 <sc-for list="{{inv.items}}" as="it" hint-placeholder-count="4">
 <div style="background: #EDE3CD; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px">
 <span style="font-size: 12px; color: #5B5246">{{it.label}}</span>
 <span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 17px; font-weight: 700">{{it.value}}</span>
+</div>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #1E1B16; padding-top: 14px">
+<span style="font-size: 15px; font-weight: 700">증명서 · 물건</span>
+<sc-if value="{{inv.noDocs}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; color: #5B5246">가진 증명서가 없다. 도시마다 관청 앞 대서소(행동 목록)에서 뗄 수 있다.</span></sc-if>
+<sc-for list="{{inv.docs}}" as="dc" hint-placeholder-count="2">
+<div style="background: #FBF7EE; border: 1.5px solid #7E5A12; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.1em; background: #7E5A12; color: #F6EFDF; padding: 2px 7px">{{dc.kind}}</span><span style="font-size: 16px; font-weight: 800">{{dc.name}}</span></div>
+<span style="font-size: 13px; line-height: 1.6; color: #3A342B">{{dc.desc}}</span>
+<span style="font-size: 12.5px; line-height: 1.6; color: #7E5A12">◇ {{dc.effect}}</span>
 </div>
 </sc-for>
 </div>
@@ -386,6 +419,9 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 </sc-for>
 </div>
 
+</sc-if>
+
+<sc-if value="{{invTabSkills}}" hint-placeholder-val="{{ false }}">
 <div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #1E1B16; padding-top: 14px">
 <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px"><span style="font-size: 15px; font-weight: 700">가져갈 기술</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 13px; color: #5B5246">{{inv.slotText}}</span></div>
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px">
@@ -422,6 +458,7 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 </div>
 </sc-for>
 <div style="font-size: 13px; line-height: 1.7; color: #5B5246">전투에는 상시 기술(기본 격투·기본 사격)과 가져간 기술이 나온다. 새 기술은 전투에서 이겨 얻는다. 같은 기술을 또 얻으면 개수가 쌓인다.</div>
+</sc-if>
 </div>
 </sc-if>
 
@@ -437,19 +474,21 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <span style="flex: 0 0 116px; font-size: 13px; font-weight: 700; color: #5B5246">{{b.label}}</span>
 <span style="flex: 0 0 52px; font-family: 'Nanum Gothic Coding', monospace; font-size: 15px; font-weight: 700; color: #2C4A5C">{{b.r}}</span>
 <span style="flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap"><span style="font-size: 16px; font-weight: 800">{{b.name}}</span><sc-if value="{{b.special}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.1em; background: #E3B04B; color: #1E1B16; padding: 2px 7px">특별 태생</span></sc-if></span><span style="font-size: 13px; line-height: 1.6; color: #3A342B">{{b.desc}}</span><sc-if value="{{b.showTag}}" hint-placeholder-val="{{ false }}"><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 11px; color: #8A7E6A">{{b.tagText}}</span></sc-if></span>
-<span style="flex: 0 1 auto; font-family: 'Nanum Gothic Coding', monospace; font-size: 13px; font-weight: 700; color: {{b.color}}">{{b.mods}}</span>
+<span style="flex: 0 1 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right"><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 13px; font-weight: 700; color: {{b.color}}">{{b.mods}}</span><sc-if value="{{b.hasTraits}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; font-weight: 700; line-height: 1.5; color: #7E5A12">{{b.traitText}}</span></sc-if></span>
+<sc-if value="{{b.canPick}}" hint-placeholder-val="{{ false }}"><button class="choice" type="button" onClick="{{b.pick}}" title="{{b.pickTip}}" style="flex: 0 0 auto; min-height: 32px; padding: 3px 10px; background: #FBF7EE; color: #7E5A12; border: 1.5px solid #7E5A12; font-family: 'Nanum Myeongjo', serif; font-size: 12.5px; font-weight: 800; white-space: nowrap">골라 바꾸기 · {{b.tokN}}장</button></sc-if>
 </div>
 </sc-for>
 </div>
 <div style="font-size: 14px; color: #5B5246">최종 능력치와 소지품은 위쪽 인물 정보에 반영되어 있다.</div>
+<div style="font-size: 13.5px; line-height: 1.6; color: #7E5A12; font-weight: 700">{{tokLine}}</div>
 <!-- 시드: 같은 시드면 같은 태생 (게임 진행은 매번 다름) -->
 <div class="ks-seed" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 12px; border: 1px dashed #8A7E6A; background: #FBF7EE">
 <span style="font-size: 13px; font-weight: 800; color: #5B5246" title="같은 시드를 넣으면 같은 태생(능력치 · 소지품 · 첫 기술)이 나온다. 시대 · 날짜와 게임 진행은 매번 다르다.">시드</span>
-<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 16px; font-weight: 700; letter-spacing: 0.08em; padding: 2px 10px; border: 1.5px solid #1E1B16; background: #FFFDF7; user-select: all">{{seedText}}</span>
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 15px; font-weight: 700; letter-spacing: 0.06em; padding: 2px 10px; border: 1.5px solid #1E1B16; background: #FFFDF7; user-select: all; word-break: break-all; max-width: 100%">{{seedText}}</span>
 <button class="choice" type="button" onClick="{{copySeed}}" style="min-height: 36px; padding: 4px 12px; background: #FBF7EE; color: #1E1B16; border: 1px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 13px; font-weight: 800">복사</button>
 <span style="flex: 1 1 12px"></span>
 <div style="flex: 1 1 220px; min-width: 0; max-width: 340px; display: flex; gap: 8px">
-<input type="text" value="{{seedDraft}}" onChange="{{seedChange}}" onKeyDown="{{seedKey}}" maxLength="30" placeholder="시드 입력" autocapitalize="characters" spellcheck="false" aria-label="시드 입력" style="box-sizing: border-box; flex: 1 1 120px; min-width: 0; min-height: 36px; padding: 4px 10px; border: 1.5px solid #8A7E6A; background: #FFFDF7; font-family: 'Nanum Gothic Coding', monospace; font-size: 15px; letter-spacing: 0.06em">
+<input type="text" value="{{seedDraft}}" onChange="{{seedChange}}" onKeyDown="{{seedKey}}" maxLength="48" placeholder="시드 입력" autocapitalize="characters" spellcheck="false" aria-label="시드 입력" style="box-sizing: border-box; flex: 1 1 120px; min-width: 0; min-height: 36px; padding: 4px 10px; border: 1.5px solid #8A7E6A; background: #FFFDF7; font-family: 'Nanum Gothic Coding', monospace; font-size: 15px; letter-spacing: 0.06em">
 <button class="choice" type="button" onClick="{{rerollSeed}}" style="min-height: 36px; padding: 4px 12px; background: #1E1B16; color: #F6EFDF; border: none; font-family: 'Nanum Myeongjo', serif; font-size: 13px; font-weight: 800; white-space: nowrap" title="입력한 시드로 다시 태어난다">시드로 태어나기</button>
 </div>
 <sc-if value="{{seedMsgOn}}" hint-placeholder-val="{{ false }}"><span style="flex-basis: 100%; font-size: 12.5px; color: #2C4A5C">{{seedMsg}}</span></sc-if>
@@ -510,7 +549,7 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <sc-for list="{{ev.options}}" as="o" hint-placeholder-count="3">
 <button class="choice ks-opt" type="button" disabled="{{o.disabled}}" onClick="{{o.choose}}" style="display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; padding: 12px 18px 12px 14px; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; text-align: left">
 <span class="ks-num" aria-hidden="true">{{o.num}}</span>
-<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 17px; font-weight: 800">{{o.label}}</span><span style="font-size: 13px; color: {{o.tagColor}}">{{o.tag}}</span></span>
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 17px; font-weight: 800">{{o.label}}</span><span style="font-size: 13px; color: {{o.tagColor}}">{{o.tag}}</span><sc-if value="{{o.hasWhy}}" hint-placeholder-val="{{ false }}"><span class="ks-why">{{o.why}}</span></sc-if></span>
 <sc-if value="{{o.hasChance}}" hint-placeholder-val="{{ true }}"><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 17px; font-weight: 700; color: #2C4A5C; white-space: nowrap">{{o.chanceText}}</span></sc-if>
 </button>
 </sc-for>
@@ -564,6 +603,10 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <sc-for list="{{cb.field.vExits}}" as="xo" hint-placeholder-count="1">
 <div onMouseEnter="{{T.exit.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.exit.tap}}" style="cursor: help; position: absolute; transform: translateX(-50%); transition: left .3s ease; left: {{xo.l}}%; bottom: 24px; width: 6px; height: 74px; background: #3F5E2F"></div>
 <div onMouseEnter="{{T.exit.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.exit.tap}}" style="cursor: help; position: absolute; transform: translateX({{xo.tx}}); transition: left .3s ease; left: {{xo.l}}%; top: 6px; font-size: 11px; font-weight: 800; color: #3F5E2F; white-space: nowrap; background: rgba(237,227,205,.9); padding: 0 3px">{{xo.name}}</div>
+</sc-for>
+<sc-for list="{{cb.field.vHurdles}}" as="hd" hint-placeholder-count="1">
+<div onMouseEnter="{{hd.tin}}" onMouseLeave="{{tipOut}}" onClick="{{hd.ttap}}" style="cursor: help; position: absolute; transform: translateX(-50%); transition: left .3s ease; left: {{hd.l}}%; bottom: 24px; width: 18px; height: 18px; background: repeating-linear-gradient(45deg, #7A5A2E 0 4px, #A07A44 4px 8px); border: 1px solid #5B4220; border-radius: 2px 2px 0 0"></div>
+<div onMouseEnter="{{hd.tin}}" onMouseLeave="{{tipOut}}" onClick="{{hd.ttap}}" style="cursor: help; position: absolute; transform: translateX(-50%); transition: left .3s ease; left: {{hd.l}}%; bottom: 44px; font-size: 10px; font-weight: 700; color: #7A5A2E; white-space: nowrap; text-align: center; line-height: 1.2">{{hd.name}}<br>{{hd.stat}}</div>
 </sc-for>
 <sc-for list="{{cb.field.vVeils}}" as="vl" hint-placeholder-count="1">
 <div onMouseEnter="{{vl.tin}}" onMouseLeave="{{tipOut}}" onClick="{{vl.ttap}}" style="cursor: help; position: absolute; transform: translateX(-50%); transition: left .3s ease; left: {{vl.l}}%; bottom: 24px; width: 26px; height: 84px; background: repeating-linear-gradient(180deg, rgba(91,82,70,.30) 0 4px, rgba(91,82,70,.08) 4px 9px); border-left: 1px dashed rgba(91,82,70,.5); border-right: 1px dashed rgba(91,82,70,.5)"></div>
@@ -771,6 +814,16 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <h2 style="margin: 0; font-family: 'Song Myung', serif; font-weight: 400; font-size: {{L.hEnd}}; line-height: 1.2">{{end.title}}</h2>
 <p style="margin: 0; font-size: 17px; line-height: 1.9; white-space: pre-line">{{end.text}}</p>
 <div style="font-size: 15px; font-weight: 700">{{end.stat}}</div>
+<sc-if value="{{end.hasScore}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px; border: 1.5px solid #1E1B16; background: #FBF7EE; padding: 14px 16px; max-width: 520px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px"><span style="font-size: 13px; letter-spacing: 0.3em; color: {{accent}}; font-weight: 800">삶의 점수</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 26px; font-weight: 800">{{end.total}}</span></div>
+<sc-for list="{{end.parts}}" as="sp" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; border-bottom: 1px dotted #B9AB8E; padding-bottom: 3px"><span>{{sp.label}} <b>{{sp.n}}</b></span><span style="font-family: 'Nanum Gothic Coding', monospace; font-weight: 700">+{{sp.pts}}</span></div>
+</sc-for>
+<div style="font-size: 14px; font-weight: 800; color: #7E5A12">{{end.gotText}}</div>
+<div style="font-size: 12.5px; color: #5B5246">{{end.nextText}}</div>
+</div>
+</sc-if>
 <button class="choice" type="button" onClick="{{restart}}" style="align-self: flex-start; min-height: 52px; padding: 14px 28px; background: #1E1B16; color: #F6EFDF; border: none; font-family: 'Nanum Myeongjo', serif; font-size: 17px; font-weight: 800">새 인생으로</button>
 </div>
 </sc-if>
@@ -849,6 +902,25 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 </div>
 </sc-for>
 <p style="margin: 0; font-size: 13px; line-height: 1.65; color: #5B5246">‘다음으로’를 누를 때마다 고른 칸에 자동으로 저장된다(이 브라우저에만). 이미 삶이 있는 칸에 새로 태어나면, 새 삶에서 처음 ‘다음으로’를 누를 때 예전 삶은 덮어써진다.</p>
+</div>
+</div>
+</sc-if>
+<!-- 태생 선택권: 굴림 하나를 원하는 항목으로 -->
+<sc-if value="{{pickOn}}" hint-placeholder-val="{{ false }}">
+<div style="position: fixed; inset: 0; z-index: 50; background: rgba(30,27,22,0.55); display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box" role="dialog" aria-modal="true" aria-label="태생 항목 고르기">
+<div style="width: 100%; max-width: 560px; max-height: 86vh; background: #F6EFDF; border: 2px solid #7E5A12; padding: 20px 18px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; font-family: 'Nanum Myeongjo', serif; color: #1E1B16">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px"><span style="font-size: 13px; letter-spacing: 0.3em; color: #7E5A12; font-weight: 800">태생 선택권 · {{pickTok}}장</span><button class="choice" type="button" onClick="{{pickClose}}" aria-label="닫기" style="min-height: 34px; min-width: 34px; padding: 2px 10px; background: transparent; color: #1E1B16; border: 1.5px solid #1E1B16; font-size: 15px; font-weight: 800">✕</button></div>
+<div style="font-family: 'Song Myung', serif; font-size: 22px; line-height: 1.35">{{pickTitle}}</div>
+<div style="font-size: 13px; color: #5B5246">하나를 고르면 선택권 1장을 쓰고, 시드가 새로 생긴다. 지금 항목: {{pickNow}}</div>
+<div style="overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px">
+<sc-for list="{{pickList}}" as="pk" hint-placeholder-count="4">
+<button class="choice ks-opt" type="button" disabled="{{pk.cur}}" onClick="{{pk.choose}}" style="display: flex; flex-direction: column; align-items: stretch; gap: 3px; padding: 8px 12px; background: {{pk.bg}}; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; text-align: left">
+<span style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap"><span style="font-size: 15.5px; font-weight: 800">{{pk.name}}</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 12px; font-weight: 700; color: #3F5E2F">{{pk.mods}}</span></span>
+<span style="font-size: 12.5px; line-height: 1.5; color: #3A342B">{{pk.desc}}</span>
+<sc-if value="{{pk.hasTraits}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #7E5A12; font-weight: 700">{{pk.traits}}</span></sc-if>
+</button>
+</sc-for>
+</div>
 </div>
 </div>
 </sc-if>
@@ -1007,7 +1079,7 @@ class Component extends DCLogic {
   fresh() {
     var keep = this.state && this.state.life ? this.state : this.loadLife();
     return { screen: 'title', player: null, loc: 'bukchon', date: { y: 1920, m: 1, w: 1 }, time: 0, slotUsed: false,
-      event: null, outcome: null, combat: null, ending: null, travel: null, log: [], seq: 0, dice: null, rolling: false, qte: null, bg: [],
+      event: null, outcome: null, combat: null, ending: null, scoreInfo: null, pickSlot: null, travel: null, log: [], seq: 0, dice: null, rolling: false, qte: null, bg: [],
       life: keep.life, base: keep.base, edStage: 0, raw: {}, importText: '', saveMsg: keep.saveMsg || '', saveOk: keep.saveOk !== false };
   }
 
@@ -1115,6 +1187,53 @@ class Component extends DCLogic {
     d.player.daysLived += n;
     var after = this.eraOf(d.date);
     if (after.id !== before.id) this.log(d, '시대가 바뀌었다 — ' + after.name + '. ' + after.desc, 'story');
+    this.settleIssues(d);
+  }
+  /* ───── 대서소 발급: 신청 → 몇 주 뒤 결과 ───── */
+  startIssue(d, id, parts) {
+    var I = ISSUE[id]; if (!I) return;
+    var p = d.player, wk = Math.max(1, I.weeks + Math.floor(Math.random() * (I.spread * 2 + 1)) - I.spread);
+    p.pending = Object.assign({}, p.pending || {}); p.pending[id] = (p.daysLived || 0) + wk;
+    p.flags['pending:' + id] = 1;
+    parts.push('신청: ' + itemName(id) + ' · 결과는 몇 주 뒤');
+  }
+  settleIssues(d) {
+    var self = this, p = d.player; if (!p || !p.pending) return;
+    var now = p.daysLived || 0, left = {}, any = false;
+    Object.keys(p.pending).forEach(function (id) {
+      var I = ISSUE[id]; if (!I) return;
+      if (p.pending[id] > now) { left[id] = p.pending[id]; return; }
+      any = true; delete p.flags['pending:' + id];
+      var ok = (I.auto && self.condOk(p, I.auto, d)) || self.check(self.tgt(diffTarget(p[I.stat], I.diff))).success;
+      if (ok) {
+        p.items = Object.assign({}, p.items || {}); p.items[id] = 1;
+        self.log(d, '대서소에서 기별이 왔다 — ' + I.ok + ' (얻음: ' + itemName(id) + ')', 'story');
+      } else {
+        var fp = I.ngFx ? self.applyFx(d, I.ngFx) : [];
+        self.log(d, '대서소에서 기별이 왔다 — ' + I.ng + (fp.length ? ' (' + fp.join(' · ') + ')' : ''), 'story');
+      }
+    });
+    if (any) p.pending = left;
+  }
+  /* 위조 의심: 몸수색 때 지닌 증명서(증표 제외)마다 CERT.forgery 확률로 빼앗김 → 빼앗긴 글 */
+  forgerySeize(d, only, except) {
+    var p = d.player, lost = [];
+    Object.keys(p.items || {}).forEach(function (id) {
+      if (!ITEMS[id] || ITEMS[id].kind !== 'doc' || id === 'tokko_badge') return;
+      if (only && only.indexOf(id) < 0) return;
+      if (except && except.indexOf(id) >= 0) return;
+      if (Math.random() < CERT.forgery) lost.push(id);
+    });
+    if (!lost.length) return '';
+    p.items = Object.assign({}, p.items); lost.forEach(function (id) { delete p.items[id]; });
+    var names = lost.map(itemName).join('·'), parts = this.applyFx(d, { heat: CERT.forgeryHeat });
+    this.log(d, '위조 의심으로 빼앗김: ' + names + (parts.length ? ' · ' + parts.join(' · ') : ''), 'bad');
+    return '“이 도장, 어디서 받은 거야?” 증명서를 불빛에 비춰 보더니 위조가 의심된다며 ' + names + josaEulReul(names) + ' 빼앗아 버렸다. (잃음: ' + names + ' · 감시도 +' + CERT.forgeryHeat + ')\n\n';
+  }
+  prependOutcome(d, pre) {
+    if (!pre) return;
+    if (d.outcome && d.outcome.text) d.outcome = Object.assign({}, d.outcome, { text: pre + d.outcome.text });
+    else if (d.event && d.event.text) d.event = Object.assign({}, d.event, { text: pre + d.event.text });
   }
   draft() {
     var s = this.state;
@@ -1141,12 +1260,57 @@ class Component extends DCLogic {
     }
   }
   commit(d) {
+    /* 쓰러뜨린 적 수 (점수용) */
+    if (d.combat && d.player) {
+      var kn = 0; d.combat.foes.forEach(function (f) { if ((f.hp <= 0 || f.surrendered) && !f.counted) { f.counted = true; kn++; } });
+      if (kn) d.player.kills = (d.player.kills || 0) + kn;
+    }
     if (d.player && d.player.hp <= 0 && d.screen !== 'end') {
       d.player.hp = 0; d.combat = null; d.event = null; d.outcome = null;
       d.screen = 'end'; d.ending = 'lose';
       this.log(d, '쓰러졌다. 의식이 멀어진다…', 'bad');
     }
-    if (d.screen === 'end') this.clearSave(d.saveSlot || 1);
+    if (d.screen === 'end') { if (!d.scoreInfo && d.player) d.scoreInfo = this.scoreRun(d); this.clearSave(d.saveSlot || 1); }
+    this.setState(d);
+  }
+  /* ───── 점수 · 태생 선택권 ───── */
+  scoreParts(p) {
+    var qs = Object.keys(p.quests || {}).map(function (k) { return p.quests[k].stage; }).filter(function (st) { return /^end/.test(st); });
+    var ok = qs.filter(function (st) { return SCORE.success.indexOf(st) >= 0; }).length;
+    var v = { weeks: p.daysLived || 0, money: Math.max(0, p.money || 0), kills: p.kills || 0, medkit: p.medkit || 0,
+      weapons: Object.keys(p.weapons || {}).filter(function (id) { return p.weapons[id] && WEAPONS[id] && id !== 'fist'; }).length,
+      ammo: p.ammo || 0, quests: ok, questEnds: qs.length - ok,
+      docs: Object.keys(p.items || {}).filter(function (id) { return ITEMS[id] && ITEMS[id].kind === 'doc'; }).length };
+    return Object.keys(SCORE.per).map(function (k) { return { k: k, n: v[k], pts: v[k] * SCORE.per[k] }; });
+  }
+  scoreRun(d) {
+    var parts = this.scoreParts(d.player), total = parts.reduce(function (a, x) { return a + x.pts; }, 0);
+    var n = SCORE.tiers.filter(function (t) { return total >= t; }).length;
+    var STAGES = this.state.life || LIFE_STAGES, got = [], meta = loadMeta();
+    for (var i = 0; i < n; i++) { var st = STAGES[Math.floor(Math.random() * STAGES.length)]; got.push(st.id); meta.tokens[st.id] = (meta.tokens[st.id] || 0) + 1; }
+    var best = total > (meta.best || 0); if (best) meta.best = total;
+    saveMeta(meta);
+    var next = SCORE.tiers.filter(function (t) { return total < t; })[0];
+    return { total: total, parts: parts, got: got, best: best, bestScore: meta.best, next: next };
+  }
+  stageLabel(id) { var st = (this.state.life || LIFE_STAGES).filter(function (x) { return x.id === id; })[0]; return st ? st.label : id; }
+  /* 태생 화면: 굴림 칸 하나를 그 단계의 원하는 항목으로 (선택권 1장) → 시드가 새로 생긴다 */
+  openPick(slot) { if (this.state.screen !== 'origin') return; this.setState({ pickSlot: slot }); }
+  closePick() { this.setState({ pickSlot: null }); }
+  applyPick(slot, idx) {
+    var s = this.state; if (s.screen !== 'origin') return;
+    var row = (s.bg || []).filter(function (r) { return r.slot === slot; })[0]; if (!row) return;
+    var meta = loadMeta(); if (!(meta.tokens[row.stage] > 0)) { this.setState({ pickSlot: null, seedMsg: '이 단계의 선택권이 없다' }); return; }
+    var ps = parseSeed(s.seed || '');
+    if (ps.base.length > SEED_BASE) { this.setState({ pickSlot: null, seedMsg: '이 시드는 너무 길어 골라 쓸 수 없다 — 다시 태어난 뒤에 써 보자' }); return; }
+    var ovr = (ps.ovr || []).slice(); while (ovr.length < SEED_OVR) ovr.push(0);
+    if (slot >= SEED_OVR) return;
+    ovr[slot] = idx + 1;
+    meta.tokens[row.stage]--; saveMeta(meta);
+    var d = this.draft(); d.pickSlot = null; d.rerollWarn = null;
+    this.applyBackground(d, encodeSeed(ps.base, ovr));
+    var nr = (d.bg || []).filter(function (r) { return r.slot === slot; })[0];
+    d.seedMsg = (nr ? row.label + ' — ' + nr.name + '(으)로 바꿨다 · ' : '') + '새 시드 ' + seedLabel(d.seed);
     this.setState(d);
   }
   advance(d) { d.time++; if (d.time > 2) { d.time = 0; this.addDays(d, 1); } }
@@ -1232,8 +1396,9 @@ class Component extends DCLogic {
   applyBackground(d, seed) {
     /* 태생 굴림 전체를 시드 난수로 (끝나면 반드시 되돌림) */
     seed = cleanSeed(seed) || newSeed();
-    this._seedRng = seedRng(seed);
-    try { this.applyBackgroundInner(d); } finally { this._seedRng = null; }
+    var ps = parseSeed(seed);
+    this._seedRng = seedRng(ps.base); this._seedOvr = ps.ovr;
+    try { this.applyBackgroundInner(d); } finally { this._seedRng = null; this._seedOvr = null; }
     d.seed = seed; d.player.seed = seed;
   }
   applyBackgroundInner(d) {
@@ -1320,6 +1485,9 @@ class Component extends DCLogic {
         var r = self.rand(rule.die || 100) + (rule.add || 0);
         var dieText = 'd' + (rule.die || 100) + (rule.add ? '+' + rule.add : '');
         var e = table.filter(function (x) { return r <= x.max; })[0] || table[table.length - 1];
+        /* 태생 선택권으로 고른 칸: 굴림은 그대로 쓰되(뒤 굴림이 바뀌지 않게) 항목만 바꾼다 */
+        var slot = rows.filter(function (rw) { return rw.slot != null; }).length, ov = self._seedOvr && self._seedOvr[slot], picked = false;
+        if (ov && table[ov - 1]) { e = table[ov - 1]; picked = true; }
         var parts = [];
         Object.keys(e.mod || {}).forEach(function (k) { stats[k] += e.mod[k]; parts.push(STAT_LABEL[k] + ' ' + (e.mod[k] > 0 ? '+' : '') + e.mod[k]); });
         Object.keys(e.fx || {}).forEach(function (k) {
@@ -1335,8 +1503,8 @@ class Component extends DCLogic {
         etags.forEach(function (t) { out.tags[t] = (out.tags[t] || 0) + 1; });
         if ((stg.times || 1) > 1) { out.picks[stg.id] = out.picks[stg.id] || []; out.picks[stg.id].push(eid); }
         else out.picks[stg.id] = eid;
-        rows.push({ stage: stg.id, label: stg.label + (stg.times > 1 ? ' ' + (n + 1) : '') + (dieText !== 'd100' ? ' (' + dieText + ')' : ''), r: r, id: eid, name: e.name, desc: e.desc, special: !!e.special,
-          tagText: etags.join(' · '), mods: parts.join(' · ') || '변화 없음' });
+        rows.push({ stage: stg.id, slot: slot, picked: picked, label: stg.label + (stg.times > 1 ? ' ' + (n + 1) : '') + (dieText !== 'd100' ? ' (' + dieText + ')' : ''), r: picked ? '골라 씀' : r, id: eid, name: e.name, desc: e.desc, special: !!e.special,
+          tagText: etags.join(' · '), traits: traitWords(etags), mods: parts.join(' · ') || (traitWords(etags).length ? '' : '변화 없음') });
       }
     });
     STAT_KEYS.forEach(function (k) { stats[k] = Math.max(STAT_MIN, Math.min(STAT_MAX, stats[k])); });
@@ -1415,6 +1583,7 @@ class Component extends DCLogic {
     /* 행동 예약: 이번 '다음으로'는 무조건 그것으로 */
     var gp = placeById(d.goPlace);
     d.goPlace = null;
+    if (gp && gp.locked && gp.locked(d.player, this)) gp = null;
     if (gp && this.placeOpen(gp, d.player) && gp.direct) { d.loc = gp.loc(d.player); gp.direct(this, d); return; }
     if (gp && this.placeOpen(gp, d.player)) {
       var sv = gp.event(this, d);
@@ -1514,8 +1683,8 @@ class Component extends DCLogic {
   }
   /* 일제 타협도에 따른 트집 확률 배율 */
   harassMult(p) {
-    var j = p.jp || 0;
-    return j >= 0 ? 1 - Math.min(1, j / ALIGN.max) * ALIGN.harassHigh : 1 + Math.min(1, -j / -ALIGN.min) * ALIGN.harassLow;
+    var j = p.jp || 0, rs = hasItem(p, 'residence') ? CERT.residenceHarass : 1;
+    return rs * (j >= 0 ? 1 - Math.min(1, j / ALIGN.max) * ALIGN.harassHigh : 1 + Math.min(1, -j / -ALIGN.min) * ALIGN.harassLow);
   }
   harassOf(d, ev) {
     if (ev.noHarass) return null;
@@ -1597,17 +1766,19 @@ class Component extends DCLogic {
   openPlaces() { if (!this.canOpenInventory()) return; this.setState({ screen: 'places', invReturn: this.state.screen }); }
   closePlaces() { this.setState({ screen: this.state.invReturn || 'loc' }); }
   reservePlace(id) {
-    var p = this.state.player, pl = placeById(id); if (!p || !pl || !this.placeOpen(pl, p)) return;
+    var p = this.state.player, pl = placeById(id); if (!p || !pl || !this.placeOpen(pl, p) || (pl.locked && pl.locked(p, this))) return;
     this.setState({ goPlace: this.state.goPlace === id ? null : id });
   }
   placesVals() {
     var self = this, s = this.state, p = s.player;
     if (!p) return { list: [], empty: true, msg: '' };
     var list = PLACES.filter(function (pl) { return self.placeOpen(pl, p); }).map(function (pl) {
-      var on = s.goPlace === pl.id;
+      var on = s.goPlace === pl.id, lk = pl.locked ? pl.locked(p, self) : '';
+      /* locked: 보이지만 지금은 못 가는 곳 (예: 이번 달에 이미 들른 상점) */
       return { kicker: pl.kicker, name: pl.name(p), sub: pl.sub(p, self), where: pl.direct ? '' : (LOCS[pl.loc(p)] ? LOCS[pl.loc(p)].name : ''),
-        on: on, status: on ? '예약됨 · 다음으로를 누르면 간다' : '', btn: on ? '예약 취소' : (pl.direct ? '다음 차례에 한다' : '다음에 여기로 간다'),
-        btnBg: on ? '#FBF7EE' : '#1E1B16', btnFg: on ? '#1E1B16' : '#F6EFDF', bg: on ? '#F3E6C4' : '#FBF7EE', border: on ? '#1E1B16' : '#B9AB8E',
+        on: on, status: on ? '예약됨 · 다음으로를 누르면 간다' : lk, locked: !!lk, statusColor: lk ? '#9E2B20' : '#3F5E2F',
+        btn: on ? '예약 취소' : lk ? '이번 달은 끝' : (pl.direct ? '다음 차례에 한다' : '다음에 여기로 간다'),
+        btnBg: on ? '#FBF7EE' : lk ? '#DCCFB4' : '#1E1B16', btnFg: on ? '#1E1B16' : lk ? '#5B5246' : '#F6EFDF', bg: on ? '#F3E6C4' : lk ? '#EFE8D8' : '#FBF7EE', border: on ? '#1E1B16' : '#B9AB8E',
         toggle: function () { self.reservePlace(pl.id); } };
     });
     var cur = placeById(s.goPlace);
@@ -1729,6 +1900,8 @@ class Component extends DCLogic {
     if (arr(c.noTags).some(function (t) { return self.hasTag(p, t); })) return false;
     if (arr(c.flags).some(function (f) { return !(p.flags && p.flags[f]); })) return false;
     if (arr(c.noFlags).some(function (f) { return p.flags && p.flags[f]; })) return false;
+    if (arr(c.items).some(function (it) { return !hasItem(p, it); })) return false;
+    if (arr(c.noItems).some(function (it) { return hasItem(p, it); })) return false;
     var val = function (k) { return k === 'heat' ? (p.heat || 0) : (p[k] || 0); };
     if (Object.keys(c.min || {}).some(function (k) { return val(k) < c.min[k]; })) return false;
     if (Object.keys(c.max || {}).some(function (k) { return val(k) > c.max[k]; })) return false;
@@ -1748,6 +1921,44 @@ class Component extends DCLogic {
     if (c.chance != null && withChance && Math.random() >= c.chance) return false;
     return true;
   }
+  /* 조건으로 뜬 선택지: 무엇 때문에 보이는지 짧은 말로 (태그는 뜻으로, 숨은 수치는 숫자 없이) */
+  tagMeaning(t) {
+    if (TAG_MEANING[t]) return TAG_MEANING[t];
+    var hit = null, cut = t.indexOf(':');
+    (this.state.life || LIFE_STAGES).forEach(function (st) {
+      (st.table || []).forEach(function (e) {
+        if (hit) return;
+        if ((e.tags || []).indexOf(t) >= 0 || (cut > 0 && t.slice(0, cut) === st.id && t.slice(cut + 1) === e.id)) hit = st.label + ': ' + e.name;
+      });
+    });
+    return hit || t;
+  }
+  optReason(o, p) {
+    var self = this, out = [], arr = function (v) { return v == null ? [] : (Array.isArray(v) ? v : [v]); };
+    var tg = function (t) { out.push(self.tagMeaning(t)); };
+    arr(o.needTag).forEach(tg);
+    var any = arr(o.anyTag).filter(function (t) { return self.hasTag(p, t); }); if (any.length) tg(any[0]);
+    if (o.needFlag) out.push(FLAG_MEANING[o.needFlag] || '앞서 한 일 때문');
+    var c = o.show;
+    if (c) {
+      arr(c.tags).forEach(tg);
+      var a2 = arr(c.anyTags).filter(function (t) { return self.hasTag(p, t); }); if (a2.length) tg(a2[0]);
+      arr(c.flags).forEach(function (f) { out.push(FLAG_MEANING[f] || '앞서 한 일 때문'); });
+      arr(c.items).forEach(function (it) { var n = itemName(it), k = n.charCodeAt(n.length - 1) - 0xAC00; out.push(n + ((k >= 0 && k <= 11171 && k % 28) ? '을' : '를') + ' 지님'); });
+      ['min', 'max'].forEach(function (g) {
+        Object.keys(c[g] || {}).forEach(function (k) {
+          if (COND_ALIGN_WORD[k]) { out.push(COND_ALIGN_WORD[k][g]); return; }
+          var nm = STAT_LABEL[k] || COND_WORD[k] || k, v = c[g][k];
+          out.push(nm + ' ' + v + (k === 'money' ? '원' : '') + (g === 'min' ? ' 이상' : ' 이하'));
+        });
+      });
+      if (c.weapon) arr(c.weapon).forEach(function (w) { out.push(w === 'gun' ? '총을 지님' : w === 'melee' ? '근접 무기를 지님' : w === 'none' ? '맨손' : (function (n) { var k = n.charCodeAt(n.length - 1) - 0xAC00; return n + ((k >= 0 && k <= 11171 && k % 28) ? '을' : '를'); })((WEAPONS[w] && WEAPONS[w].name) || w) + ' 지님'); });
+      if (arr(c.city).length) out.push(arr(c.city).map(function (x) { return (CITIES[x] && CITIES[x].name) || x; }).join('·'));
+      if (arr(c.time).length) out.push(arr(c.time).map(function (x) { return COND_TIME[x]; }).join('·'));
+      if (c.years) out.push(c.years[0] + (c.years[1] !== c.years[0] ? '–' + c.years[1] : '') + '년');
+    }
+    return out.filter(function (x, i) { return out.indexOf(x) === i; }).join(' · ');
+  }
   /* 고를 때: 조건부 결과(alt) 중 맞는 첫 줄 */
   altOf(opt, p, d) {
     var self = this;
@@ -1762,9 +1973,32 @@ class Component extends DCLogic {
     if (hide.some(function (t) { return self.hasTag(p, t); })) return false;
     return true;
   }
+  /* 증명서: 검문(조사에 순응 선택지가 있는 사건)에서 내보일 수 있는 선택지를 붙인다 */
+  certOptions(ev, p) {
+    var hasComply = (ev.options || []).some(function (o) { return o.comply; });
+    if (!hasComply || ev.cornered || ev.kind === 'align' || !p) return [];
+    var out = [];
+    if (hasItem(p, 'tokko_badge')) out.push({ label: '고등계 협력 증표를 내보인다', cert: 'tokko_badge', show: { items: ['tokko_badge'] } });
+    if (hasItem(p, 'residence')) out.push({ label: '거주증명서를 내보인다', cert: 'residence', show: { items: ['residence'] } });
+    return out;
+  }
+  certPass(d, ev, opt) {
+    var p = d.player, nm = ev.inspector || (ev.title || '').replace(/의 불심검문$/, '').replace(/ 둘$/, '') || '순사';
+    var parts = [], text;
+    if (opt.cert === 'tokko_badge') {
+      parts = parts.concat(this.applyFx(d, { heat: -CERT.badgeHeat, kr: -CERT.badgeKr }));
+      text = '품속에서 놋쇠 증표를 꺼내 손바닥에 올려 보였다. ' + nm + '의 얼굴이 굳더니, 이내 허리를 굽힌다.\n“아, 실례했습니다. 가시지요.” 줄 서 있던 사람들이 당신을 흘끔거린다. 그 눈빛이 등에 박힌다.';
+    } else {
+      text = '거주증명서를 펼쳐 보였다. ' + nm + josaIGa(nm) + ' 도장과 얼굴을 번갈아 보더니 종이를 돌려준다.\n“주소가 확실하군. 가 봐.”';
+    }
+    parts.push(itemName(opt.cert) + ' 사용');
+    d.outcome = { title: ev.title, text: text, summary: parts.join(' · '), fight: null };
+    d.event = null; d.screen = 'outcome';
+    this.log(d, ev.title + ' — ' + itemName(opt.cert) + '로 통과', 'sys');
+  }
   visibleOptions(ev, p) {
     var self = this;
-    return (ev.options || []).filter(function (o) {
+    return this.certOptions(ev, p).concat(ev.options || []).filter(function (o) {
       if (o.hideIf && p.flags[o.hideIf]) return false;
       if (o.hideWeapon && (ownedWeapons(p)[o.hideWeapon] || (p.stash && p.stash.weapons && p.stash.weapons[o.hideWeapon]))) return false;
       if (o.needFlag && !p.flags[o.needFlag]) return false;
@@ -1778,6 +2012,20 @@ class Component extends DCLogic {
     if (!opt) return;
     var cost = this.costOf(ev, opt, s.player);
     if (cost && cost.money && s.player.money < cost.money) return;
+    if (opt.cert === 'residence') {
+      /* 거주증명서: 절반쯤만 통한다 — 안 통하면 그대로 몸수색 */
+      var cpl = (ev.options || []).filter(function (o) { return o.comply; })[0];
+      this.roll('거주증명서', Math.round(CERT.residencePass * 100), function (d, res) {
+        var seized = cpl ? self.forgerySeize(d, ['residence']) : '';
+        if (seized) { self.doSearch(d, ev, cpl, 0, false); self.prependOutcome(d, '거주증명서를 펼쳐 보였다.\n' + seized); return; }
+        if (res.success || !cpl) { self.certPass(d, ev, opt); return; }
+        var nm0 = ev.inspector || '순사', pre = '거주증명서를 펼쳐 보였다. ' + nm0 + josaIGa(nm0) + ' 종이를 대충 훑더니 도로 던진다.\n“종이야 아무나 떼지. 짐 풀어.”\n\n';
+        self.doSearch(d, ev, cpl, CERT.residenceMiss, ['residence']);
+        self.prependOutcome(d, pre);
+      });
+      return;
+    }
+    if (opt.cert) { var dct = this.draft(); this.certPass(dct, ev, opt); this.commit(dct); return; }
     if (opt.comply) { var dc = this.draft(); this.doSearch(dc, ev, opt); this.commit(dc); return; }
     if (opt.bribe) {
       /* 뇌물: 먹히면 넘어가고, 안 먹히면 돈만 빼앗기고 싸움 */
@@ -1798,9 +2046,15 @@ class Component extends DCLogic {
   bribeChance(p) { var B = SEARCH.bribe; return Math.max(B.min, Math.min(B.max, B.chance + ((p && p.jp) || 0) / B.alignDiv)); }
   lookAwayChance(p) { var L = SEARCH.look, jp = (p && p.jp) || 0; return jp < L.from ? 0 : Math.min(L.max, L.base + (jp - L.from) * L.per); }
   frameChance(p) { var F = SEARCH.frame, jp = (p && p.jp) || 0; return jp > F.from ? 0 : Math.min(F.max, F.base + (F.from - jp) * F.per); }
-  doSearch(d, ev, opt) {
+  doSearch(d, ev, opt, missBonus, forge) {
+    /* forge: false = 위조 검사 안 함 · 배열 = 그 증명서는 빼고 검사 */
+    var pre = forge === false ? '' : this.forgerySeize(d, null, forge);
+    this.doSearch0(d, ev, opt, missBonus);
+    this.prependOutcome(d, pre);
+  }
+  doSearch0(d, ev, opt, missBonus) {
     var self = this, p = d.player, seen = [], missed = [];
-    CONTRABAND.forEach(function (c) { if (!c.has(p)) return; (Math.random() < (c.spot ? c.spot(p) : 1) ? seen : missed).push(c.name); });
+    CONTRABAND.forEach(function (c) { if (!c.has(p)) return; (Math.random() < (c.spot ? c.spot(p) : 1) - (missBonus || 0) ? seen : missed).push(c.name); });
     var withJosa = function (t) { return t + josaIGa(t); };
     var mt = missed.join('·'), missNote = missed.length ? '\n(' + mt + (josaIGa(mt) === '이' ? '은' : '는') + ' 들키지 않았다.)' : '';
     if (seen.length) {
@@ -1870,7 +2124,20 @@ class Component extends DCLogic {
       var bag = Object.assign({}, this.skillBag(d.player)); bag[out.skill] = (bag[out.skill] || 0) + 1; d.player.skillBag = bag;
       parts.push('기술 획득: ' + SKILLS[out.skill].name + (bag[out.skill] > 1 ? ' ×' + bag[out.skill] : ''));
     }
-    parts = parts.concat(this.applyFx(d, out.fx));
+    /* 물건 얻기·잃기 */
+    if (out.item || out.unitem) {
+      var its = Object.assign({}, d.player.items || {});
+      arrOf(out.item).forEach(function (it) { its[it] = (its[it] || 0) + 1; parts.push('얻음: ' + itemName(it)); });
+      arrOf(out.unitem).forEach(function (it) { if (its[it]) { delete its[it]; parts.push('잃음: ' + itemName(it)); } });
+      d.player.items = its;
+    }
+    /* 대서소 신청: 몇 주 뒤에 결과 */
+    if (opt && opt.apply && good) this.startIssue(d, opt.apply, parts);
+    /* 행상 허가증: 일거리로 번 돈 +1 */
+    var fxOut = out.fx;
+    if (ev && ev.kind === 'work' && fxOut && fxOut.money > 0 && hasItem(d.player, 'peddler')) fxOut = Object.assign({}, fxOut, { money: fxOut.money + CERT.peddlerPay });
+    parts = parts.concat(this.applyFx(d, fxOut));
+    if (fxOut !== out.fx) parts.push('행상 허가증 +' + CERT.peddlerPay + '원');
     /* 검문류: 판정에 실패해 전투가 될 상황이면, 바로 싸우지 않고 '조사에 순응한다'만 남은 선택지 화면으로 */
     var comply = (ev.options || []).filter(function (o) { return o.comply; })[0];
     if (!good && opt.check && out.fight && comply && !ev.cornered) {
@@ -1911,7 +2178,8 @@ class Component extends DCLogic {
     d.travel = { to: to };
     var enc = Math.min(PATROL_ENC.max, PATROL_ENC.base + (d.player.heat + (d.time === 2 ? PATROL_ENC.night : 0)) * PATROL_ENC.perHeat)
       + Math.max(0, -(d.player.jp || 0)) / -ALIGN.min * ALIGN.watchEnc;
-    if (Math.random() < enc) ev = this.makePatrol(d);
+    /* 여행증명서가 있으면 역 앞 불심검문은 없다 */
+    if (!hasItem(d.player, 'travel_pass') && Math.random() < enc) ev = this.makePatrol(d);
     if (!ev) {
       var pool = (L.events || []).filter(function (id) { return EVENTS[id] && self.tagsOk(d.player, EVENTS[id]); });
       ev = EVENTS[this.pick(pool.length ? pool : L.events)];
@@ -1920,7 +2188,9 @@ class Component extends DCLogic {
   }
   /* 역 사건이 끝난 뒤: 운임을 내고 떠난다 */
   doTravel(d) {
-    var p = d.player, from = this.curCity(d), to = d.travel.to, t = trainOf(from, to);
+    var p = d.player, from = this.curCity(d), to = d.travel.to, t0 = trainOf(from, to);
+    /* 여행증명서: 기차표 반값 */
+    var t = t0 && hasItem(p, 'travel_pass') ? Object.assign({}, t0, { fare: Math.ceil(t0.fare * CERT.travelFare), passNote: true }) : t0;
     d.travel = null; d.event = null; d.screen = 'outcome';
     var fill = function (x) { return x.replace('{from}', CITIES[from].name).replace('{to}', CITIES[to].name); };
     if (!t || (p.money || 0) < t.fare) {
@@ -1934,7 +2204,7 @@ class Component extends DCLogic {
     var nt = d.time + t.slots, late = nt > 2;
     d.time = Math.min(2, nt); d.slotUsed = true;
     var text = fill(this.pick(TRAIN_TEXT.board)) + '\n' + fill(this.pick(TRAIN_TEXT.arrive)) + (late ? '\n' + TRAIN_TEXT.late : '');
-    var parts = ['소지금 -' + t.fare + '원', t.line, CITIES[to].name + ' 도착', '감시도 ' + (p.heat || 0)];
+    var parts = ['소지금 -' + t.fare + '원' + (t.passNote ? ' (여행증명서 반값)' : ''), t.line, CITIES[to].name + ' 도착', '감시도 ' + (p.heat || 0)];
     d.outcome = { title: CITIES[to].name + '행 기차', text: text, summary: parts.join(' · '), fight: null };
     this.log(d, t.line + ' — ' + CITIES[from].name + '에서 ' + CITIES[to].name + '(으)로. ' + parts.join(', '), 'story');
   }
@@ -1978,7 +2248,7 @@ class Component extends DCLogic {
     if (form === 'surround' && Math.random() < G.surroundGap) {
       var gapOf = function (sd) { var g = rel.filter(function (o) { return Math.sign(o.r) === sd; }).map(function (o) { return Math.abs(o.r); }); return g.length ? Math.min.apply(null, g) : 99; };
       var gs = gapOf(-1) > gapOf(1) ? -1 : 1, gg = Math.min(gapOf(gs), G.exitFar);
-      if (gg >= 4.5) { var ir = gs * (3 + Math.random() * (gg - 4)); if (!exRels.some(function (q) { return Math.abs(q - ir) < 2; })) exRels.push(ir); }
+      if (gg >= 4.5) { var ir = gs * (3 + Math.random() * (gg - 4)); if (!exRels.some(function (q) { return Math.abs(q - ir) < G.exitGap; })) exRels.push(ir); }
     }
     /* 3) 길이: 기준 길이 ± (적·출구가 다 들어가지 않으면 maxLen 까지 늘리고, 그래도 넘치면 줄여 넣는다) · 나의 자리는 들어가는 범위 안에서 무작위 */
     var lo = 0, hi = 0;
@@ -1986,7 +2256,7 @@ class Component extends DCLogic {
     exRels.forEach(function (r) { lo = Math.min(lo, r); hi = Math.max(hi, r); });
     var span = hi - lo;
     var LEN = Math.round(A.len + G.len[0] + Math.random() * (G.len[1] - G.len[0]));
-    LEN = Math.max(G.minLen, Math.min(G.maxLen, Math.max(LEN, Math.ceil(span + 2))));
+    LEN = Math.max(G.minLen, LEN, Math.ceil(span + 2));
     var scale = span > LEN ? LEN / span : 1;
     var pxLo = -lo * scale, pxHi = LEN - hi * scale;
     var px = Math.round((pxLo + Math.random() * Math.max(0, pxHi - pxLo)) * 10) / 10;
@@ -2023,24 +2293,47 @@ class Component extends DCLogic {
     }
     var vlNames = namesFor(A.veilNames, G.veilPool, vlAt.length);
     var veils = vlAt.sort(function (a, b) { return a - b; }).map(function (at, i) { return { at: at, name: vlNames[i] }; });
+    /* 6) 이동 방해물: 나·적과 1.2m 이상, 출구·엄폐물·서로와 hurdleGap 이상 */
+    var nHd = gp(G.hurdles || [0]), hdAt = [];
+    for (var ht = 0; hdAt.length < nHd && ht < 80; ht++) {
+      var ha = Math.round((1 + Math.random() * (LEN - 2)) * 10) / 10;
+      if (Math.abs(ha - px) < 1.2 || foes.some(function (f) { return Math.abs(f.x - ha) < 1.2; })) continue;
+      if (hdAt.concat(cvAt).concat(exits.map(function (x) { return x.at; })).some(function (q) { return Math.abs(q - ha) < G.hurdleGap; })) continue;
+      hdAt.push(ha);
+    }
+    var hdPool = HURDLES.slice().sort(function () { return Math.random() - 0.5; });
+    var hurdles = hdAt.sort(function (a, b) { return a - b; }).map(function (at, i) { return Object.assign({ at: at }, hdPool[i % hdPool.length]); });
+    /* 7) 겹친 방해물 · 임시 방해물 (OBSTACLES) — 아래 placeObstacle 이 세 목록에 함께 넣는다 */
+    var tmpArena = { len: LEN, covers: covers, veils: veils, hurdles: hurdles, exits: exits };
+    var nPerm = gp(OBST_GEN.perm), nTemp = gp(OBST_GEN.temp);
+    var permPool = OBSTACLES.filter(function (o) { return !o.temp; }).sort(function () { return Math.random() - 0.5; });
+    var tempPool = OBSTACLES.filter(function (o) { return o.temp; }).sort(function () { return Math.random() - 0.5; });
+    for (var oi = 0; oi < nPerm && oi < permPool.length; oi++) self.placeObstacle(tmpArena, permPool[oi], px, foes, false);
+    for (var ti = 0; ti < nTemp && ti < tempPool.length; ti++) self.placeObstacle(tmpArena, tempPool[ti], px, foes, true);
+    covers.sort(function (a, b) { return a.at - b.at; }); veils.sort(function (a, b) { return a.at - b.at; }); hurdles.sort(function (a, b) { return a.at - b.at; });
     d.combat = { foes: foes, target: foes[0].uid, uidSeq: uid, round: 1, shot: false, cd: {},
-      arena: { name: A.name, len: LEN, exits: exits, crowd: !!A.crowd, covers: covers, veils: veils },
+      arena: { name: A.name, len: LEN, lo: 0, hi: LEN, exits: exits, crowd: !!A.crowd, covers: covers, veils: veils, hurdles: hurdles,
+        pool: { cover: (A.coverNames || (A.covers || []).map(function (cv) { return cv.name; })).concat(G.coverPool), veil: (A.veilNames || []).concat(G.veilPool), exit: (A.exitNames || [A.exitName]).filter(Boolean).concat(G.exitPool) } },
       px: px, free: 0, inCover: false, coverSide: 0, crouch: false,
       alarm: alarm && foes.some(function (f) { return f.t.whistle; }) ? TACTIC.alarm : null, backups: 0, form: form,
       official: OFFICIALS.indexOf(foes[0].id) >= 0 };
+    this.ensureArena(d.combat, G.startSpan);
     this.syncTarget(d.combat);
     d.screen = 'combat'; d.cbTab = 'skill'; d.tip = null;
     var names = foes.map(function (f) { return f.name; }).join(', ');
     this.log(d, '전투 개시 — ' + names + ' · ' + A.name + (foes.length > 1 ? (form === 'surround' ? ' · 앞뒤로 포위당했다!' : ' · 한쪽에서 몰려온다') : '') + ' · 거리 ' + this.fmtM(this.distOf(d.combat)), 'foe');
     var exTxt = exits.map(function (x) { return (x.at < px ? '왼쪽 ' : '오른쪽 ') + self.fmtM(x.at - px) + ' ' + x.name + (self.pathCost(d.combat, d.player, x.at).blocked ? '(적이 막음)' : ''); });
-    this.log(d, '빠져나갈 길 ' + exits.length + '곳 — ' + exTxt.join(' · ') + (covers.length ? ' · 엄폐물 ' + covers.map(function (cv) { return cv.name; }).join('·') : '') + (veils.length ? ' · 시야를 가리는 것 ' + veils.map(function (v) { return v.name; }).join('·') : ''), 'sys');
+    this.log(d, '빠져나갈 길 ' + exits.length + '곳 — ' + exTxt.join(' · ') + (covers.length ? ' · 엄폐물 ' + covers.map(function (cv) { return cv.name; }).join('·') : '') + (veils.length ? ' · 시야를 가리는 것 ' + veils.map(function (v) { return v.name; }).join('·') : '') + (hurdles.length ? ' · 길을 막는 것 ' + hurdles.map(function (h) { return h.name + '(' + STAT_LABEL[h.stat] + ')'; }).join('·') : '') + (covers.concat(veils).concat(hurdles).some(function (x) { return x.temp; }) ? ' · (‘잠시’가 붙은 것은 곧 사라진다)' : ''), 'sys');
     if (d.combat.alarm) this.log(d, '호루라기 소리! 증원이 ' + d.combat.alarm + '합 뒤 도착한다.', 'bad');
     /* 관헌의 태세: 모두 '생포'로 시작, 격화도는 감시도에서 (STANCE) */
     var heat0 = d.player.heat || 0;
-    foes.forEach(function (f) { if (self.isOfficial(f)) { f.mode = 'capture'; f.esc = Math.min(STANCE.cap, heat0 * STANCE.heat); } });
+    foes.forEach(function (f) { if (self.isOfficial(f)) { f.mode = 'capture'; f.esc = Math.min(STANCE.cap, heat0 * STANCE.heat); f.giveUp = self.capGiveUp(); } });
     this.planAll(d.combat, d.player);
     d.combat.feedSplit = -1; d.combat.feedStale = true;
   }
+  /* 생포를 포기하는 기준: 쓰러진 사람 수 (STANCE.giveUp 중 하나) */
+  capGiveUp() { var g = STANCE.giveUp; return g[Math.floor(Math.random() * g.length)]; }
+  downsOf(c) { return (c.foes || []).filter(function (f) { return f.hp <= 0; }).length; }
   /* 격화: 관헌 모두(또는 한 명)의 esc 를 올린다 */
   escalate(c, n, only) {
     (c.foes || []).forEach(function (f) { if (f.mode && !f.out && f.hp > 0 && (!only || f.uid === only)) f.esc = Math.min(STANCE.cap, (f.esc || 0) + n); });
@@ -2049,13 +2342,16 @@ class Component extends DCLogic {
   stanceTick(d, e) {
     var c = d.combat; if (!e.mode) return false;
     var dist = this.distOf(c, e), hasGun = e.t.style === 'gun', nm = e.name + josaIGa(e.name);
-    if (e.mode === 'capture' && Math.random() * 100 < (e.esc || 0)) {
+    /* 생포 포기: 내가 총을 쐈거나, 쓰러진 사람이 giveUp 명(1~2명) 이상일 때만 */
+    var downs = this.downsOf(c), why = c.shot ? 'shot' : downs >= (e.giveUp || STANCE.giveUp[0]) ? 'down' : '';
+    if (e.mode === 'capture' && why) {
       e.mode = hasGun && (c.shot || dist > STANCE.shootDist) ? 'shoot' : 'melee';
-      this.log(d, e.mode === 'shoot' ? nm + ' 포승을 내던지고 총을 뽑아 든다 — 이제 쏘려 한다!' : nm + ' 포승을 집어넣고 곤봉을 고쳐 쥔다 — 생포할 생각이 없다.', 'bad');
+      var pre = why === 'shot' ? '총성에 ' : '동료가 쓰러지자 ';
+      if (this.props.showOdds ?? false) this.log(d, pre + (e.mode === 'shoot' ? nm + ' 포승을 내던지고 총을 뽑아 든다 — 이제 쏘려 한다!' : nm + ' 포승을 집어넣고 곤봉을 고쳐 쥔다 — 생포할 생각이 없다.'), 'bad');
       return true;
     }
     if (e.mode === 'melee' && hasGun && dist > STANCE.shootDist && Math.random() < STANCE.switchShoot) {
-      e.mode = 'shoot'; this.log(d, nm + ' 거리가 벌어지자 총을 뽑아 든다!', 'bad'); return true;
+      e.mode = 'shoot'; if (this.props.showOdds ?? false) this.log(d, nm + ' 거리가 벌어지자 총을 뽑아 든다!', 'bad'); return true;
     }
     return false;
   }
@@ -2063,7 +2359,7 @@ class Component extends DCLogic {
   decideCapture(c, p, e) {
     var T = e.t, P = PERSONALITY[e.pers] || PERSONALITY.cautious, C = STANCE.capture, dist = this.distOf(c, e), roll = Math.random;
     var A = function (type) { return { type: type }; }, al = this.alive(c), side = Math.sign(e.x - c.px) || 1;
-    if (c.held === e.uid) return A(p.hp <= p.maxHp * C.bindHp || (c.heldTurns || 0) >= C.bindTurns ? 'bind' : 'subdue');
+    if (c.held === e.uid) return A('subdue');
     if (e.morale < P.flee) return A('flee');
     if (T.whistle && c.alarm === null && !e.whistled && roll() < 0.35) return A('whistle');
     var lead = al[0];
@@ -2077,7 +2373,7 @@ class Component extends DCLogic {
   /* 포박: 생포 태세 관헌에게 묶여 끌려간다 — 항복과 같은 손해 + ARREST.jailWeeks 주 */
   arrest(d, e) {
     var extra = this.applyFx(d, { days: ARREST.jailWeeks });
-    this.surrenderEnd(d, '포박', e.name + '의 포승에 손목이 묶였다. 주재소 유치장에서 이레를 보내고, 몸수색 끝에 풀려났다.', extra, e.name + '에게 포박당했다.');
+    this.surrenderEnd(d, '포박', (d.combat && d.combat.knockedOut ? e.name + '의 곤봉에 정신을 잃었다. 깨어 보니 포승에 묶여 끌려가는 중이었다.\n' : e.name + '의 포승에 손목이 묶였다. ') + '주재소 유치장에서 이레를 보내고, 몸수색 끝에 풀려났다.', extra, e.name + '에게 포박당했다.');
   }
   makeFoe(id, x, uid) {
     var E = ENEMIES[id] || ENEMIES.junsa, T = Object.assign({}, FOE_TACTICS._default, FOE_TACTICS[id] || {});
@@ -2100,7 +2396,98 @@ class Component extends DCLogic {
     c.enemy = cur || c.foes[0];
   }
   distOf(c, f) { f = f || c.enemy; return f ? Math.abs(f.x - c.px) : 99; }
-  stepOf(p) { return TACTIC.step + (p.agi || 0) / TACTIC.stepAgi; }
+  stepOf(p) { return Math.max(TACTIC.stepMin, Math.min(TACTIC.stepMax, TACTIC.step + ((p.agi || 0) - TACTIC.stepMid) / TACTIC.stepAgi)); }
+  /* a → b 사이(a 바로 옆 0.25m 는 빼고)에 있는 첫 이동 방해물 */
+  hurdleBetween(c, a, b) {
+    var dir = b > a ? 1 : -1;
+    return ((c.arena && c.arena.hurdles) || []).filter(function (h) { return (h.at - a) * dir > 0.25 && (b - h.at) * dir > 0.05; })
+      .sort(function (x, y) { return Math.abs(x.at - a) - Math.abs(y.at - a); })[0] || null;
+  }
+  hurdleChance(p, h) { return this.tgt(diffTarget(p[h.stat], h.diff)); }
+  /* ───── 끝없는 전장 ─────
+     나·적 가운데 가장 바깥에 있는 이에게서 span(기본 margin) m 안쪽까지 전장이 없으면 chunk 씩 더 만든다 (만든 곳은 그대로 남는다) */
+  ensureArena(c, span) {
+    var G = ARENA_GEN, ar = c.arena, m = span || G.margin;
+    if (ar.lo == null) { ar.lo = 0; ar.hi = ar.len; }
+    if (!ar.pool) ar.pool = { cover: G.coverPool, veil: G.veilPool, exit: G.exitPool };
+    var xs = [c.px].concat(this.alive(c).map(function (f) { return f.x; }));
+    var need = function () { return { L: Math.min.apply(null, xs) - m, R: Math.max.apply(null, xs) + m }; };
+    for (var k = 0; k < 40 && ar.lo > need().L; k++) this.genChunk(c, ar.lo - G.chunk, ar.lo);
+    for (var k2 = 0; k2 < 40 && ar.hi < need().R; k2++) this.genChunk(c, ar.hi, ar.hi + G.chunk);
+    ar.len = ar.hi;
+  }
+  genChunk(c, a, b) {
+    var G = ARENA_GEN, ar = c.arena, gp = function (arr) { return arr[Math.floor(Math.random() * arr.length)]; };
+    var pick = function (pool) { return pool[Math.floor(Math.random() * pool.length)]; };
+    var taken = function () { return ar.covers.concat(ar.veils).concat(ar.hurdles).map(function (x) { return x.at; }).concat(ar.exits.map(function (x) { return x.at; })); };
+    var spot = function (gap) { for (var t = 0; t < 40; t++) { var x = Math.round((a + 0.5 + Math.random() * (b - a - 1)) * 10) / 10; if (!taken().some(function (q) { return Math.abs(q - x) < gap; })) return x; } return null; };
+    if (b > ar.hi) ar.hi = b; if (a < ar.lo) ar.lo = a;
+    /* 출구: 다른 출구와 exitGap 이상 떨어진 자리에만 */
+    if (Math.random() < G.cExit) {
+      for (var t = 0; t < 20; t++) {
+        var ex = Math.round((a + 1 + Math.random() * (b - a - 2)) * 10) / 10;
+        if (ar.exits.some(function (x) { return Math.abs(x.at - ex) < G.exitGap; })) continue;
+        ar.exits.push({ at: ex, name: pick(ar.pool.exit) }); break;
+      }
+    }
+    for (var i = gp(G.cCovers); i > 0; i--) { var at = spot(G.coverGap); if (at !== null) ar.covers.push({ at: at, name: pick(ar.pool.cover), obscure: Math.random() < VEIL.coverChance }); }
+    for (var j = gp(G.cVeils); j > 0; j--) { var va = spot(G.veilGap); if (va !== null) ar.veils.push({ at: va, name: pick(ar.pool.veil) }); }
+    for (var h = gp(G.cHurdles); h > 0; h--) { var ha = spot(G.hurdleGap); if (ha !== null) ar.hurdles.push(Object.assign({ at: ha }, pick(HURDLES))); }
+    if (Math.random() < G.cCombo) { var po = OBSTACLES.filter(function (o) { return !o.temp; }); this.placeObstacle(ar, pick(po), c.px, c.foes, false, null, [a, b]); }
+    ['exits', 'covers', 'veils', 'hurdles'].forEach(function (k) { ar[k].sort(function (x, y) { return x.at - y.at; }); });
+  }
+  /* 방해물 하나를 전장에 놓는다: 성질마다 covers/veils/hurdles 에 같은 oid 로 넣는다 · temp 면 남은 합(ttl) */
+  placeObstacle(ar, o, px, foes, temp, log, range) {
+    var G = OBST_GEN, at = null, used = (ar.covers || []).concat(ar.veils || []).concat(ar.hurdles || []).map(function (x) { return x.at; }).concat((ar.exits || []).map(function (x) { return x.at; }));
+    for (var t = 0; t < 60 && at === null; t++) {
+      var lo0 = range ? range[0] : Math.max(ar.lo != null ? ar.lo : 0, px - 16), hi0 = range ? range[1] : Math.min(ar.hi != null ? ar.hi : ar.len, px + 16);
+      var a = Math.round((lo0 + 0.5 + Math.random() * (hi0 - lo0 - 1)) * 10) / 10;
+      if (Math.abs(a - px) < G.near || (foes || []).some(function (f) { return f.hp > 0 && !f.out && Math.abs(f.x - a) < G.near; })) continue;
+      if (used.some(function (q) { return Math.abs(q - a) < G.gap; })) continue;
+      at = a;
+    }
+    if (at === null) return null;
+    var oid = 'o' + Math.floor(Math.random() * 1e9), ttl = temp && o.temp ? o.temp[0] + Math.floor(Math.random() * (o.temp[1] - o.temp[0] + 1)) : 0;
+    var base = { at: at, name: o.name, oid: oid, temp: !!temp, ttl: ttl, gone: o.gone };
+    if (o.cover) ar.covers.push(Object.assign({}, base, { obscure: !!o.veil }));
+    else if (o.veil) ar.veils.push(Object.assign({}, base));
+    if (o.hurdle) ar.hurdles.push(Object.assign({}, base, o.hurdle, { sub: !!(o.cover || o.veil) }));
+    return base;
+  }
+  /* 합마다: 임시 방해물의 남은 합을 줄이고, 다 되면 치운다 · 가끔 새 임시 방해물이 나타난다 */
+  obstacleTick(d) {
+    var c = d.combat, ar = c.arena, self = this, gone = {};
+    this.ensureArena(c);
+    ['covers', 'veils', 'hurdles'].forEach(function (k) { (ar[k] || []).forEach(function (x) { if (x.temp && !gone[x.oid]) { x.ttl--; if (x.ttl <= 0) gone[x.oid] = x; } }); });
+    Object.keys(gone).forEach(function (oid) {
+      var x = gone[oid];
+      ['covers', 'veils', 'hurdles'].forEach(function (k) { ar[k] = (ar[k] || []).filter(function (y) { return y.oid !== oid; }); });
+      if (c.inCover && Math.abs(c.px - x.at) <= TACTIC.coverRange && !self.coverAt(c, c.px)) c.inCover = false;
+      c.foes.forEach(function (f) { if (f.inCover && Math.abs(f.x - x.at) <= TACTIC.coverRange && !self.coverAt(c, f.x)) f.inCover = false; if (f.climb && Math.abs(f.climb.at - x.at) < 0.05) f.climb = null; });
+      self.log(d, (x.gone || x.name + josaIGa(x.name) + ' 사라졌다') + '.', 'sys');
+    });
+    var nTemp = {}; ['covers', 'veils', 'hurdles'].forEach(function (k) { (ar[k] || []).forEach(function (x) { if (x.temp) nTemp[x.oid] = 1; }); });
+    if (Object.keys(nTemp).length < OBST_GEN.maxTemp && Math.random() < OBST_GEN.spawn) {
+      var pool = OBSTACLES.filter(function (o) { return o.temp; }), o = pool[Math.floor(Math.random() * pool.length)];
+      var placed = this.placeObstacle(ar, o, c.px, c.foes, true);
+      if (placed) {
+        ['covers', 'veils', 'hurdles'].forEach(function (k) { ar[k].sort(function (a, b) { return a.at - b.at; }); });
+        var side = placed.at > c.px ? '오른쪽 ' : '왼쪽 ';
+        this.log(d, (o.come || o.name + josaIGa(o.name) + ' 나타났다') + ' — ' + side + this.fmtM(placed.at - c.px) + '.', 'foe');
+      }
+    }
+  }
+  /* 피해 가기: dir 쪽에서 나를 막고 있는 가장 가까운 적 (한 걸음 안) · 그 뒤로 갈 자리가 있어야 */
+  dodgeFoe(c, p, dir) {
+    var px = c.px, step = this.stepOf(p), al = this.alive(c);
+    var f = al.filter(function (x) { return (x.x - px) * dir > 0; }).sort(function (a, b) { return Math.abs(a.x - px) - Math.abs(b.x - px); })[0];
+    if (!f || Math.abs(f.x - px) > step + 0.8) return null;
+    var room = dir > 0 ? c.arena.hi - f.x : f.x - c.arena.lo;
+    if (room < DODGE.min + 0.2) return null;
+    /* 바로 뒤에 다른 적이 붙어 있으면 빠져나갈 틈이 없다 */
+    if (al.some(function (o) { return o.uid !== f.uid && (o.x - f.x) * dir > 0 && Math.abs(o.x - f.x) < DODGE.room; })) return null;
+    return f;
+  }
   /* 가장 가까운 열린 출구 (모두 막혔으면 가장 가까운 출구) */
   nearExit(c, p) {
     var self = this, ex = (c.arena.exits || []).slice().sort(function (a, b) { return Math.abs(a.at - c.px) - Math.abs(b.at - c.px); });
@@ -2114,10 +2501,16 @@ class Component extends DCLogic {
   }
   veilPen(c, a, b) { return Math.min(VEIL.max, this.veilsBetween(c, a, b).length * VEIL.hit); }
   isOfficial(e) { return !!e && OFFICIALS.indexOf(e.id) >= 0; }
+  /* 고등계 증표에 겁먹을 확률: 남은 적이 모두 CERT.badgeScare 에 있어야 하고, 그중 가장 낮은 값 */
+  badgeChance(c) {
+    var al = this.alive(c), vals = al.map(function (f) { return CERT.badgeScare[f.id]; });
+    if (!al.length || vals.some(function (v) { return v == null; })) return null;
+    return Math.min.apply(null, vals);
+  }
   /* 무고 주장 확률 (PLEA 참고) */
   pleaChance(c, p, e) {
     var al = this.alive(c).length;
-    return this.tgt(p.int + (PLEA.foe[e.id] || 0) + this.talkAlign(p, e) - (this.contrabandOf(p).length ? PLEA.contraband : 0)
+    return this.tgt(p.int + (PLEA.foe[e.id] || 0) + this.talkAlign(p, e) + (hasItem(p, 'residence') ? CERT.residencePlea : 0) - (this.contrabandOf(p).length ? PLEA.contraband : 0)
       - (p.heat || 0) * PLEA.heat - (c.pleaFails || 0) * PLEA.fail - (al - 1) * PLEA.crowd - (e.backup ? 20 : 0));
   }
   /* 항복 요구 확률 (DEMAND 참고) — 판정은 무작위 */
@@ -2259,7 +2652,11 @@ class Component extends DCLogic {
     e.inCover = false;
     var dir = e.x > c.px ? 1 : -1, dist = this.distOf(c, e);
     var delta = Math.max(-e.t.speed, Math.min(e.t.speed, dist - want));
-    e.x = Math.max(0, Math.min(c.arena.len, e.x - dir * delta));
+    var nx = Math.max(c.arena.lo, Math.min(c.arena.hi, e.x - dir * delta));
+    /* 이동 방해물: 그 앞에서 멈추고, 다음 한 합을 넘는 데 쓴다 */
+    var hd = this.hurdleBetween(c, e.x, nx);
+    if (hd) { var mdir = Math.sign(nx - e.x); nx = hd.at - mdir * 0.3; e.climb = { at: hd.at, dir: mdir, name: hd.name }; }
+    e.x = nx;
     if (Math.abs(e.x - c.px) < 0.8) e.x = c.px + dir * 0.8;
   }
   /* 적의 잡기 시도: 성공하면 c.held = 그 적 */
@@ -2270,6 +2667,7 @@ class Component extends DCLogic {
     if (this.check(t).success) {
       c.held = e.uid; c.inCover = false; c.heldTurns = 0;
       p.hp -= 1;
+      if (p.hp <= 0 && e.mode === 'capture') { p.hp = 1; c.arrestBy = e.uid; c.knockedOut = true; }
       this.log(d, e.name + '에게 멱살을 잡혔다! 체력 -1 · 움직일 수 없다 · 다음 공격은 피할 수 없다', 'bad');
     } else this.log(d, e.name + '의 손을 뿌리치듯 피했다.', 'sys');
   }
@@ -2281,9 +2679,10 @@ class Component extends DCLogic {
     if (forced && !soft) { c.held = null; }
     if (forced || this.check(t).success) {
       var dmg = Math.max(1, this.rollSpec(e.dmg) + (e.backup ? TACTIC.backup.dmg : 0) - (soft ? STANCE.capture.softDmg : 0));
-      if (soft) dmg = Math.min(dmg, Math.max(0, p.hp - 1));
       p.hp -= dmg;
-      if (soft && p.hp <= p.maxHp * STANCE.capture.bindHp) c.arrestBy = e.uid; this.log(d, e.name + (soft ? '의 곤봉 — ' : '의 공격 — ') + (forced ? '붙잡힌 채 그대로 맞았다' : '명중') + ', 체력 -' + dmg, 'foe');
+      /* 생포 태세의 공격으로 쓰러지면 죽지 않고 끌려간다 */
+      if (soft && p.hp <= 0) { p.hp = 1; c.arrestBy = e.uid; c.knockedOut = true; }
+      this.log(d, e.name + '의 공격 — ' + (forced ? '붙잡힌 채 그대로 맞았다' : '명중') + ', 체력 -' + dmg, 'foe');
       if (melee && c.inCover) { c.inCover = false; this.log(d, e.name + josaIGa(e.name) + ' 엄폐물 뒤로 파고들어 나를 끌어냈다 — 엄폐가 풀렸다.', 'bad'); }
     } else this.log(d, e.name + '의 공격 — 빗나감' + (!melee && this.coverFaces(c, e) ? ' (엄폐물에 맞았다)' : ''), 'sys');
     e.aim = 0;
@@ -2325,7 +2724,7 @@ class Component extends DCLogic {
   }
   /* 이동 한계: 그 방향으로 가장 가까운 적 0.8m 앞까지 */
   moveLimit(c, dir) {
-    var px = c.px, lim = dir > 0 ? c.arena.len : 0;
+    var px = c.px, lim = dir > 0 ? c.arena.hi : c.arena.lo;
     this.alive(c).forEach(function (f) {
       if (dir > 0 && f.x > px) lim = Math.min(lim, f.x - 0.8);
       if (dir < 0 && f.x < px) lim = Math.max(lim, f.x + 0.8);
@@ -2338,8 +2737,10 @@ class Component extends DCLogic {
     return { blocked: false, cost: Math.max(1, Math.ceil(Math.abs(goal - c.px) / this.stepOf(p))) };
   }
   move(kind) {
+    if (/^dodge:/.test(kind)) { this.dodgePast(+kind.split(':')[1]); return; }
     var s = this.state; if (s.rolling || s.qte || !s.combat || s.combat.held) return;
-    var d = this.draft(), c = d.combat, p = d.player, step = this.stepOf(p);
+    /* 실제 한 걸음: 기준 걸음 ± stepVar 만큼 무작위 */
+    var d = this.draft(), c = d.combat, p = d.player, step = this.stepOf(p) * (1 + (Math.random() * 2 - 1) * TACTIC.stepVar);
     var target = null, cost = 1, label = '';
     /* 다가가기·물러나기: 표적 기준 방향 */
     if (kind === 'in' || kind === 'out') {
@@ -2365,21 +2766,49 @@ class Component extends DCLogic {
       label = kind === 'cover' ? cv.name + (arrive ? '에 닿았다' : ' 쪽으로 움직였다') : (arrive ? exO.name + '에 닿았다' : exO.name + ' 쪽으로 달렸다 (남은 ' + this.fmtM(goal - target) + ')');
     }
     if (target === null) return;
-    var moved = Math.abs(target - c.px);
-    /* 달아나려는 기색: 출구로 가거나 표적에게서 멀어지면 관헌이 생포를 포기하기 쉬워진다 */
+    var self = this, from = c.px, hd = this.hurdleBetween(c, from, target);
+    if (!hd) { this.finishMove(d, kind, target, label, exO, cost); this.commit(d); return; }
+    /* 이동 방해물: 판정 — 실패하면 그 앞에서 멈춘다 */
+    var hdir = target > from ? 1 : -1, stopAt = hd.at - hdir * 0.3;
+    this.roll(hd.name + ' 넘기', this.hurdleChance(p, hd), function (d2, res) {
+      if (res.success) { self.log(d2, hd.ok + '.', 'good'); self.finishMove(d2, kind, target, label, exO, cost); }
+      else { self.log(d2, hd.ng + ' — ' + hd.name + ' 앞에서 멈췄다.', 'bad'); self.finishMove(d2, kind, stopAt, hd.name + ' 앞까지 왔다', null, cost); }
+    });
+  }
+  /* 이동 마무리: 자리 옮기기 · 붙잡은 손 놓기 · 출구 도착 · 행동력 */
+  finishMove(d, kind, target, label, exO, cost) {
+    var c = d.combat, moved = Math.abs(target - c.px);
     if (/^exit/.test(kind) || Math.abs(c.enemy.x - target) > Math.abs(c.enemy.x - c.px) + 0.05) this.escalate(c, STANCE.flee);
-    /* 내가 움직이면 붙잡고 있던 손을 놓는다 */
     var me = this; c.foes.forEach(function (f) { if (f.grabbed > 0 && !f.out) { f.grabbed = 0; me.log(d, f.name + '을(를) 붙잡고 있던 손을 놓았다.', 'sys'); } });
-    c.px = Math.max(0, Math.min(c.arena.len, target)); c.inCover = false; c.crouch = false;
+    c.px = Math.max(c.arena.lo, Math.min(c.arena.hi, target)); c.inCover = false; c.crouch = false;
+    this.ensureArena(c);
     if (exO && Math.abs(c.px - exO.at) < 0.5) {
       var parts = this.combatHeat(d, 1).concat(this.officialHeat(d));
       this.log(d, exO.name + '(으)로 빠져나갔다.', 'sys');
       this.endCombat(d, '도주 성공', exO.name + '(으)로 몸을 던졌다. 추격을 따돌렸다.', parts);
-      this.commit(d); return;
+      return;
     }
     this.syncTarget(c);
     this.log(d, label + ' (' + this.fmtM(moved) + ')', 'sys');
-    this.spendAp(d, cost); this.commit(d);
+    this.spendAp(d, cost);
+  }
+  /* 피해 가기: 막아선 적을 지나쳐 그 뒤로 — 떨어지는 거리는 민첩·근력에 따라 무작위 */
+  dodgePast(dir) {
+    var s = this.state; if (s.rolling || s.qte || !s.combat || s.combat.held) return;
+    var d = this.draft(), c = d.combat, p = d.player, f = this.dodgeFoe(c, p, dir); if (!f) return;
+    var reach = DODGE.base + ((p.agi || 0) * DODGE.agi + (p.str || 0) * DODGE.str) / 100;
+    var land = f.x + dir * Math.min(DODGE.max, DODGE.min + Math.random() * reach);
+    land = Math.max(c.arena.lo, Math.min(c.arena.hi, land));
+    /* 다른 적 바로 앞에서 멈춘다 */
+    this.alive(c).forEach(function (o) { if (o.uid !== f.uid && (o.x - f.x) * dir > 0 && (land - o.x) * dir > -0.8) land = o.x - dir * 0.8; });
+    /* 적 뒤에 방해물이 있으면 그 앞에서 멈춘다 */
+    var hd = this.hurdleBetween(c, f.x, land); if (hd) land = hd.at - dir * 0.3;
+    if ((land - f.x) * dir < 0.5) land = f.x + dir * 0.5;
+    var gap = Math.abs(land - f.x);
+    var how = gap < 1.3 ? '겨우 ' + f.name + '의 옆구리를 비집고 지나갔다 — 바로 등 뒤다' : gap < 2.3 ? f.name + '의 팔을 피해 옆으로 빠져나갔다' : f.name + '의 손이 닿기 전에 훌쩍 지나쳐 달렸다';
+    c.target = f.uid;
+    this.finishMove(d, 'dodge', land, how, null, 1);
+    this.commit(d);
   }
   /* 적에게 막히지 않고 갈 수 있는 가장 가까운 엄폐물 */
   reachableCover(c, p) {
@@ -2423,6 +2852,27 @@ class Component extends DCLogic {
       d2.player.hp += heal; d2.player.medkit--;
       this.log(d2, '상처를 동여맸다. 최대 체력의 ' + pct + '% → 체력 +' + heal, 'good');
       this.spendAp(d2, 1); this.commit(d2);
+    } else if (kind === 'badge') {
+      /* 고등계 협력 증표: 관헌이 있으면 바로 끝, 왈패·낭인 등은 확률로 물러남 (공격하기 전에만) */
+      if (!hasItem(p, 'tokko_badge') || c0.attacked) return;
+      var offB = this.alive(c0).some(function (f) { return self.isOfficial(f); });
+      if (offB) {
+        var db = this.draft(), ptsB = this.applyFx(db, { kr: -CERT.badgeKr });
+        this.log(db, '놋쇠 증표를 꺼내 보였다. 관헌이 멈칫하더니 허리를 굽힌다.', 'good');
+        this.endCombat(db, '고등계 증표', '품속에서 놋쇠 증표를 꺼내 손바닥에 올려 보였다. 관헌들의 얼굴이 굳더니, 이내 허리를 굽힌다.\n“실례했습니다. 몰라뵈었습니다.”\n멀찍이서 지켜보던 동네 사람들이 고개를 돌린다.', ptsB.concat(['고등계 협력 증표 사용']));
+        this.commit(db);
+        return;
+      }
+      var chB = this.badgeChance(c0); if (chB == null) return;
+      this.roll('증표', this.tgt(chB * 100), function (d, res) {
+        if (res.success) {
+          var pts2 = self.applyFx(d, { kr: -CERT.badgeKr });
+          self.endCombat(d, '고등계 증표', '놋쇠 증표를 쳐들자 상대들의 낯빛이 변한다. “고, 고등계…?”\n한 놈이 먼저 꽁무니를 빼자 나머지도 뿔뿔이 흩어진다.', pts2.concat(['고등계 협력 증표 사용']));
+        } else {
+          self.log(d, '증표를 쳐들었지만 상대가 코웃음을 친다. “그딴 쇳조각이 무서울 줄 알고?”', 'bad');
+          self.spendAp(d, 1);
+        }
+      });
     } else if (kind === 'plea') {
       if (c0.attacked || !this.isOfficial(e)) return;
       this.roll('무고 주장', this.pleaChance(c0, p, e), function (d, res) {
@@ -2479,11 +2929,12 @@ class Component extends DCLogic {
     var byOfficial = !!ds.combat.official || this.alive(ds.combat).some(function (f) { return OFFICIALS.indexOf(f.id) >= 0; });
     if (!byOfficial) { var lost = Math.ceil(pl.money * TACTIC.surrenderMoney); if (lost) { pl.money -= lost; partsS.push('소지금 -' + lost + '원'); } }
     if (byOfficial) {
-      var conf = carriedGuns(pl).map(function (id) { return WEAPONS[id].name; });
+      /* 총포 소지 허가증으로 지닌 총·탄환은 빼앗기지 않는다 */
+      var conf = carriedGuns(pl).filter(function (id) { return !permittedGun(pl, id); }).map(function (id) { return WEAPONS[id].name; });
       var w2 = Object.assign({}, pl.weapons || {});
-      Object.keys(w2).forEach(function (id) { if (WEAPONS[id] && WEAPONS[id].contraband) { if (WEAPONS[id].slot !== 'gun') conf.push(WEAPONS[id].name); delete w2[id]; } });
+      Object.keys(w2).forEach(function (id) { if (WEAPONS[id] && WEAPONS[id].contraband && !permittedGun(pl, id)) { if (WEAPONS[id].slot !== 'gun') conf.push(WEAPONS[id].name); delete w2[id]; } });
       pl.weapons = w2; pl.equip = this.equipOf(pl); pl.flags.gun = carriedGuns(pl).length > 0;
-      if (pl.ammo) { conf.push('탄환 ' + pl.ammo + '발'); pl.ammo = 0; }
+      if (pl.ammo && !hasItem(pl, 'gun_permit')) { conf.push('탄환 ' + pl.ammo + '발'); pl.ammo = 0; }
       if (conf.length) partsS.push('압수: ' + conf.join(', '));
     }
     partsS = partsS.concat(this.combatHeat(ds, 1)).concat(this.officialHeat(ds));
@@ -2521,14 +2972,22 @@ class Component extends DCLogic {
       if (e.bleed > 0) {
         e.hp -= e.bleedDmg; e.bleed--;
         this.log(d, e.name + '의 상처에서 피가 흐른다. 체력 -' + e.bleedDmg, 'good');
-        if (e.hp <= 0) { this.log(d, e.name + '이(가) 쓰러졌다.', 'good'); continue; }
+        if (e.hp <= 0) { this.log(d, e.name + josaIGa(e.name) + ' 쓰러졌다.', 'good'); continue; }
       }
       /* 태세가 바뀌면 이번 차례 행동도 새로 정한다 */
       if (this.stanceTick(d, e)) e.intent = this.planIntent(c, p, e);
       var it = e.intent || this.planIntent(c, p, e), dist = this.distOf(c, e);
       var reach = T.reach, P = PERSONALITY[e.pers] || PERSONALITY.cautious;
       var self2 = this, sideNow = Math.sign(e.x - c.px) || 1;
-      if (e.stun > 0) {
+      var climbNow = !!e.climb && !e.grabbed && c.held !== e.uid && Math.sign(c.px - e.x) === e.climb.dir;
+      if (e.climb && !climbNow) e.climb = null;
+      if (climbNow) {
+        /* 이동 방해물을 넘는 데 이번 합을 다 쓴다 */
+        e.x = Math.max(c.arena.lo, Math.min(c.arena.hi, e.climb.at + e.climb.dir * 0.4)); e.inCover = false;
+        if (Math.abs(e.x - c.px) < 0.8) e.x = c.px - e.climb.dir * 0.8;
+        this.log(d, e.name + josaIGa(e.name) + ' ' + e.climb.name + josaEulReul(e.climb.name) + ' 넘느라 한 합을 썼다.', 'good');
+        e.climb = null;
+      } else if (e.stun > 0) {
         e.stun--;
         this.log(d, e.name + '은(는) 몸을 가누지 못한다.', 'good');
       } else if (c.held === e.uid && e.mode === 'capture') {
@@ -2543,10 +3002,10 @@ class Component extends DCLogic {
         else this.log(d, e.name + josaIGa(e.name) + ' 붙잡힌 채 버둥거린다.', 'foe');
       } else if (it.type === 'flee') {
         e.out = true; e.fled = true;
-        this.log(d, e.name + '이(가) ' + (e.hp < e.maxHp / 3 ? '피를 흘리며 ' : '') + '등을 돌려 달아났다!', 'good');
+        this.log(d, e.name + josaIGa(e.name) + ' ' + (e.hp < e.maxHp / 3 ? '피를 흘리며 ' : '') + '등을 돌려 달아났다!', 'good');
       } else if (it.type === 'whistle' && c.alarm === null) {
         c.alarm = TACTIC.alarm; e.whistled = true;
-        this.log(d, e.name + '이(가) 호루라기를 분다! 증원이 ' + c.alarm + '합 뒤 도착한다.', 'bad');
+        this.log(d, e.name + josaIGa(e.name) + ' 호루라기를 분다! 증원이 ' + c.alarm + '합 뒤 도착한다.', 'bad');
       } else if (it.type === 'offer') {
         c.offered = true; c.offer = { uid: e.uid };
         this.log(d, e.name + ': “' + this.pick(OFFER_LINES) + '” (다음 합에 항복할 수 있다)', 'foe');
@@ -2556,41 +3015,42 @@ class Component extends DCLogic {
       } else if (it.type === 'retreat') {
         var want = T.style === 'gun' ? T.pref : dist + T.speed;
         e.inCover = false; this.foeMove(c, e, Math.max(want, dist + 2));
-        this.log(d, e.name + '이(가) 뒤로 물러선다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe');
+        this.log(d, e.name + josaIGa(e.name) + ' 뒤로 물러선다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe');
       } else if (it.type === 'grab' && !c.held && dist <= TACTIC.grabReach) {
         this.foeGrab(d, e);
+        if (c.arrestBy === e.uid) { this.arrest(d, e); return; }
       } else if (e.mode === 'capture' && (it.type === 'subdue' || it.type === 'closein' || it.type === 'grab' || it.type === 'bind')) {
         /* 생포: 닿으면 곤봉으로 제압, 아니면 붙잡을 거리까지 다가온다 (이동과 공격은 한 번에 하나) */
         if (it.type === 'subdue' && dist <= T.reach) { this.foeAttack(d, e, true); if (c.arrestBy === e.uid) { this.arrest(d, e); return; } }
-        else { this.foeMove(c, e, TACTIC.grabReach * 0.9); e.inCover = false; this.log(d, e.name + josaIGa(e.name) + ' 포승을 쥐고 다가온다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe'); }
+        else { this.foeMove(c, e, TACTIC.grabReach * 0.9); e.inCover = false; this.log(d, e.name + josaIGa(e.name) + ' 다가온다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe'); }
       } else if (it.type === 'flank' && dist <= T.speed + 2) {
         var nx = c.px - sideNow * 1.2;
-        if (nx >= 0 && nx <= c.arena.len && !this.alive(c).some(function (f) { return f.uid !== e.uid && Math.abs(f.x - nx) < 0.5; })) {
+        if (nx >= c.arena.lo && nx <= c.arena.hi && !this.alive(c).some(function (f) { return f.uid !== e.uid && Math.abs(f.x - nx) < 0.5; })) {
           e.x = nx; e.inCover = false;
-          this.log(d, e.name + '이(가) 옆으로 돌아 반대편으로 파고든다!', 'foe');
-        } else { this.foeMove(c, e, reach); this.log(d, e.name + '이(가) 다가온다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe'); }
+          this.log(d, e.name + josaIGa(e.name) + ' 옆으로 돌아 반대편으로 파고든다!', 'foe');
+        } else { this.foeMove(c, e, reach); this.log(d, e.name + josaIGa(e.name) + ' 다가온다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe'); }
       } else if (it.type === 'blockExit') {
         var nxE = this.nearExit(c, p) || { at: c.px + sideNow * 2, name: '출구' };
         var ex = nxE.at, exSide = Math.sign(ex - c.px) || sideNow, target = c.px + exSide * Math.min(Math.abs(ex - c.px), 1.5);
         var mv = Math.max(-T.speed, Math.min(T.speed, target - e.x));
-        e.x = Math.max(0, Math.min(c.arena.len, e.x + mv)); e.inCover = false;
-        this.log(d, e.name + '이(가) ' + nxE.name + ' 쪽을 막아선다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe');
+        e.x = Math.max(c.arena.lo, Math.min(c.arena.hi, e.x + mv)); e.inCover = false;
+        this.log(d, e.name + josaIGa(e.name) + ' ' + nxE.name + ' 쪽을 막아선다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe');
       } else if (it.type === 'takeCover') {
         var cv = this.foeCoverSpot(c, e);
-        if (cv) { e.x = cv.at; e.inCover = true; this.log(d, e.name + '이(가) ' + cv.name + ' 뒤로 몸을 숨긴다. (내 사격 명중 -' + TACTIC.foeCover + ')', 'foe'); }
+        if (cv) { e.x = cv.at; e.inCover = true; this.log(d, e.name + josaIGa(e.name) + ' ' + cv.name + ' 뒤로 몸을 숨긴다. (내 사격 명중 -' + TACTIC.foeCover + ')', 'foe'); }
         else this.foeAttack(d, e);
       } else if (T.style === 'melee' || e.mode === 'melee') {
         if (dist > reach) {
           var spd = T.speed + (it.type === 'charge' ? 1 : 0);
           var keep = T.speed; T.speed = spd; this.foeMove(c, e, reach); T.speed = keep; e.inCover = false;
-          this.log(d, e.name + '이(가) ' + (it.type === 'charge' ? '달려든다' : '다가온다') + '. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe');
+          this.log(d, e.name + josaIGa(e.name) + ' ' + (it.type === 'charge' ? '달려든다' : '다가온다') + '. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe');
         } else this.foeAttack(d, e);
       } else {
         if (dist <= reach) this.foeAttack(d, e);
-        else if (it.type === 'aim') { e.aim = TACTIC.aim; this.log(d, e.name + '이(가) 숨을 고르며 겨눈다.', 'foe'); }
+        else if (it.type === 'aim') { e.aim = TACTIC.aim; this.log(d, e.name + josaIGa(e.name) + ' 숨을 고르며 겨눈다.', 'foe'); }
         else {
           /* 움직였으면 이번엔 쏘지 않는다 (이동과 공격은 한 번에 하나) */
-          if (Math.abs(dist - T.pref) > 4 && !(e.grabbed > 0) && !e.inCover) { this.foeMove(c, e, T.pref); this.log(d, e.name + '이(가) 자리를 옮긴다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe'); }
+          if (Math.abs(dist - T.pref) > 4 && !(e.grabbed > 0) && !e.inCover) { this.foeMove(c, e, T.pref); this.log(d, e.name + josaIGa(e.name) + ' 자리를 옮긴다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe'); }
           else this.foeAttack(d, e);
         }
       }
@@ -2607,19 +3067,22 @@ class Component extends DCLogic {
         var cnt = this.alive(c).length;
         if (cnt < TACTIC.maxFoes && c.backups < TACTIC.maxBackups) {
           var bid = this.alive(c).some(function (f) { return f.id === 'kenpei'; }) ? 'kenpei' : 'junsa';
-          var edge = Math.abs(c.px - c.arena.len) > Math.abs(c.px - 0) ? c.arena.len : 0;
-          /* 출구 쪽 끝에서 나타나면 퇴로가 막힌다 — 출구에서 먼 쪽을 기본, 1/3 확률로 출구 쪽 */
-          var nxB = this.nearExit(c, p), exitEdge = nxB && nxB.at < c.arena.len / 2 ? 0 : c.arena.len;
-          if (Math.random() < TACTIC.backupFromExit) edge = exitEdge;
+          /* 증원은 나에게서 backupDist m 떨어진 곳에서 나타난다 — 출구 반대쪽이 기본, backupFromExit 확률로 출구 쪽 */
+          var nxB = this.nearExit(c, p), exSide = nxB ? (Math.sign(nxB.at - c.px) || 1) : (Math.random() < 0.5 ? -1 : 1);
+          var bSide = Math.random() < TACTIC.backupFromExit ? exSide : -exSide, BD = ARENA_GEN.backupDist;
+          var edge = Math.round((c.px + bSide * (BD[0] + Math.random() * (BD[1] - BD[0]))) * 10) / 10, exitEdge = bSide === exSide ? edge : null;
           var nf = this.makeFoe(bid, edge, ++c.uidSeq); nf.backup = true;
-          c.foes = c.foes.concat([nf]); c.backups++;
-          this.log(d, '증원 도착! ' + nf.name + '이(가) ' + (edge === exitEdge ? '출구 쪽에서' : '반대편에서') + ' 달려온다.', 'bad');
+          /* 증원 관헌도 생포 태세로 온다 (이미 총성이 났거나 여럿 쓰러졌으면 첫 차례에 바로 포기) */
+          if (this.isOfficial(nf)) { nf.mode = 'capture'; nf.esc = 0; nf.giveUp = this.capGiveUp(); }
+          c.foes = c.foes.concat([nf]); c.backups++; this.ensureArena(c);
+          this.log(d, '증원 도착! ' + nf.name + josaIGa(nf.name) + ' ' + (edge === exitEdge ? '출구 쪽에서' : '반대편에서') + ' 달려온다.', 'bad');
         } else this.log(d, '증원이 더 몰려왔지만 골목이 비좁아 들어오지 못한다.', 'sys');
       }
     }
     if (this.checkFoes(d)) return;
     if (c.held) c.heldTurns = (c.heldTurns || 0) + 1; else c.heldTurns = 0;
     Object.keys(c.cd).forEach(function (k) { if (c.cd[k] > 0) c.cd[k]--; });
+    this.obstacleTick(d);
     c.round++; c.crouch = false;
     c.shaken = c.shakenNext ? TACTIC.shaken : 0; c.shakenNext = false;
     this.planAll(c, p);
@@ -3057,7 +3520,14 @@ class Component extends DCLogic {
     var s = this.state;
     return !!s.player && !s.rolling && !s.qte && ['loc', 'event', 'outcome'].indexOf(s.screen) >= 0;
   }
-  openInventory() { if (!this.canOpenInventory()) return; this.setState({ screen: 'inventory', invReturn: this.state.screen, invMsg: '' }); }
+  openInventory(tab) { if (!this.canOpenInventory()) return; this.setState({ screen: 'inventory', invTab: tab === 'skills' ? 'skills' : 'items', invReturn: this.state.screen, invMsg: '' }); }
+  setInvTab(tab) { this.setState({ invTab: tab, invMsg: '' }); }
+  /* 소지품 · 기술 · 행동 화면 사이 전환 (돌아갈 곳은 그대로) */
+  menuTab(tab) {
+    var s = this.state; if (['inventory', 'places'].indexOf(s.screen) < 0) return;
+    if (tab === 'act') this.setState({ screen: 'places' });
+    else this.setState({ screen: 'inventory', invTab: tab, invMsg: '' });
+  }
   closeInventory() { this.setState({ screen: this.state.invReturn || 'loc', invMsg: '' }); }
   /* 기술 카드: 가진 개수보다 덜 장착했고 칸이 남으면 하나 더 챙기고, 아니면 하나를 내려놓는다 */
   toggleSkill(id) {
@@ -3085,7 +3555,7 @@ class Component extends DCLogic {
   }
   inventoryVals() {
     var self = this, s = this.state, p = s.player;
-    var empty = { items: [], weapons: [], slots: [], groups: [], slotText: '', baseText: '', noSkills: false, msg: '', msgColor: '#5B5246' };
+    var empty = { items: [], docs: [], hasDocs: false, weapons: [], slots: [], groups: [], slotText: '', baseText: '', noSkills: false, msg: '', msgColor: '#5B5246' };
     if (s.screen !== 'inventory' || !p) return empty;
     var known = this.knownSkills(p), lo = this.loadoutOf(p);
     var slots = [];
@@ -3132,7 +3602,13 @@ class Component extends DCLogic {
       { label: '탄환', value: (p.ammo || 0) + '발' },
       { label: '구급약', value: (p.medkit || 0) + '개' }
     ];
-    return { items: items, weapons: weapons, slots: slots, groups: groups, slotText: lo.length + ' / ' + SKILL_SLOTS,
+    /* 증명서·물건 (ITEMS) */
+    var docs = Object.keys(p.items || {}).filter(function (id) { return p.items[id] && ITEMS[id]; }).map(function (id) {
+      var it = ITEMS[id]; return { name: it.name + (p.items[id] > 1 ? ' ×' + p.items[id] : ''), desc: it.desc, effect: it.effect, kind: it.kind === 'doc' ? '증명서' : '물건' };
+    }).concat(Object.keys(p.pending || {}).filter(function (id) { return ITEMS[id]; }).map(function (id) {
+      return { name: ITEMS[id].name, desc: '대서소에 신청해 둔 서류. 관청이 받아 줄지는 아직 모른다.', effect: '결과를 기다리는 중 · 몇 주 뒤 기별이 온다', kind: '신청 중' };
+    }));
+    return { items: items, docs: docs, hasDocs: docs.length > 0, noDocs: !docs.length, weapons: weapons, slots: slots, groups: groups, slotText: lo.length + ' / ' + SKILL_SLOTS,
       baseText: DEFAULT_SKILLS.map(function (id) { return SKILLS[id].name; }).join(' · '),
       noSkills: !groups.length,
       msg: s.invMsg || (groups.length ? '익힌 기술 중 ' + SKILL_SLOTS + '개까지 골라 가져갈 수 있다.' : '아직 익힌 기술이 없다. 전투에서 이기면 하나씩 얻는다.'), msgColor: s.invOk === false ? '#9E2B20' : '#3F5E2F' };
@@ -3404,8 +3880,14 @@ class Component extends DCLogic {
                 + (lk ? ' · 들켜도 못 본 척 ' + Math.round(lk * 100) + '%' : '') + (fr ? ' · 누명 ' + Math.round(fr * 100) + '%' : ''));
           } else if (o.bribe) {
             tag.push(showOdds ? '먹힐 확률 ' + Math.round(self.bribeChance(p) * 100) + '% · 안 먹히면 돈만 잃고 싸움' : '안 먹히면 돈만 잃고 싸움');
+          } else if (o.apply && ISSUE[o.apply]) {
+            var IS = ISSUE[o.apply];
+            tag.push('결과는 ' + (showOdds ? (IS.weeks - IS.spread) + '~' + (IS.weeks + IS.spread) + '주 뒤' : '약 ' + IS.weeks + '주 뒤') + ' · ' + (IS.auto && self.condOk(p, IS.auto, s) ? '판정 없이 발급' : STAT_LABEL[IS.stat] + ' 판정' + (showOdds ? ' ' + self.tgt(diffTarget(p[IS.stat], IS.diff)) + '%' : '') + ' · 실패하면 수수료만 날림'));
+          } else if (o.cert === 'residence') {
+            tag.push(showOdds ? '통할 확률 ' + Math.round(CERT.residencePass * 100) + '% · 안 통하면 몸수색 (놓칠 확률 +' + Math.round(CERT.residenceMiss * 100) + '%)' : '안 통하면 몸수색');
           } else if (!o.check && !o.cost) tag.push(o.ok && o.ok.fight ? '전투 발생' : '판정 없음');
-          return { label: o.label, tag: tag.join(' · '), hasChance: hasChance, chanceText: chanceText, tagColor: /전투|발각/.test(tag.join(' ')) ? KIND_COLOR.fight : '#5B5246', num: ['一', '二', '三', '四', '五', '六', '七'][i] || String(i + 1), disabled: rolling || lacking, choose: function () { self.choose(i); } };
+          var why = self.optReason(o, p);
+          return { label: o.label, tag: tag.join(' · '), why: why, hasWhy: !!why, hasChance: hasChance, chanceText: chanceText, tagColor: /전투|발각/.test(tag.join(' ')) ? KIND_COLOR.fight : '#5B5246', num: ['一', '二', '三', '四', '五', '六', '七'][i] || String(i + 1), disabled: rolling || lacking, choose: function () { self.choose(i); } };
         }) };
     }
 
@@ -3458,7 +3940,7 @@ class Component extends DCLogic {
       }).filter(function (g) { return g.skills.length; });
       var status = [];
       /* 적의 태세(생포·근접·사격)는 내부 상태라 숨긴다 (showOdds 를 켜면 보임) */
-      if (e.mode && showOdds) status.push({ tipIn: tipH('stance').in, tipTap: tipH('stance').tap, text: '태세 · ' + STANCE.label[e.mode] + ' — ' + STANCE.text[e.mode] + (showOdds && e.mode === 'capture' ? ' (격화 ' + Math.round(e.esc || 0) + '%)' : '') });
+      if (e.mode && showOdds) status.push({ tipIn: tipH('stance').in, tipTap: tipH('stance').tap, text: '태세 · ' + STANCE.label[e.mode] + ' — ' + STANCE.text[e.mode] + (showOdds && e.mode === 'capture' ? ' (총을 쏘거나 ' + (e.giveUp || STANCE.giveUp[0]) + '명 쓰러지면 포기 · 지금 ' + this.downsOf(cmb) + '명)' : '') });
       if (e.stun > 0) status.push({ tipIn: tipH('stun').in, tipTap: tipH('stun').tap, text: (e.prone ? '넘어짐' : '기절') + ' ' + e.stun + '합' });
       if (e.prone) status.push({ tipIn: tipH('prone').in, tipTap: tipH('prone').tap, text: '빈틈 · 다음 공격 명중 +20' });
       if (e.inCover) status.push({ tipIn: tipH('foeCover').in, tipTap: tipH('foeCover').tap, text: '엄폐 중 · 내 사격 명중 -' + TACTIC.foeCover + ' · 근접 공격으로 끌어낼 수 있다' });
@@ -3475,9 +3957,13 @@ class Component extends DCLogic {
         { label: '구급약', tag: '최대 체력의 (2d6×5)% · 남은 ' + p.medkit + '개 · 행동력 1', k: 'medkit', hide: p.medkit < 1 || p.hp >= p.maxHp, off: false }
       ];
       var nAlive = this.alive(cmb).length;
+      if (hasItem(p, 'tokko_badge') && !cmb.attacked) {
+        var offA = this.alive(cmb).some(function (f) { return self.isOfficial(f); }), bch = offA ? 1 : this.badgeChance(cmb);
+        if (bch != null) acts.push({ label: '고등계 증표를 내보인다', tag: (offA ? '관헌이 물러난다' : (showOdds ? '확률 ' + Math.round(bch * 100) + '%' : '겁먹으면') + ' 상대가 흩어진다') + ' · 전투 종료 · 동포의 눈총 · 행동력 1', t: offA ? undefined : this.tgt(bch * 100), k: 'badge', hide: false, off: false });
+      }
       if (!cmb.attacked && this.isOfficial(e)) acts.push({ label: '무고를 주장한다', tag: (showOdds ? '지능 ' + p.int + ' ' + ((PLEA.foe[e.id] || 0) >= 0 ? '+' : '') + (PLEA.foe[e.id] || 0) + (cmb.pleaFails ? ' − 실패 ' + cmb.pleaFails + '번' : '') : '지능 판정') + ' · 성공 시 전투 없이 풀려남 · 행동력 ' + PLEA.ap, t: this.pleaChance(cmb, p, e), k: 'plea' });
       if (cmb.attacked) acts.push({ label: '항복 요구', tag: (showOdds ? '근력·지능 보정 ' + (this.demandStat(p) >= 0 ? '+' : '') + Math.round(this.demandStat(p)) + ' · ' : '근력·지능 + ') + '상처·사기·총·동료 수에 따라 무작위 · 성공 시 ' + e.name + josaIGa(e.name) + ' 무기를 버림 · 행동력 ' + DEMAND.ap, t: this.demandChance(cmb, p, e), k: 'demand' });
-      if (e.talk !== undefined && !cmb.attacked) acts.push({ label: '설득', tag: (showOdds ? '지능 ' + p.int + ' ' + (e.talk >= 0 ? '+' : '') + e.talk + (nAlive > 1 ? ' − 머릿수' : '') : '지능 판정') + ' · 성공 시 ' + (nAlive > 1 ? e.name + '이(가) 물러남' : '전투 종료') + ' · 행동력 2', t: this.tgt(p.int + e.talk - (e.backup ? 20 : 0) - (nAlive - 1) * 10 + this.talkAlign(p, e)), k: 'talk', off: cmb.ap < 2 });
+      if (e.talk !== undefined && !cmb.attacked) acts.push({ label: '설득', tag: (showOdds ? '지능 ' + p.int + ' ' + (e.talk >= 0 ? '+' : '') + e.talk + (nAlive > 1 ? ' − 머릿수' : '') : '지능 판정') + ' · 성공 시 ' + (nAlive > 1 ? e.name + josaIGa(e.name) + ' 물러남' : '전투 종료') + ' · 행동력 2', t: this.tgt(p.int + e.talk - (e.backup ? 20 : 0) - (nAlive - 1) * 10 + this.talkAlign(p, e)), k: 'talk', off: cmb.ap < 2 });
 
       var step = this.stepOf(p), dist0 = this.distOf(cmb), ncv = this.reachableCover(cmb, p);
       var limL = this.moveLimit(cmb, -1), limR = this.moveLimit(cmb, 1);
@@ -3486,11 +3972,19 @@ class Component extends DCLogic {
       var tdir = Math.sign(e.x - cmb.px) || 1, inLim = tdir > 0 ? limR - cmb.px : cmb.px - limL, outLim = tdir > 0 ? cmb.px - limL : limR - cmb.px;
       var behind = this.alive(cmb).filter(function (f) { return Math.sign(f.x - cmb.px) === -tdir; });
       var arrowIn = tdir > 0 ? '→' : '←', arrowOut = tdir > 0 ? '←' : '→';
+      /* 가는 길에 이동 방해물이 있으면 표시 */
+      var hdNote = function (goal) { var h = self.hurdleBetween(cmb, cmb.px, goal); return h ? ' · ' + h.name + ' 넘기(' + STAT_LABEL[h.stat] + (showOdds ? ' ' + Math.round(self.hurdleChance(p, h)) + '%' : '') + ')' : ''; };
+      var goIn = cmb.px + tdir * Math.min(step, inLim), goOut = cmb.px - tdir * Math.min(step, outLim);
+      /* 피해 가기: 양쪽 중 막아선 적이 있는 쪽 */
+      var dodges = [1, -1].map(function (dd) {
+        var df = self.dodgeFoe(cmb, p, dd); if (!df) return null;
+        return { label: '피해 가기 ' + (dd > 0 ? '→' : '←'), tip: 'move:dodge', short: df.name + ' 뒤로 · 거리는 운', tag: df.name + '을(를) 지나쳐 그 뒤로 · 떨어지는 거리 무작위(민첩·근력) · 행동력 1', k: 'dodge:' + dd, off: false };
+      }).filter(Boolean);
       var moves = [
-        { label: '다가가기 ' + arrowIn, short: Math.min(step, inLim).toFixed(1) + 'm · ' + e.name + ' 쪽', tag: Math.min(step, inLim).toFixed(1) + 'm · 표적 ' + e.name + ' 쪽 · 행동력 1', k: 'in', hide: inLim < 0.05, off: false },
-        { label: '물러나기 ' + arrowOut, short: Math.min(step, outLim).toFixed(1) + 'm' + (behind.length ? ' · 뒤에 적' : ''), tag: Math.min(step, outLim).toFixed(1) + 'm' + (behind.length ? ' · 그쪽에 ' + behind.map(function (f) { return f.name; }).join('·') + ' 있음' : '') + ' · 행동력 1', k: 'out', hide: outLim < 0.05, off: false },
+        { label: '다가가기 ' + arrowIn, short: '약 ' + Math.min(step, inLim).toFixed(1) + 'm · ' + e.name + ' 쪽' + hdNote(goIn), tag: Math.min(step, inLim).toFixed(1) + 'm · 표적 ' + e.name + ' 쪽 · 행동력 1', k: 'in', hide: inLim < 0.05, off: false },
+        { label: '물러나기 ' + arrowOut, short: '약 ' + Math.min(step, outLim).toFixed(1) + 'm' + (behind.length ? ' · 뒤에 적' : '') + hdNote(goOut), tag: Math.min(step, outLim).toFixed(1) + 'm' + (behind.length ? ' · 그쪽에 ' + behind.map(function (f) { return f.name; }).join('·') + ' 있음' : '') + ' · 행동력 1', k: 'out', hide: outLim < 0.05, off: false },
         { label: ncv ? ncv.name + '(으)로' : '엄폐물로', short: ncv ? this.fmtM(ncv.at - cmb.px) + (cvCost > 1 ? ' · ' + cvCost + '번' : '') : '', tag: ncv ? this.fmtM(ncv.at - cmb.px) + ' · 행동력 1에 ' + step.toFixed(1) + 'm씩' + (cvCost > 1 ? ' (' + cvCost + '번)' : '') : '', k: 'cover', hide: !ncv, off: false },
-      ].concat(cmb.arena.exits.map(function (x, i) {
+      ].concat(dodges).concat(cmb.arena.exits.map(function (x, i) {
         var pc = self.pathCost(cmb, p, x.at), ar = x.at < cmb.px ? '←' : '→';
         return { label: x.name + '(으)로 도주 ' + ar, tip: 'move:exit',
           short: pc.blocked ? '적이 막고 있다' : self.fmtM(x.at - cmb.px) + (pc.cost > 1 ? ' · ' + pc.cost + '번' : '') + ' · 닿으면 탈출',
@@ -3503,7 +3997,7 @@ class Component extends DCLogic {
           hit: showOdds ? (Math.round(self.enemyHitChance(cmb, p, f) * 10) / 10) + '%' : '',
           on: on, border: on ? '#E3B04B' : '#4A443A', btn: on ? '표적' : '표적으로', pick: guard('foe:' + f.uid, function () { self.setTarget(f.uid); }), tipIn: tipH('foe:' + f.uid).in };
       });
-      var LEN = cmb.arena.len, pct = function (x) { return Math.max(0, Math.min(100, x / LEN * 100)); };
+      var LO = cmb.arena.lo != null ? cmb.arena.lo : 0, LEN = cmb.arena.hi != null ? cmb.arena.hi : cmb.arena.len, pct = function (x) { return Math.max(0, Math.min(100, (x - LO) / (LEN - LO) * 100)); };
       /* 카메라: 나와 표적을 함께 비춘다 */
       var V = FIELD_VIEW, me = cmb.px, tx = e.x, span = Math.abs(tx - me) + 2 * V.pad;
       var vw = Math.max(V.min, Math.min(V.max, span));
@@ -3523,10 +4017,10 @@ class Component extends DCLogic {
         else (x.at < vl ? offL : offR).push({ text: (x.at < vl ? '◀ ' : '') + x.name + ' ' + self.fmtM(x.at - me) + (x.at < vl ? '' : ' ▶'), bg: '#3F5E2F', fg: '#F6EFDF', pick: tipH('exit').tap, tipIn: tipH('exit').in, isFoe: false });
       });
       var walls = [];
-      if (vl < 0) walls.push({ l: 0, w: Math.min(100, VP(0)) });
+      if (vl < LO) walls.push({ l: 0, w: Math.min(100, VP(LO)) });
       if (vr > LEN) walls.push({ l: Math.max(0, VP(LEN)), w: 100 - Math.max(0, VP(LEN)) });
       var vticks = [];
-      for (var kk = Math.ceil((vl - me) / V.tick); kk <= Math.floor((vr - me) / V.tick); kk++) { if (!kk) continue; var xx = me + kk * V.tick; if (xx < 0 || xx > LEN) continue; vticks.push({ l: VP(xx), t: Math.abs(kk * V.tick) + 'm' }); }
+      for (var kk = Math.ceil((vl - me) / V.tick); kk <= Math.floor((vr - me) / V.tick); kk++) { if (!kk) continue; var xx = me + kk * V.tick; if (xx < LO || xx > LEN) continue; vticks.push({ l: VP(xx), t: Math.abs(kk * V.tick) + 'm' }); }
       var dA = Math.max(vl, Math.min(me, tx)), dB = Math.min(vr, Math.max(me, tx));
       var field = {
         name: cmb.arena.name, dist: this.fmtM(dist0), px: pct(cmb.px),
@@ -3535,8 +4029,9 @@ class Component extends DCLogic {
         vMe: VP(me), vFoes: viewFoes, offL: offL, offR: offR, hasOffL: offL.length > 0, hasOffR: offR.length > 0, walls: walls, vTicks: vticks,
         vExits: vExits,
         vCovers: cmb.arena.covers.filter(function (cv) { return inView(cv.at); }).map(function (cv) { var tk = tipH(cv.obscure ? 'coverVeil' : 'cover');
-          return { l: VP(cv.at), name: cv.name, h: cv.obscure ? 46 : 30, top: cv.obscure ? 72 : 56, bg: cv.obscure ? 'repeating-linear-gradient(135deg, #8A7E6A 0 5px, #6F6555 5px 9px)' : '#8A7E6A', tin: tk.in, ttap: tk.tap }; }),
-        vVeils: (cmb.arena.veils || []).filter(function (v) { return inView(v.at); }).map(function (v) { var tk = tipH('veil'); return { l: VP(v.at), name: v.name, tin: tk.in, ttap: tk.tap }; }),
+          return { l: VP(cv.at), name: cv.name + (cv.temp ? ' ·잠시' + (showOdds ? ' ' + cv.ttl + '합' : '') : ''), h: cv.obscure ? 46 : 30, top: cv.obscure ? 72 : 56, bg: cv.obscure ? 'repeating-linear-gradient(135deg, #8A7E6A 0 5px, #6F6555 5px 9px)' : '#8A7E6A', tin: tk.in, ttap: tk.tap }; }),
+        vHurdles: (cmb.arena.hurdles || []).filter(function (h) { return inView(h.at); }).map(function (h) { var tk = tipH('hurdle'); return { l: VP(h.at), name: h.sub ? '' : h.name + (h.temp ? ' ·잠시' + (showOdds ? ' ' + h.ttl + '합' : '') : ''), stat: (h.sub ? '넘기 ' : '') + STAT_LABEL[h.stat] + (showOdds ? ' ' + Math.round(self.hurdleChance(p, h)) + '%' : ''), tin: tk.in, ttap: tk.tap }; }),
+        vVeils: (cmb.arena.veils || []).filter(function (v) { return inView(v.at); }).map(function (v) { var tk = tipH(v.temp ? 'temp' : 'veil'); return { l: VP(v.at), name: v.name + (v.temp ? ' ·잠시' + (showOdds ? ' ' + v.ttl + '합' : '') : ''), tin: tk.in, ttap: tk.tap }; }),
         veilOn: self.veilPen(cmb, cmb.px, e.x) > 0, veilText: '시야 방해 · 서로 명중 -' + self.veilPen(cmb, cmb.px, e.x),
         vDistL: VP(dA), vDistW: Math.max(0, VP(dB) - VP(dA)), vDistC: (VP(dA) + VP(dB)) / 2, vDistOn: Math.abs(tx - me) >= 1,
         feedMine: (cmb.feed || []).slice(0, cmb.feedSplit >= 0 ? cmb.feedSplit : (cmb.feed || []).length).slice(-4).map(function (l) { return { text: l.text, color: LOG_STYLE[l.kind] || '#5B5246' }; }),
@@ -3546,7 +4041,7 @@ class Component extends DCLogic {
         freeOn: !!cmb.free, freeText: cmb.free ? '선제 · 무료 행동 ' + cmb.free : '',
         crowd: cmb.arena.crowd,
         covers: cmb.arena.covers.map(function (cv) { return { l: pct(cv.at), name: cv.name }; }),
-        ticks: [0, 5, 10, 15, 20, 25, 30].filter(function (m) { return m <= LEN; }).map(function (m) { return { l: pct(m), t: m + 'm' }; }),
+        ticks: [],
         ap: Array.apply(null, Array(cmb.free || 0)).map(function () { return { bg: '#E3B04B' }; }), apText: cmb.free ? '선제 · 무료 행동 ' + cmb.free : cmb.round + '합째',
         attacksText: '행동력 1 = 적이 한 번 움직인다',
         coverText: cmb.inCover ? '엄폐 중 · ' + (cmb.coverSide > 0 ? '오른쪽' : '왼쪽') + ' 막음 (-' + TACTIC.cover + '%)' : '',
@@ -3568,14 +4063,14 @@ class Component extends DCLogic {
       cbv = { name: e.name, title: e.title, desc: e.desc, hp: Math.max(0, e.hp), maxHp: e.maxHp,
         tabs: tabs, tabSkill: tabNow === 'skill', tabMove: tabNow === 'move', tabAct: tabNow === 'act', noActions: !nAct,
         detail: !!s.cbDetail, detailText: s.cbDetail ? '간단히' : '자세히', toggleDetail: function () { self.setState({ cbDetail: !self.state.cbDetail }); },
-        stepText: '한 걸음 ' + step.toFixed(1) + 'm',
+        stepText: '한 걸음 약 ' + step.toFixed(1) + 'm (조금씩 달라진다)',
         hpPct: Math.max(0, Math.round(e.hp / e.maxHp * 100)), round: s.combat.round, guard: false,
         groups: groups, status: status, hasStatus: status.length > 0, noSkills: !groups.length,
         field: field,
         statLine: (showOdds ? '명중률 ' + e.hit + '% · 회피 ' + e.evade + ' · ' : '') + '피해 ' + this.specLabel(e.dmg) + ' · ' + (e.t.style === 'gun' ? '총 · 선호 거리 ' + e.t.pref + 'm' : '근접 · ' + e.t.reach + 'm'),
         actions: acts.filter(function (a) { return !a.hide; }).map(function (a) {
           var has = showOdds && a.t !== undefined;
-          var apm = /행동력 (\d)/.exec(a.tag || ''); var short = a.k === 'surrender' ? '전투 종료 · ' + a.tag.split(' · ')[0] : (a.k === 'talk' || a.k === 'plea' ? '지능 판정 · ' : a.k === 'demand' ? '근력·지능 + 운 · ' : a.k === 'break' ? '근력 판정 · ' : a.k === 'medkit' ? '체력 회복 · ' : a.k === 'cover' ? '적 명중 -' + TACTIC.cover + '% · ' : '') + (apm ? '행동력 ' + apm[1] : '');
+          var apm = /행동력 (\d)/.exec(a.tag || ''); var short = a.k === 'surrender' ? '전투 종료 · ' + a.tag.split(' · ')[0] : (a.k === 'badge' ? '증표 · 전투 종료 · ' : a.k === 'talk' || a.k === 'plea' ? '지능 판정 · ' : a.k === 'demand' ? '근력·지능 + 운 · ' : a.k === 'break' ? '근력 판정 · ' : a.k === 'medkit' ? '체력 회복 · ' : a.k === 'cover' ? '적 명중 -' + TACTIC.cover + '% · ' : '') + (apm ? '행동력 ' + apm[1] : '');
           return { label: a.label, short: short, tag: a.tag, hasChance: has, chanceText: has ? odds(a.t) : '', disabled: (rolling || !!s.qte || !!a.off) && !s.infoMode, choose: guard('act:' + a.k, function () { self.act(a.k); }), tipIn: tipH('act:' + a.k).in };
         }) };
     }
@@ -3593,7 +4088,23 @@ class Component extends DCLogic {
     }
 
     var en = ENDINGS[s.ending] || { kicker: '', title: '', text: '' };
-    var endv = { kicker: en.kicker, title: en.title, text: en.text,
+    var meta0 = s.screen === 'origin' || s.screen === 'end' ? loadMeta() : { tokens: {} }, sc = s.scoreInfo;
+    var tokKeys = Object.keys(meta0.tokens || {}).filter(function (k) { return meta0.tokens[k] > 0; });
+    var tokLine = tokKeys.length ? '태생 선택권 — ' + tokKeys.map(function (k) { return self.stageLabel(k) + ' ' + meta0.tokens[k] + '장'; }).join(' · ') + ' (각 단계 칸의 ‘골라 바꾸기’로 쓴다)' : '';
+    /* 선택권 고르기 창 */
+    var pickRow = s.pickSlot != null ? (s.bg || []).filter(function (r) { return r.slot === s.pickSlot; })[0] : null;
+    var pickStage = pickRow ? (s.life || LIFE_STAGES).filter(function (x) { return x.id === pickRow.stage; })[0] : null;
+    var pickList = pickStage ? pickStage.table.slice().sort(function (a, b) { return a.max - b.max; }).map(function (e, i) {
+      var mods = Object.keys(e.mod || {}).map(function (k) { return STAT_LABEL[k] + ' ' + (e.mod[k] > 0 ? '+' : '') + e.mod[k]; })
+        .concat(Object.keys(e.fx || {}).map(function (k) { return (FX_LABEL[k] || k) + ' ' + (e.fx[k] > 0 ? '+' : '') + e.fx[k] + (k === 'money' ? '원' : ''); })).join(' · ');
+      var tr = traitWords([pickStage.id + ':' + (e.id || '')].concat(e.tags || []).concat(e.flag ? [e.flag] : []));
+      var cur = pickRow.name === e.name;
+      return { name: e.name + (e.special ? ' · 특별' : '') + (cur ? ' (지금)' : ''), desc: e.desc || '', mods: mods || '변화 없음', traits: tr.join(' · '), hasTraits: tr.length > 0, cur: cur, bg: cur ? '#E8DCC2' : '#FBF7EE', choose: function () { self.applyPick(s.pickSlot, i); } };
+    }) : [];
+    var endv = { kicker: en.kicker, title: en.title, text: en.text, hasScore: !!sc, total: sc ? sc.total + '점' : '',
+      parts: sc ? sc.parts.filter(function (x) { return x.n; }).map(function (x) { return { label: SCORE.label[x.k], n: x.n + SCORE.unit[x.k], pts: x.pts }; }) : [],
+      gotText: sc ? (sc.got.length ? '태생 선택권 ' + sc.got.length + '장을 얻었다 — ' + sc.got.map(function (g) { return self.stageLabel(g); }).join(' · ') : '이번 삶으로는 선택권을 얻지 못했다') + (sc.best ? ' · 최고 점수!' : '') : '',
+      nextText: sc ? (sc.next ? '다음 선택권까지 ' + (sc.next - sc.total) + '점 · ' : '') + '최고 점수 ' + sc.bestScore + '점 · 선택권은 다음 삶의 태생 화면에서 쓴다' : '',
       stat: p && s.ending ? cityDef(p.city).name + '에서 ' + p.daysLived + '주를 살아냈다 · 마지막 주 ' + this.dateLabel(s.date) : '' };
 
     return {
@@ -3623,9 +4134,18 @@ class Component extends DCLogic {
       isCombat: s.screen === 'combat', isEnd: s.screen === 'end', isOrigin: s.screen === 'origin',
       isInventory: s.screen === 'inventory', inv: this.inventoryVals(),
       isPlaces: s.screen === 'places', places: this.placesVals(), openPlaces: function () { self.openPlaces(); }, closePlaces: function () { self.closePlaces(); },
-      invLocked: !this.canOpenInventory(), openInventory: function () { self.openInventory(); }, closeInventory: function () { self.closeInventory(); },
+      invLocked: !this.canOpenInventory(), openInventory: function () { self.openInventory('items'); }, openSkills: function () { self.openInventory('skills'); },
+      invTabItems: s.invTab !== 'skills', invTabSkills: s.invTab === 'skills',
+      showMenuBtns: ['inventory', 'places'].indexOf(s.screen) < 0,
+      tabItemsOn: s.screen === 'inventory' && s.invTab !== 'skills', tabSkillsOn: s.screen === 'inventory' && s.invTab === 'skills', tabActOn: s.screen === 'places',
+      tabItemsBg: s.screen === 'inventory' && s.invTab !== 'skills' ? '#1E1B16' : '#FBF7EE', tabItemsFg: s.screen === 'inventory' && s.invTab !== 'skills' ? '#F6EFDF' : '#1E1B16',
+      tabSkillsBg: s.screen === 'inventory' && s.invTab === 'skills' ? '#1E1B16' : '#FBF7EE', tabSkillsFg: s.screen === 'inventory' && s.invTab === 'skills' ? '#F6EFDF' : '#1E1B16',
+      tabActBg: s.screen === 'places' ? '#1E1B16' : '#FBF7EE', tabActFg: s.screen === 'places' ? '#F6EFDF' : '#1E1B16',
+      tabItemsGo: function () { self.menuTab('items'); }, tabSkillsGo: function () { self.menuTab('skills'); }, tabActGo: function () { self.menuTab('act'); },
+      invKicker: s.invTab === 'skills' ? '기술' : '소지품', invTitle: s.invTab === 'skills' ? '무엇을 익혀 나설 것인가' : '무엇을 지니고 나설 것인가', closeInventory: function () { self.closeInventory(); },
       /* 태그는 내부 판단용이라 숨긴다 (Tweaks 의 showOdds 를 켜면 제작 확인용으로 보임) */
-      bgRows: (s.bg || []).map(function (b) { return Object.assign({}, b, { showTag: !!(self.props.showOdds ?? false) && !!b.tagText, color: b.mods === '변화 없음' ? '#5B5246' : b.mods.indexOf('-') >= 0 ? (b.mods.indexOf('+') >= 0 ? '#7A5A12' : '#9E2B20') : '#3F5E2F' }); }),
+      bgRows: (s.bg || []).map(function (b) { var tk = (meta0.tokens || {})[b.stage] || 0; return Object.assign({}, b, {
+        canPick: b.slot != null && b.slot < SEED_OVR && tk > 0, tokN: tk, pickTip: self.stageLabel(b.stage) + ' 선택권으로 이 칸의 항목을 직접 고른다', pick: function () { self.openPick(b.slot); }, hasTraits: !!(b.traits && b.traits.length), traitText: (b.traits || []).join(' · '), showTag: !!(self.props.showOdds ?? false) && !!b.tagText, color: b.mods === '변화 없음' ? '#5B5246' : b.mods.indexOf('-') >= 0 ? (b.mods.indexOf('+') >= 0 ? '#7A5A12' : '#9E2B20') : '#3F5E2F' }); }),
       beginLife: function () { self.askName(); },
       nameOpen: !!s.nameOpen, nameDraft: s.nameDraft || '', nameMax: NAME_MAX,
       nameChange: function (ev) { self.setState({ nameDraft: String(ev && ev.target ? ev.target.value : '').slice(0, NAME_MAX) }); },
@@ -3635,11 +4155,13 @@ class Component extends DCLogic {
       rerollWarnOn: !!(s.rerollWarn && s.rerollWarn.length) && s.screen === 'origin',
       rerollWarnText: (s.rerollWarn || []).map(function (k) { return STAT_LABEL[k] + ' ' + STAT_MAX + '%'; }).join(' · '),
       rerollWarnMax: STAT_MAX,
+      tokLine: tokLine, pickOn: !!pickRow, pickTitle: pickRow ? pickRow.label + ' — 무엇으로 바꿀까' : '', pickNow: pickRow ? pickRow.name : '', pickTok: pickRow ? ((meta0.tokens || {})[pickRow.stage] || 0) : 0,
+      pickList: pickList, pickClose: function () { self.closePick(); },
       rerollConfirm: function () { self.reroll(true); },
       rerollCancel: function () { self.setState({ rerollWarn: null }); },
       toTitle: function () { self.toTitle(); },
       seedText: s.seed ? seedLabel(s.seed) : '—', seedDraft: s.seedDraft || '', seedMsg: s.seedMsg || '', seedMsgOn: !!s.seedMsg,
-      seedChange: function (ev) { self.setState({ seedDraft: String(ev && ev.target ? ev.target.value : '').slice(0, 30) }); },
+      seedChange: function (ev) { self.setState({ seedDraft: String(ev && ev.target ? ev.target.value : '').slice(0, 48) }); },
       seedKey: function (ev) { if (ev && ev.key === 'Enter') { self.rerollSeed(ev.target && ev.target.value); } },
       rerollSeed: function () { self.rerollSeed(); },
       copySeed: function () {

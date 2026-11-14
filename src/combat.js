@@ -142,15 +142,60 @@ var FIELD_VIEW = { min: 14, max: 24, pad: 3, tick: 5 };
    len: 기준 길이에 더하는 범위 [최소, 최대] · minLen/maxLen: 길이 한계 (적·출구가 다 들어가지 않으면 늘린다)
    covers·exits: 개수를 이 목록에서 무작위로 (같은 수가 많을수록 잘 나온다)
    exitGap: 출구끼리 최소 거리 · exitNear~exitFar: 두 번째 출구부터 나와의 거리 · coverGap: 엄폐물끼리 · coverNear: 나와 엄폐물 최소 거리 */
-var ARENA_GEN = { len: [-4, 6], minLen: 20, maxLen: 40,
-  covers: [1, 2, 2, 2, 3, 3, 4], exits: [1, 1, 2, 2, 2, 3],
-  exitGap: 4, exitNear: 3, exitFar: 15, coverGap: 3, coverNear: 2,
+/* 끝없는 전장: 처음엔 나를 중심으로 ±startSpan m 를 만들고, 누군가 끝에서 margin m 안으로 오면 chunk m 씩 더 만든다.
+   한번 만든 곳은 그대로 기억한다. chunk 마다: 엄폐물 cCovers · 시야 cVeils · 이동 방해 cHurdles · 겹친 방해물 cCombo 확률 · 출구 cExit 확률
+   출구끼리는 exitGap(30m) 안에 붙어 있을 수 없다 */
+var ARENA_GEN = { len: [-4, 6], minLen: 20, startSpan: 40, margin: 30, chunk: 20,
+  cCovers: [0, 1, 1, 2], cVeils: [0, 0, 1], cHurdles: [0, 0, 1], cCombo: 0.35, cExit: 0.55, backupDist: [12, 16],
+  covers: [1, 2, 2, 2, 3, 3, 4], exits: [1], /* 시작 때는 출구 하나 — 나머지는 전장을 만들어 가며 30m 이상 떨어진 곳에 */
+  exitGap: 30, exitNear: 30, exitFar: 45, coverGap: 3, coverNear: 2,
   surroundGap: 0.4, /* 포위됐을 때 한쪽 적보다 안쪽에 샛길이 하나 더 생길 확률 */
   veils: [0, 1, 1, 1, 2, 2], veilGap: 2, /* 시야 방해물 개수 · 서로·출구·엄폐물과 최소 거리 */
+  hurdles: [0, 1, 1, 1, 2, 2], hurdleGap: 2.5, /* 이동 방해물 개수 · 서로·출구·엄폐물과 최소 거리 */
   veilPool: ['빨래 줄', '천막 차양', '아궁이 연기', '짚단 더미', '걸어 둔 멍석', '솥에서 오르는 김'],
   coverPool: ['전봇대', '짐수레', '나무 궤짝', '가마니 더미', '돌담', '인력거', '빈 술독', '널빤지 더미'],
   exitPool: ['골목 어귀', '담장 틈', '뒷골목', '쪽문', '샛길', '처마 밑 통로'] };
-var TACTIC = { ap: 3, step: 2, stepAgi: 40, attacks: 1, cover: 35, coverRange: 1, crouch: 15, aim: 20,
+/* ───── 이동 방해물 ─────
+   넘어가려면 stat 판정(diff). 실패하면 그 앞에서 멈춘다(행동력은 쓴다). 적은 판정 없이 넘지만 그 앞에서 멈췄다가 다음 한 합을 넘는 데 쓴다.
+   이름 · 판정 능력치 · 난이도 · 넘을 때/실패할 때 글 */
+var HURDLES = [
+  { name: '낮은 돌담', stat: 'str', diff: 'normal', ok: '돌담을 짚고 몸을 끌어올려 넘었다', ng: '돌담에 매달렸다가 미끄러져 내려왔다' },
+  { name: '장작 더미', stat: 'str', diff: 'easy', ok: '장작 더미를 밀어젖히고 넘었다', ng: '장작이 무너져 내려 발이 묶였다' },
+  { name: '뒤엎어진 수레', stat: 'agi', diff: 'normal', ok: '수레 바퀴를 딛고 훌쩍 넘었다', ng: '수레 끌채에 발이 걸렸다' },
+  { name: '시궁창 도랑', stat: 'agi', diff: 'easy', ok: '도랑을 훌쩍 건너뛰었다', ng: '도랑에 발이 빠졌다' },
+  { name: '철조망 울타리', stat: 'agi', diff: 'hard', ok: '철조망 틈으로 몸을 비틀어 빠져나갔다', ng: '철조망에 옷자락이 걸렸다' },
+  { name: '깨진 독 조각', stat: 'con', diff: 'normal', ok: '깨진 독 조각을 밟고 아픔을 참으며 지나갔다', ng: '발바닥이 찢길 듯해 멈춰 섰다' },
+  { name: '얼어붙은 비탈', stat: 'agi', diff: 'normal', ok: '얼음 비탈을 미끄러지듯 내려섰다', ng: '얼음에 미끄러져 넘어졌다' }
+];
+/* ───── 겹친 방해물 · 임시 방해물 ─────
+   한 물건이 여러 성질을 함께 가질 수 있다: cover 엄폐물 · veil 시야 방해 · hurdle 이동 방해(넘기 판정)
+   temp: [최소, 최대] 합 동안만 있다가 사라진다 (없으면 끝까지 남음) · come: 전투 중에 나타날 때 글 · gone: 사라질 때 글
+   OBST_GEN: 전투 시작 때 겹친 방해물 개수(perm) · 임시 방해물 개수(temp) · 합마다 새 임시 방해물이 나타날 확률(spawn) · 동시에 있을 수 있는 임시 방해물 수(maxTemp) */
+var H_CLIMB = function (stat, diff, ok, ng) { return { stat: stat, diff: diff, ok: ok, ng: ng }; };
+var OBSTACLES = [
+  /* 오래 남는 겹친 방해물 */
+  { name: '무너진 돌담', cover: true, hurdle: H_CLIMB('str', 'normal', '무너진 돌담 위로 기어올라 넘었다', '무너진 돌 더미에 발이 미끄러졌다') },
+  { name: '천막 친 노점', cover: true, veil: true },
+  { name: '쌓아 둔 볏짚 더미', veil: true, hurdle: H_CLIMB('str', 'easy', '볏짚 더미를 헤치고 넘었다', '볏짚에 발이 푹 빠졌다') },
+  { name: '빨래 널린 장대 울타리', cover: true, veil: true, hurdle: H_CLIMB('agi', 'normal', '장대 사이로 몸을 빼냈다', '젖은 빨래에 휘감겼다') },
+  /* 잠시 있다 사라지는 것 */
+  { name: '흙먼지 바람', veil: true, temp: [1, 3], come: '흙먼지 바람이 골목을 휩쓴다', gone: '흙먼지가 가라앉았다' },
+  { name: '굴뚝 연기', veil: true, temp: [2, 4], come: '굴뚝에서 시커먼 연기가 내려앉는다', gone: '연기가 걷혔다' },
+  { name: '멈춰 선 인력거', cover: true, temp: [2, 4], come: '인력거 하나가 길 한복판에 멈춰 선다', gone: '인력거꾼이 서둘러 인력거를 끌고 가 버렸다' },
+  { name: '쏟아진 사과 광주리', hurdle: H_CLIMB('agi', 'easy', '굴러다니는 사과를 피해 건너갔다', '사과를 밟고 미끄러졌다'), temp: [2, 5], come: '광주리가 엎어져 사과가 길바닥에 쏟아진다', gone: '행인들이 사과를 다 주워 갔다' },
+  { name: '짐 부리는 달구지', cover: true, hurdle: H_CLIMB('str', 'normal', '달구지 짐칸을 타 넘었다', '달구지 바퀴에 걸려 멈췄다'), temp: [2, 4], come: '달구지 한 대가 들어와 짐을 부리기 시작한다', gone: '달구지가 짐을 다 부리고 떠났다' },
+  { name: '지나가는 소 떼', veil: true, hurdle: H_CLIMB('agi', 'normal', '소 떼 사이를 비집고 빠져나갔다', '소 엉덩이에 밀려 물러났다'), temp: [1, 3], come: '소 떼가 우르르 골목으로 몰려든다', gone: '소 떼가 지나갔다' },
+  { name: '천막 노점 행렬', cover: true, veil: true, temp: [2, 4], come: '장꾼들이 급히 천막을 펼친다', gone: '장꾼들이 천막을 걷어 달아났다' },
+  { name: '멈춰 선 전차', cover: true, veil: true, hurdle: H_CLIMB('agi', 'hard', '전차 발판을 딛고 건너편으로 뛰어내렸다', '전차 발판에서 미끄러졌다'), temp: [2, 3], come: '전차가 종을 울리며 들어와 멈춰 선다', gone: '전차가 다시 종을 울리며 떠났다' },
+  { name: '구경꾼 인파', veil: true, hurdle: H_CLIMB('str', 'normal', '구경꾼들을 어깨로 밀치고 지나갔다', '구경꾼들에게 떠밀려 나왔다'), temp: [1, 3], come: '소란을 듣고 구경꾼들이 몰려든다', gone: '구경꾼들이 흩어졌다' }
+];
+var OBST_GEN = { perm: [0, 0, 1, 1], temp: [0, 0, 0, 1], spawn: 0.15, maxTemp: 2, near: 1.0, gap: 1.5 };
+/* 피해 가기: 막아선 적 하나를 지나쳐 그 뒤로 간다 (행동력 1, 판정 없음)
+   적 뒤로 떨어지는 거리 = min + 무작위(0~1) × (base + (민첩×agi + 근력×str)/100) — 최대 max m */
+var DODGE = { min: 0.8, base: 0.6, agi: 1.4, str: 0.6, max: 3.5, room: 1.0 };
+/* 한 걸음(m) = step + (민첩 − stepMid) / stepAgi, stepMin~stepMax 로 묶음 (민첩 10 → 2.2m · 50 → 3m · 90 → 3.8m) */
+/* stepVar: 실제로 움직이는 거리의 편차 (한 걸음 × (1 ± stepVar), 무작위) */
+var TACTIC = { ap: 3, step: 3, stepMid: 50, stepAgi: 50, stepMin: 2.2, stepMax: 3.8, stepVar: 0.15, attacks: 1, cover: 35, coverRange: 1, crouch: 15, aim: 20,
   alarm: 4, shotAlarm: 5, backup: { hit: 10, dmg: 1 }, gunFall: 1.5, gunMaxFall: 30,
   /* 먼 거리 사격: 적은 선호 거리 + gunFarFrom 을 넘은 1m마다 명중 -gunFarFall (최대 -gunFarMax, 위 gunFall 과 별도)
      나는 무기의 far(없으면 farFrom)m 를 넘은 1m마다 명중 -farFall (최대 -farMax, 무기 거리 곡선과 별도) */
@@ -202,12 +247,12 @@ var MORALE = { hit: 60, ally: 25, shot: 10 };
 var INTENT_TEXT = {
   stunned: '정신을 못 차리고 있다', attack: '덤벼들려 한다', approach: '다가오려 한다', charge: '곧장 달려들려 한다',
   grab: '멱살을 잡으려 한다', flank: '옆으로 돌아 반대편을 노린다', blockExit: '출구 쪽을 막으려 한다',
-  retreat: '뒤로 물러서려 한다', flee: '달아나려 한다', subdue: '곤봉으로 제압하려 한다', bind: '포승으로 묶으려 한다', closein: '붙잡으려 다가온다', takeCover: '엄폐물 뒤로 숨으려 한다', aim: '숨을 고르며 겨누려 한다',
+  retreat: '뒤로 물러서려 한다', flee: '달아나려 한다', subdue: '덤벼들려 한다', bind: '덤벼들려 한다', closein: '다가오려 한다', takeCover: '엄폐물 뒤로 숨으려 한다', aim: '숨을 고르며 겨누려 한다',
   shift: '자리를 옮기려 한다 (이번엔 쏘지 않는다)', shoot: '총을 쏘려 한다', intimidate: '겁을 주려 한다', offer: '항복을 권하려 한다', whistle: '호루라기로 증원을 부르려 한다'
 };
 var INTENT_HINT = {
   attack: '몸에 힘이 들어간다', approach: '발끝이 이쪽을 향한다', charge: '어깨가 앞으로 쏠린다', grab: '손을 뻗을 듯 어깨가 들썩인다',
-  subdue: '곤봉을 고쳐 쥔다', bind: '포승을 푼다', closein: '포승을 쥐고 거리를 잰다', flank: '눈길이 내 옆쪽으로 흐른다', blockExit: '출구 쪽을 힐끗 본다', retreat: '무게가 뒤로 실린다', flee: '뒷걸음질 칠 기색이다',
+  subdue: '몸에 힘이 들어간다', bind: '몸에 힘이 들어간다', closein: '발끝이 이쪽을 향한다', flank: '눈길이 내 옆쪽으로 흐른다', blockExit: '출구 쪽을 힐끗 본다', retreat: '무게가 뒤로 실린다', flee: '뒷걸음질 칠 기색이다',
   takeCover: '주변 엄폐물을 살핀다', aim: '숨이 가라앉는다', shift: '발을 옮길 기색이다', shoot: '방아쇠에 손가락이 걸려 있다',
   intimidate: '입을 열려 한다', offer: '말을 걸려 한다', whistle: '가슴팍의 무언가를 더듬는다'
 };
@@ -385,12 +430,15 @@ function hasAnyGun(p) { var w = ownedWeapons(p); /* 은닉처에 둔 총은 owne
 /* 조사 이/가: 마지막 글자에 받침이 있으면 '이' */
 function josaIGa(w) { var c = String(w || '').charCodeAt(String(w || '').length - 1) - 0xAC00; return (c >= 0 && c <= 11171 && c % 28) ? '이' : '가'; }
 /* 불법 소지품 · spot: 몸수색에서 들킬 확률 (작은 물건일수록 놓치기 쉽다) */
+/* 총포 소지 허가증으로 지닐 수 있는 총 (군용 소총·기관총·경찰 권총은 안 된다) */
+var GUN_PERMIT_OK = ['hunting', 'browning', 'mauser'];
+function permittedGun(p, id) { return hasItem(p, 'gun_permit') && GUN_PERMIT_OK.indexOf(id) >= 0; }
 var CONTRABAND = [
-  { id: 'gun', name: '총', has: function (p) { return hasAnyGun(p); },
+  { id: 'gun', name: '총', has: function (p) { var w = ownedWeapons(p); return Object.keys(w).some(function (id) { return w[id] && WEAPONS[id] && WEAPONS[id].slot === 'gun' && !permittedGun(p, id); }); },
     spot: function (p) { var w = ownedWeapons(p); return ['rifle', 'lmg', 'hunting'].some(function (id) { return w[id]; }) ? 0.98 : 0.85; } },
   { id: 'blade', name: '칼', has: function (p) { var w = ownedWeapons(p); return ['knife', 'saber'].some(function (id) { return w[id]; }); },
     spot: function (p) { return ownedWeapons(p).saber ? 0.95 : 0.6; } },
-  { id: 'ammo', name: '탄환', has: function (p) { return (p.ammo || 0) > 0; }, spot: function (p) { return (p.ammo || 0) >= 10 ? 0.7 : 0.45; } },
+  { id: 'ammo', name: '탄환', has: function (p) { return (p.ammo || 0) > 0 && !hasItem(p, 'gun_permit'); }, spot: function (p) { return (p.ammo || 0) >= 10 ? 0.7 : 0.45; } },
   { id: 'leaflet', name: '격문', has: function (p) { return !!(p.flags && p.flags.leaflet); }, spot: function () { return 0.6; } }
 ];
 /* ───── 몸수색 (조사에 순응) ─────
@@ -446,16 +494,14 @@ var DEMAND = { ap: 1, base: 10, str: 0.6, int: 0.4, pivot: 30, statMul: 0.5, sta
 /* ───── 관헌의 태세 (전투 AI) ─────
    관헌(OFFICIALS)은 태세 하나를 지니고 그에 따라 움직인다: capture 생포 · melee 근접 · shoot 사격
    - 시작은 모두 '생포' — 포승과 곤봉으로 붙잡아 끌고 가려 한다 (총을 쏘지 않는다)
-   - 격화(esc, 0~100): 매 차례 esc% 확률로 생포를 포기하고 근접/사격 태세로 바뀐다 (한번 바뀌면 생포로 돌아가지 않는다)
-     시작 esc = 감시도 × heat · 선공 ambush · 내가 공격할 때마다 attack · 총을 쏘면 shot · 그 관헌을 맞히면 hurt
-     동료가 쓰러지면 ally · 출구 쪽으로/멀어지게 움직이면 flee · 도주 판정을 시도하면 fleeAct · 최대 cap
+   - 생포 포기: 내가 총을 쏘거나, 쓰러진 사람이 giveUp 중 하나(관헌마다 무작위 1~2명) 이상이면 근접/사격 태세로 바뀐다
+     (한번 바뀌면 생포로 돌아가지 않는다) · esc 수치는 이제 쓰지 않음(기록용)
    - 바뀔 때: 총이 있는 관헌(총잡이)은 내가 총을 쐈거나 거리가 shootDist 보다 멀면 사격, 아니면 근접
      근접 태세의 총잡이도 내가 멀어지면(shootDist 초과) switchShoot 확률로 총을 뽑는다
    capture: grab 붙잡으려 할 확률 · offerPlus 항복 권유 가산 · blockPlus 출구 막기 가산 · softDmg 제압 피해 감소
-            붙잡은 채 내 체력이 bindHp 비율 이하이거나 bindTurns 합 넘게 붙잡혀 있으면 포박(전투 끝, 끌려감)
-            생포 태세의 제압은 사람을 죽이지 않는다: 체력이 bindHp 비율 이하로 떨어지면 그 자리에서 포박 */
+            생포 태세의 공격(곤봉·멱살)으로 체력이 0이 되면 죽지 않고 포박되어 끌려간다 (그 전에는 전투가 이어진다) */
 var STANCE = { heat: 2.5, ambush: 45, attack: 6, shot: 35, hurt: 12, ally: 25, flee: 12, fleeAct: 25, cap: 95,
-  shootDist: 3, switchShoot: 0.3,
+  shootDist: 3, switchShoot: 0.3, giveUp: [1, 2],
   capture: { grab: 0.6, offerPlus: 0.25, blockPlus: 0.2, softDmg: 2, bindHp: 0.35, bindTurns: 2 },
   label: { capture: '생포', melee: '근접', shoot: '사격' },
   text: { capture: '포승과 곤봉으로 붙잡으려 한다', melee: '때려눕히려 한다', shoot: '쏘려 한다' } };

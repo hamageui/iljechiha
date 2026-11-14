@@ -67,6 +67,99 @@ var AMBUSH = { ap: 1, prone: true, jp: -10 };
 var LIE_LOW = { heat: 2 };
 var LIE_LOW_TEXT = ['셋방 문을 걸어 잠그고 숨을 죽였다. 골목을 지나는 구둣발 소리가 멀어진다.', '사람 많은 곳을 피해 뒷골목만 골라 다녔다. 아무 일도 일어나지 않았다.',
   '하루 종일 장독대 뒤에서 짚신을 삼았다. 바깥 일에는 귀를 막았다.', '모자를 눌러쓰고 조용히 지냈다. 눈에 띄지 않는 것도 기술이다.'];
+/* ───── 상시 상점 ─────
+   도시마다 하나, '행동' 목록에 늘 있다. 이용은 한 달에 한 번 (p.shopMonth = 'y-m').
+   합법적인 물건만: 생필품·회복(늘) + 능력치 물건(이달의 물건 SHOP.monthlyCount 개, 도시·달마다 바뀜 · 한 번 들를 때 하나씩)
+   한 번 들르면 여러 개를 살 수 있다 (사고 나면 '계속' → 다시 가게 안). */
+var SHOP = {
+  monthlyCount: 2,
+  always: [
+    { id: 'meal', label: '국밥 한 그릇', price: 1, fx: { hp: 3 }, text: '가게 한쪽 평상에서 국밥 한 그릇을 비웠다. 속이 뜨끈해진다.' },
+    { id: 'medkit', label: '구급약 (고약 · 붕대)', price: 3, fx: { medkit: 1 }, text: '고약 한 덩이와 무명 붕대를 기름종이에 싸서 받았다.' },
+    { id: 'tonic', label: '달인 한약 한 첩', price: 5, fx: { hp: 8 }, text: '주인이 뒷방 약탕기에서 막 달인 한약을 사발에 따라 준다. 쓴맛이 혀끝에 남지만 몸이 한결 가볍다.' }
+  ],
+  monthly: [
+    { id: 'novel', label: '언문 소설책', price: 5, fx: { int: 1 }, text: '손때 묻은 언문 소설을 한 권 샀다. 며칠 밤을 등잔 밑에서 읽었다.' },
+    { id: 'primer', label: '일본어 교본', price: 6, fx: { edu: 1 }, text: '보통학교에서 쓰던 일본어 교본을 샀다. 가나 글자 옆에 누군가 연필로 한글 토를 달아 두었다.' },
+    { id: 'ginseng', label: '인삼 한 뿌리', price: 8, fx: { con: 1 }, text: '잔뿌리가 성한 인삼 한 뿌리. 주인이 “달여 먹으면 겨울을 난다”며 신문지에 싸 준다.' },
+    { id: 'dumbbell', label: '무쇠 아령', price: 7, fx: { str: 1 }, text: '무쇠로 된 아령 한 쌍. 셋방 구석에서 아침저녁으로 들었다 놓았다 했다.' },
+    { id: 'sneakers', label: '고무 운동화', price: 6, fx: { agi: 1 }, text: '밑창이 두툼한 고무 운동화. 신고 골목을 달려 보니 발이 가볍다.' },
+    { id: 'slingshot', label: '고무줄 새총', price: 4, fx: { acc: 1 }, text: '아이들 장난감 같지만 손에 익히면 쓸모가 있다. 빈 깡통을 세워 놓고 겨누는 연습을 했다.' }
+  ]
+};
+var SHOPS = {
+  gyeongseong: { name: '덕흥상회', loc: 'jongno', sub: '종로 뒷골목 만물상',
+    text: '종로 뒷골목, 처마 낮은 만물상. 문을 열면 비누 냄새, 약초 냄새, 종이 냄새가 한꺼번에 밀려온다.\n돋보기를 코끝에 건 주인 영감이 장부에서 눈을 들지도 않고 말한다.\n“어서 오시오. 법에 걸리는 물건은 없으니 마음 놓고 고르시오.”',
+    again: '주인 영감이 주판알을 튕기며 묻는다. “또 뭐 필요한 거 있소?”', bye: '“다음 달에 또 들르시오. 새 물건이 들어올 테니.” 문 위의 방울이 딸랑 운다.' },
+  pyongyang: { name: '평안상회', loc: 'py_market', sub: '대동문 장터 만물상',
+    text: '대동문 장터 어귀의 만물상. 고무신, 성냥, 약재, 책 꾸러미가 천장까지 쌓였다.\n주인 아낙이 팔짱을 끼고 당신을 훑어본다.\n“들어오라우. 우리 집 물건은 다 허가받은 기야. 값도 정직하구.”',
+    again: '주인 아낙이 셈을 마치고 고개를 든다. “또 뭘 보갔어?”', bye: '“다음 달에 오라우. 새 물건 들어오디.” 아낙이 문간까지 배웅한다.' },
+  busan: { name: '남선상회', loc: 'bs_market', sub: '부평정 시장 만물상',
+    text: '부평정 시장 모퉁이 만물상. 건어물 냄새가 스민 선반에 약재와 생필품이 빼곡하다.\n주인 아재가 계산대에 턱을 괴고 말한다.\n“어서 오이소. 밀수품 같은 건 없심더. 다 정식으로 들온 물건이라예.”',
+    again: '주인 아재가 장부에 적다 말고 묻는다. “또 뭐 드릴까예?”', bye: '“다음 달에 또 오이소. 새 물건 들어올 낍니더.” 아재가 손을 흔든다.' }
+};
+function shopKey(date) { return date ? date.y + '-' + date.m : ''; }
+/* 이달의 물건: 도시·연·월로 정해지는 순서 (같은 달 같은 도시면 늘 같다) */
+function shopStock(city, date) {
+  var rng = seedRng('shop:' + city + ':' + shopKey(date)), pool = SHOP.monthly.slice(), out = [];
+  while (out.length < SHOP.monthlyCount && pool.length) out.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
+  return out;
+}
+function shopOf(p) { return SHOPS[(p && p.city) || START_CITY] || SHOPS[START_CITY]; }
+function shopEvent(self, d) {
+  var p = d.player, city = p.city || START_CITY, S = shopOf(p), stock = shopStock(city, d.date);
+  p.shopMonth = shopKey(d.date);
+  /* 지난 방문에 산 표식은 지운다 (능력치 물건은 한 번 들를 때 하나씩) */
+  p.flags = Object.assign({}, p.flags);
+  Object.keys(p.flags).forEach(function (k) { if (k.indexOf('shopbuy:') === 0) delete p.flags[k]; });
+  var opt = function (it, once) {
+    var o = { label: it.label + (once ? ' · 이달의 물건' : ''), cost: { money: it.price },
+      ok: { text: it.text, fx: it.fx, step: 'main' } };
+    if (once) { o.show = { noFlags: ['shopbuy:' + it.id] }; o.ok.flag = 'shopbuy:' + it.id; }
+    return o;
+  };
+  var opts = SHOP.always.map(function (it) { return opt(it, false); }).concat(stock.map(function (it) { return opt(it, true); }));
+  opts.push({ label: '가게를 나선다', ok: { text: S.bye } });
+  return { id: 'shop_' + city, title: S.name, kind: 'shop', text: S.text, options: opts,
+    steps: { main: { title: S.name, text: S.again, options: opts } } };
+}
+/* ───── 대서소: 증명서를 떼는 곳 (도시마다 관청 앞) ─────
+   일본어를 알아야 서류를 쓸 수 있다. 수수료를 내고 신청하면 weeks ± spread 주 뒤에 결과가 온다.
+   결과가 올 때 stat·diff 판정 (auto 가 참이면 판정 없이 발급) — 실패하면 수수료만 날린다 */
+var DAESEO = {
+  gyeongseong: { name: '광화문통 대서소', loc: 'jongno', who: '안경 낀 대서인' },
+  pyongyang: { name: '평양부청 앞 대서소', loc: 'py_market', who: '붓을 귀에 꽂은 대서인' },
+  busan: { name: '부산부청 앞 대서소', loc: 'bs_jangsu', who: '팔토시를 낀 대서인' }
+};
+var ISSUE = {
+  residence: { cost: 12, weeks: 2, spread: 1, stat: 'edu', diff: 'easy', show: { max: { heat: 12 } },
+    apply: '대서인이 주소와 본적, 호주 이름을 받아 적어 면사무소로 넣는다.\n“면사무소 일이 밀려서, 두어 주는 걸릴 거요.”',
+    ok: '면사무소에서 붉은 도장이 찍힌 거주증명서가 나왔다.', ng: '본적과 호적이 맞지 않는다며 거주증명서 신청이 반려되었다. 수수료는 돌아오지 않는다.' },
+  peddler: { cost: 15, weeks: 3, spread: 1, stat: 'edu', diff: 'easy',
+    apply: '장터 조합과 부청에 낼 서류를 꾸몄다.\n“조합 도장 받고 부청 도장 받고… 서너 주는 보시오.”',
+    ok: '이름이 새겨진 행상 허가증 나무 패가 나왔다.', ng: '엉뚱한 사람 장부와 섞였다며 행상 허가증 신청이 돌아왔다. 수수료만 날렸다.' },
+  travel_pass: { cost: 20, weeks: 4, spread: 1, stat: 'int', diff: 'normal', show: { items: ['residence'], max: { heat: 8 } },
+    apply: '대서인이 그럴듯한 여행 용무를 지어 적는다.\n“경찰서 고등계 도장까지 받아야 하니, 한 달은 잡으시오.”',
+    ok: '경찰서 도장이 찍힌 여행증명서가 나왔다.', ng: '경찰서에서 여행 목적을 캐물었다는 기별이 왔다. 여행증명서는 반려, 이름만 장부에 남았다.', ngFx: { heat: 1 } },
+  gun_permit: { cost: 50, weeks: 8, spread: 2, stat: 'edu', diff: 'hard', show: { min: { jp: 30 }, max: { heat: 5 } }, auto: { anyTags: ['hunter'] },
+    apply: '신원 보증인 두 사람의 이름을 적고 경찰서장 면담 날짜를 받았다.\n“신원 조회가 길다오. 두 달은 각오하시오.”',
+    ok: '경찰서장 직인이 찍힌 총포 소지 허가증이 나왔다. “수렵용과 호신용에 한하오.”', ng: '“보증인이 시원찮군.” 총포 소지 허가증 신청이 반려되었다. 수수료는 돌아오지 않는다.' }
+};
+function daeseoOf(p) { return DAESEO[(p && p.city) || START_CITY] || DAESEO[START_CITY]; }
+function daeseoEvent(self, d) {
+  var p = d.player, D = daeseoOf(p);
+  var opts = Object.keys(ISSUE).map(function (id) {
+    var I = ISSUE[id], sh = Object.assign({}, I.show || {});
+    sh.noItems = [id]; sh.noFlags = ['pending:' + id];
+    var nm = itemName(id), k = nm.charCodeAt(nm.length - 1) - 0xAC00;
+    return { label: nm + ((k >= 0 && k <= 11171 && k % 28) ? '을' : '를') + ' 신청한다', cost: { money: I.cost }, apply: id, show: sh,
+      ok: { text: I.apply + '\n\n(결과는 몇 주 뒤에 알 수 있다)' } };
+  });
+  opts.push({ label: '아무것도 떼지 않고 나온다', ok: { text: '대서소 문을 나섰다. 등 뒤에서 ' + D.who + '이(가) 다음 손님을 부른다.' } });
+  return { id: 'daeseo', title: D.name, kind: 'shop', noHarass: true,
+    text: '관청 앞 골목, 간판에 “대서(代書)”라고 쓰인 좁은 방. 벽마다 일본어 서류 견본과 수수료 표가 붙었다.\n' + D.who + '이(가) 돋보기 너머로 당신을 올려다본다.\n“무슨 서류요? 꾸며서 넣어 드리리다. 단, 관청이 받아 줄지는 몇 주 지나 봐야 아오.”',
+    options: opts };
+}
 var PLACES = [
   { id: 'lie_low', kicker: '행동',
     open: function () { return true; },
@@ -91,7 +184,28 @@ var PLACES = [
     name: function () { return '오카다 상회'; },
     sub: function () { return '본정 뒷골목 잡화상 · 오카다와의 연줄로 반값'; },
     loc: function () { return 'honmachi'; },
-    event: function () { return Object.assign({ id: 'hn_shop' }, EVENTS.hn_shop); } }
+    event: function () { return Object.assign({ id: 'hn_shop' }, EVENTS.hn_shop); } },
+  { id: 'shop', kicker: '상점 · 한 달에 한 번',
+    open: function (p) { return !!p; },
+    name: function (p) { return shopOf(p).name; },
+    sub: function (p, self) {
+      var S = shopOf(p), st = shopStock((p && p.city) || START_CITY, self.state.date);
+      return S.sub + ' · 생필품·약 · 이달의 물건: ' + st.map(function (it) { return it.label; }).join(', ');
+    },
+    loc: function (p) { return shopOf(p).loc; },
+    locked: function (p, self) { return p && p.shopMonth === shopKey(self.state.date) ? '이번 달은 이미 다녀왔다 · 다음 달에 새 물건이 들어온다' : ''; },
+    event: function (self, d) { return shopEvent(self, d); } },
+  { id: 'daeseo', kicker: '대서소 · 증명서',
+    open: function (p) { return !!p; },
+    locked: function (p, self) { return p && !self.hasTag(p, CERT.issueTag) ? '일본어를 몰라 관청 서류를 꾸밀 수 없다' : ''; },
+    name: function (p) { return daeseoOf(p).name; },
+    sub: function (p) {
+      var have = Object.keys(p.items || {}).filter(function (id) { return ITEMS[id] && ITEMS[id].kind === 'doc'; }).map(itemName);
+      var wait = Object.keys(ISSUE).filter(function (id) { return p.flags && p.flags['pending:' + id]; }).map(itemName);
+      return '거주·여행·행상·총포 증명서 신청 · 결과는 몇 주 뒤' + (have.length ? ' · 가진 것: ' + have.join(', ') : '') + (wait.length ? ' · 기다리는 것: ' + wait.join(', ') : '');
+    },
+    loc: function (p) { return daeseoOf(p).loc; },
+    event: function (self, d) { return daeseoEvent(self, d); } }
 ];
 /* 장기 이야기의 후속 단계도 행동 탭에 뜬다 (QUESTS 를 읽어 자동으로 추가) */
 function questDue(p, qid) {
