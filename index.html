@@ -8,13 +8,13 @@
 <title>일제치하</title>
 <script src="support.js?v=a098be6b14"></script>
 <!-- 데이터: core · combat · world · events · cities · stories · devtool -->
-<script src="data/core.js?v=cd898ae11b"></script>
-<script src="data/combat.js?v=22f46411cc"></script>
-<script src="data/world.js?v=01590e996e"></script>
-<script src="data/events.js?v=3eb4f892ab"></script>
-<script src="data/cities.js?v=36c689a5f1"></script>
+<script src="data/core.js?v=e11bee99c2"></script>
+<script src="data/combat.js?v=1d40de1fb0"></script>
+<script src="data/world.js?v=3ff0ed463e"></script>
+<script src="data/events.js?v=401b715b94"></script>
+<script src="data/cities.js?v=77c1feccaa"></script>
 <script src="data/stories.js?v=b10fbb0187"></script>
-<script src="data/devtool.js?v=089c6eb9ec"></script>
+<script src="data/devtool.js?v=a72fec94ae"></script>
 </head>
 <body>
 <x-dc>
@@ -588,12 +588,9 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 </div>
 </div>
 <sc-if value="{{infoMode}}" hint-placeholder-val="{{ false }}"><div style="margin-top: -8px; padding: 6px 10px; background: #2C4A5C; color: #F6EFDF; font-size: 13px">설명 모드 — 궁금한 것을 누르면 설명 카드가 뜬다. 버튼을 눌러도 행동하지 않는다.</div></sc-if>
-<!-- 전투: 위는 전장·적, 아래는 내 행동 -->
-<div style="display: flex; flex-direction: column; gap: 16px">
-<div style="min-width: 0; display: flex; flex-direction: column; gap: 14px">
-<!-- 전장: 나와 표적을 함께 비추는 화면 (적을 누르면 표적이 바뀐다) -->
-<div style="background: #FBF7EE; border: 1.5px solid #1E1B16; padding: 6px">
-<div style="position: relative; height: 128px; background: #EDE3CD; border: 1px solid #B9AB8E; overflow: hidden">
+<!-- 전투: 전장 지도가 본 화면 — 적·이동 화살표·적 정보·소식·기술/이동/행동이 모두 이 안에 -->
+<div style="background: #EDE3CD; border: 2px solid #1E1B16; box-shadow: 0 0 0 3px #FBF7EE, 0 0 0 4px #1E1B16; display: flex; flex-direction: column; min-width: 0">
+<div style="position: relative; height: 310px; background: linear-gradient(180deg, #E6DBC2 0, #EDE3CD 60%, #E2D5B8 100%); border: 1px solid #B9AB8E; overflow: hidden">
 <sc-for list="{{cb.field.walls}}" as="w" hint-placeholder-count="0"><div onMouseEnter="{{T.wall.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.wall.tap}}" style="cursor: help; position: absolute; top: 0; bottom: 0; left: {{w.l}}%; width: {{w.w}}%; background: repeating-linear-gradient(45deg, #CDBF9F 0 6px, #DCD0B3 6px 12px); transition: left .3s ease, width .3s ease"></div></sc-for>
 <div style="position: absolute; left: 0; right: 0; bottom: 22px; height: 2px; background: #B9AB8E"></div>
 <sc-for list="{{cb.field.vTicks}}" as="tk" hint-placeholder-count="3">
@@ -622,12 +619,14 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 </sc-if>
 <div onMouseEnter="{{T.me.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.me.tap}}" style="cursor: help; position: absolute; transform: translateX(-50%); transition: left .3s ease; left: {{cb.field.vMe}}%; bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 2px; z-index: 3">
 <span style="font-size: 11px; font-weight: 800; color: #2C4A5C">나</span>
-<span style="width: 24px; height: 24px; border-radius: 50%; background: #2C4A5C; border: 2px solid #F6EFDF; box-sizing: border-box; display: block"></span>
+<span style="width: 32px; height: 32px; border-radius: 50%; background: #2C4A5C; border: 2.5px solid #F6EFDF; box-sizing: border-box; display: block; box-shadow: 0 1px 4px rgba(0,0,0,.25)"></span>
 </div>
 <sc-for list="{{cb.field.vFoes}}" as="fm" hint-placeholder-count="1">
-<button type="button" onClick="{{fm.pick}}" onMouseEnter="{{fm.tipIn}}" onMouseLeave="{{tipOut}}" aria-label="{{fm.title}}" style="position: absolute; transform: translateX(-50%); transition: left .3s ease; left: {{fm.l}}%; bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0; background: none; border: none; cursor: pointer; z-index: 2; font-family: 'Nanum Myeongjo', serif">
+<button type="button" onClick="{{fm.pick}}" onMouseEnter="{{fm.tipIn}}" onMouseLeave="{{tipOut}}" aria-label="{{fm.title}}" style="position: absolute; transform: translateX(-50%); transition: left .3s ease; left: {{fm.l}}%; bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0; background: none; border: none; cursor: pointer; pointer-events: none; z-index: {{fm.z}}; font-family: 'Nanum Myeongjo', serif">
+<span style="max-width: 110px; overflow: hidden; text-overflow: ellipsis; font-size: 10.5px; font-style: italic; color: #7A3B12; white-space: nowrap; background: rgba(237,227,205,.85); padding: 0 3px">{{fm.intent}}</span>
 <span style="font-size: 11px; font-weight: {{fm.weight}}; color: {{fm.labelColor}}; white-space: nowrap">{{fm.name}}</span>
-<span style="width: {{fm.size}}px; height: {{fm.size}}px; border-radius: 50%; background: #9E2B20; border: 3px solid {{fm.ring}}; box-sizing: border-box; color: #F6EFDF; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center">{{fm.tag}}</span>
+<span style="display: block; width: 36px; height: 4px; background: #B9AB8E"><span style="display: block; height: 100%; width: {{fm.hpPct}}%; background: #9E2B20"></span></span>
+<span style="pointer-events: auto; width: {{fm.size}}px; height: {{fm.size}}px; border-radius: 50%; background: #9E2B20; border: 3px solid {{fm.ring}}; box-sizing: border-box; color: #F6EFDF; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center">{{fm.tag}}</span>
 </button>
 </sc-for>
 <sc-if value="{{cb.field.hasOffL}}" hint-placeholder-val="{{ false }}">
@@ -640,33 +639,22 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <sc-for list="{{cb.field.offR}}" as="o" hint-placeholder-count="1"><button type="button" onClick="{{o.pick}}" onMouseEnter="{{o.tipIn}}" onMouseLeave="{{tipOut}}" style="padding: 2px 7px; background: {{o.bg}}; color: {{o.fg}}; border: none; font-family: 'Nanum Myeongjo', serif; font-size: 11px; font-weight: 800; cursor: pointer; white-space: nowrap">{{o.text}}</button></sc-for>
 </div>
 </sc-if>
-</div>
-</div>
-<sc-if value="{{cb.field.multi}}" hint-placeholder-val="{{ false }}">
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px">
-<sc-for list="{{cb.field.foeList}}" as="fl" hint-placeholder-count="3">
-<button class="choice" type="button" onClick="{{fl.pick}}" onMouseEnter="{{fl.tipIn}}" onMouseLeave="{{tipOut}}" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; background: #1E1B16; color: #F6EFDF; border: 2px solid {{fl.border}}; font-family: 'Nanum Myeongjo', serif; text-align: left">
-<span style="display: flex; justify-content: space-between; gap: 6px; width: 100%"><span style="font-size: 15px; font-weight: 800">{{fl.name}}</span><span style="font-size: 11px; color: #E3B04B; font-weight: 700">{{fl.btn}}</span></span>
-<span style="display: block; width: 100%; height: 5px; background: #4A443A"><span style="display: block; height: 100%; width: {{fl.hpPct}}%; background: #E3B04B"></span></span>
-<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 11px; color: #CFC2A6">체력 {{fl.hp}} · {{fl.where}} {{fl.hit}}</span>
-<span style="font-size: 12px; color: #E4D9C2">{{fl.intent}}</span>
-</button>
-</sc-for>
-</div>
-</sc-if>
-<div style="background: #1E1B16; color: #F6EFDF; padding: 20px 22px; display: flex; flex-direction: column; gap: 10px">
+<button class="choice" type="button" disabled="{{cb.arrowL.off}}" onClick="{{cb.arrowL.go}}" aria-label="왼쪽으로 움직인다" title="{{cb.arrowL.tip}}" style="position: absolute; left: 6px; bottom: 30px; z-index: 5; width: 46px; height: 54px; background: rgba(251,247,238,.94); color: #1E1B16; border: 1.5px solid #1E1B16; font-size: 22px; font-weight: 800; opacity: {{cb.arrowL.op}}">◀</button>
+<button class="choice" type="button" disabled="{{cb.arrowR.off}}" onClick="{{cb.arrowR.go}}" aria-label="오른쪽으로 움직인다" title="{{cb.arrowR.tip}}" style="position: absolute; right: 6px; bottom: 30px; z-index: 5; width: 46px; height: 54px; background: rgba(251,247,238,.94); color: #1E1B16; border: 1.5px solid #1E1B16; font-size: 22px; font-weight: 800; opacity: {{cb.arrowR.op}}">▶</button>
+<sc-if value="{{cb.cardOn}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: {{cb.cardTop}}px; left: {{cb.cardL}}; right: {{cb.cardR}}; width: min(310px, 84%); max-height: 205px; overflow-y: auto; box-sizing: border-box; z-index: 6; background: rgba(30,27,22,.96); color: #F6EFDF; border: 2px solid #E3B04B; padding: 10px 12px; display: flex; flex-direction: column; gap: 5px; box-shadow: 0 4px 14px rgba(0,0,0,.3)">
+<button type="button" onClick="{{cb.cardClose}}" aria-label="적 정보 닫기" style="position: absolute; top: 4px; right: 4px; min-width: 28px; min-height: 28px; background: transparent; color: #CFC2A6; border: 1px solid #4A443A; font-size: 13px; cursor: pointer">✕</button>
 <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap">
-<h2 onMouseEnter="{{T.foe.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.foe.tap}}" style="cursor: help; margin: 0; font-family: 'Song Myung', serif; font-weight: 400; font-size: {{L.h2}}">{{cb.name}}</h2>
-<span style="font-size: 14px; color: #CFC2A6">{{cb.title}}</span>
+<h2 onMouseEnter="{{T.foe.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.foe.tap}}" style="cursor: help; margin: 0; font-family: 'Song Myung', serif; font-weight: 400; font-size: 20px">{{cb.name}}</h2>
+<span style="font-size: 12px; color: #CFC2A6">{{cb.title}}</span>
 </div>
-<p style="margin: 0; font-size: 15px; line-height: 1.7; color: #E4D9C2">{{cb.desc}}</p>
-<div style="display: flex; justify-content: space-between; font-size: 14px"><span>체력</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-weight: 700">{{cb.hp}} / {{cb.maxHp}}</span></div>
-<div style="height: 10px; background: #4A443A"><div style="height: 100%; width: {{cb.hpPct}}%; background: #E3B04B; transition: width .3s"></div></div>
-<div onMouseEnter="{{T.foeStats.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.foeStats.tap}}" style="cursor: help; font-family: 'Nanum Gothic Coding', monospace; font-size: 13px; color: #CFC2A6">{{cb.statLine}}</div>
+<div style="display: flex; justify-content: space-between; font-size: 12.5px"><span>체력</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-weight: 700">{{cb.hp}} / {{cb.maxHp}}</span></div>
+<div style="flex: none; height: 7px; background: #4A443A"><div style="height: 100%; width: {{cb.hpPct}}%; background: #E3B04B; transition: width .3s"></div></div>
+<div onMouseEnter="{{T.foeStats.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.foeStats.tap}}" style="cursor: help; font-family: 'Nanum Gothic Coding', monospace; font-size: 11.5px; color: #CFC2A6">{{cb.statLine}}</div>
 <div style="border-top: 1px solid #4A443A; padding-top: 8px; display: flex; flex-direction: column; gap: 2px">
 <span onMouseEnter="{{T.read.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.read.tap}}" style="cursor: help; font-size: 12px; letter-spacing: 0.15em; color: #E3B04B; font-weight: 700">기색 · {{cb.field.readLv}}</span>
-<span onMouseEnter="{{T.intent.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.intent.tap}}" style="cursor: help; font-size: 15px; font-weight: 700">{{cb.field.intent}}</span>
-<span onMouseEnter="{{T.persona.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.persona.tap}}" style="cursor: help; font-size: 13px; color: #E4D9C2">{{cb.field.persText}}</span>
+<span onMouseEnter="{{T.intent.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.intent.tap}}" style="cursor: help; font-size: 13.5px; font-weight: 700">{{cb.field.intent}}</span>
+<span onMouseEnter="{{T.persona.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.persona.tap}}" style="cursor: help; font-size: 12px; color: #E4D9C2">{{cb.field.persText}}</span>
 <span onMouseEnter="{{T.hitme.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.hitme.tap}}" style="cursor: help; font-family: 'Nanum Gothic Coding', monospace; font-size: 12px; color: #CFC2A6">{{cb.field.hitText}}</span>
 </div>
 <sc-if value="{{cb.hasStatus}}" hint-placeholder-val="{{ false }}">
@@ -677,26 +665,27 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 </div>
 </sc-if>
 </div>
+</sc-if>
 </div>
 <!-- 이번 합 소식: 내 행동 → 적의 행동 -->
-<div onMouseEnter="{{T.feed.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.feed.tap}}" style="cursor: help; border: 1.5px solid #1E1B16; background: #FBF7EE; padding: 8px 12px; display: flex; flex-direction: column; gap: 6px" aria-live="polite">
+<div onMouseEnter="{{T.feed.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.feed.tap}}" style="cursor: help; border-top: 1px solid #B9AB8E; background: rgba(251,247,238,.75); padding: 7px 10px; display: flex; flex-direction: column; gap: 5px" aria-live="polite">
 <div style="display: flex; align-items: flex-start; gap: 10px">
 <span style="flex: none; min-width: 36px; text-align: center; padding: 2px 6px; background: #2C4A5C; color: #F6EFDF; font-size: 12px; font-weight: 800">{{cb.field.feedMineLabel}}</span>
 <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
-<sc-for list="{{cb.field.feedMine}}" as="l" hint-placeholder-count="1"><span style="font-size: 14px; line-height: 1.5; color: {{l.color}}">{{l.text}}</span></sc-for>
+<sc-for list="{{cb.field.feedMine}}" as="l" hint-placeholder-count="1"><span style="font-size: 13px; line-height: 1.45; color: {{l.color}}">{{l.text}}</span></sc-for>
 </div>
 </div>
 <sc-if value="{{cb.field.hasFeedFoe}}" hint-placeholder-val="{{ false }}">
 <div style="display: flex; align-items: flex-start; gap: 10px; border-top: 1px dashed #B9AB8E; padding-top: 6px">
 <span style="flex: none; min-width: 36px; text-align: center; padding: 2px 6px; background: #9E2B20; color: #F6EFDF; font-size: 12px; font-weight: 800">적</span>
 <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
-<sc-for list="{{cb.field.feedFoe}}" as="l" hint-placeholder-count="1"><span style="font-size: 14px; line-height: 1.5; color: {{l.color}}">{{l.text}}</span></sc-for>
+<sc-for list="{{cb.field.feedFoe}}" as="l" hint-placeholder-count="1"><span style="font-size: 13px; line-height: 1.45; color: {{l.color}}">{{l.text}}</span></sc-for>
 </div>
 </div>
 </sc-if>
 </div>
 <!-- 내 행동 (탭) -->
-<div style="min-width: 0; display: flex; flex-direction: column; gap: 8px">
+<div style="min-width: 0; display: flex; flex-direction: column; gap: 8px; padding: 8px 10px 10px; border-top: 1px solid #B9AB8E">
 <!-- 타이밍 맞추기: 팝업으로 (화면이 밀리거나 움직이지 않게) -->
 <sc-if value="{{qte.on}}" hint-placeholder-val="{{ false }}">
 <div style="position: fixed; inset: 0; z-index: 60; background: rgba(30,27,22,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; box-sizing: border-box" role="dialog" aria-modal="true" aria-label="타이밍 맞추기">
@@ -1079,7 +1068,7 @@ class Component extends DCLogic {
   fresh() {
     var keep = this.state && this.state.life ? this.state : this.loadLife();
     return { screen: 'title', player: null, loc: 'bukchon', date: { y: 1920, m: 1, w: 1 }, time: 0, slotUsed: false,
-      event: null, outcome: null, combat: null, ending: null, scoreInfo: null, pickSlot: null, travel: null, log: [], seq: 0, dice: null, rolling: false, qte: null, bg: [],
+      event: null, outcome: null, combat: null, ending: null, scoreInfo: null, pickSlot: null, train: null, travel: null, log: [], seq: 0, dice: null, rolling: false, qte: null, bg: [],
       life: keep.life, base: keep.base, edStage: 0, raw: {}, importText: '', saveMsg: keep.saveMsg || '', saveOk: keep.saveOk !== false };
   }
 
@@ -1529,7 +1518,7 @@ class Component extends DCLogic {
       text = C.sleepPaid;
       parts.push('소지금 -1원');
     } else {
-      heal = Math.min(2, p.maxHp - p.hp); p.hp += heal;
+      heal = Math.min(BROKE_HEAL, p.maxHp - p.hp); p.hp += heal;
       text = C.sleepBroke;
     }
     p.heat = Math.max(0, p.heat - 1);
@@ -1980,6 +1969,7 @@ class Component extends DCLogic {
     var out = [];
     if (hasItem(p, 'tokko_badge')) out.push({ label: '고등계 협력 증표를 내보인다', cert: 'tokko_badge', show: { items: ['tokko_badge'] } });
     if (hasItem(p, 'residence')) out.push({ label: '거주증명서를 내보인다', cert: 'residence', show: { items: ['residence'] } });
+    if (hasItem(p, 'fake_id')) out.push({ label: '위조 도민증을 내민다', cert: 'fake_id', show: { items: ['fake_id'] } });
     return out;
   }
   certPass(d, ev, opt) {
@@ -1988,6 +1978,8 @@ class Component extends DCLogic {
     if (opt.cert === 'tokko_badge') {
       parts = parts.concat(this.applyFx(d, { heat: -CERT.badgeHeat, kr: -CERT.badgeKr }));
       text = '품속에서 놋쇠 증표를 꺼내 손바닥에 올려 보였다. ' + nm + '의 얼굴이 굳더니, 이내 허리를 굽힌다.\n“아, 실례했습니다. 가시지요.” 줄 서 있던 사람들이 당신을 흘끔거린다. 그 눈빛이 등에 박힌다.';
+    } else if (opt.cert === 'fake_id') {
+      text = '도민증을 내밀었다. ' + nm + josaIGa(nm) + ' 사진과 얼굴을 번갈아 보더니 턱짓을 한다.\n“가.” 등 뒤로 식은땀이 흘렀다.';
     } else {
       text = '거주증명서를 펼쳐 보였다. ' + nm + josaIGa(nm) + ' 도장과 얼굴을 번갈아 보더니 종이를 돌려준다.\n“주소가 확실하군. 가 봐.”';
     }
@@ -1996,6 +1988,8 @@ class Component extends DCLogic {
     d.event = null; d.screen = 'outcome';
     this.log(d, ev.title + ' — ' + itemName(opt.cert) + '로 통과', 'sys');
   }
+  /* 재고: 품절이면 남은 주 수, 아니면 0 */
+  soldOut(p, o) { if (!o || !o.stock || !p || !p.restock) return 0; var due = p.restock[o.stock] || 0; return Math.max(0, due - (p.daysLived || 0)); }
   visibleOptions(ev, p) {
     var self = this;
     return this.certOptions(ev, p).concat(ev.options || []).filter(function (o) {
@@ -2012,6 +2006,7 @@ class Component extends DCLogic {
     if (!opt) return;
     var cost = this.costOf(ev, opt, s.player);
     if (cost && cost.money && s.player.money < cost.money) return;
+    if (this.soldOut(s.player, opt)) return;
     if (opt.cert === 'residence') {
       /* 거주증명서: 절반쯤만 통한다 — 안 통하면 그대로 몸수색 */
       var cpl = (ev.options || []).filter(function (o) { return o.comply; })[0];
@@ -2022,6 +2017,25 @@ class Component extends DCLogic {
         var nm0 = ev.inspector || '순사', pre = '거주증명서를 펼쳐 보였다. ' + nm0 + josaIGa(nm0) + ' 종이를 대충 훑더니 도로 던진다.\n“종이야 아무나 떼지. 짐 풀어.”\n\n';
         self.doSearch(d, ev, cpl, CERT.residenceMiss, ['residence']);
         self.prependOutcome(d, pre);
+      });
+      return;
+    }
+    if (opt.cert === 'fake_id') {
+      /* 위조 도민증: 먼저 들통날지, 아니면 반쯤 통한다 — 안 통하면 몸수색 */
+      var cplF = (ev.options || []).filter(function (o) { return o.comply; })[0];
+      this.roll('위조 도민증', Math.round(CERT.fakePass * 100), function (d, res) {
+        var nmF = ev.inspector || '순사';
+        if (cplF && Math.random() < CERT.fakeCaught) {
+          d.player.items = Object.assign({}, d.player.items); delete d.player.items.fake_id;
+          var hp0 = self.applyFx(d, { heat: CERT.fakeHeat });
+          self.log(d, '위조 도민증이 들통났다' + (hp0.length ? ' · ' + hp0.join(' · ') : ''), 'bad');
+          self.doSearch(d, ev, cplF, 0, false);
+          self.prependOutcome(d, '도민증을 내밀었다. ' + nmF + josaIGa(nmF) + ' 도장을 엄지로 문지르더니 눈을 가늘게 뜬다.\n“이거 어디서 났어? 인주가 번지잖아.” 도민증을 빼앗아 품에 넣는다. (잃음: 위조 도민증 · 감시도 +' + CERT.fakeHeat + ')\n“짐 풀어. 전부.”\n\n');
+          return;
+        }
+        if (res.success || !cplF) { self.certPass(d, ev, opt); return; }
+        self.doSearch(d, ev, cplF, 0, ['fake_id']);
+        self.prependOutcome(d, '도민증을 내밀었다. ' + nmF + josaIGa(nmF) + ' 흘끗 보고 돌려준다. “그래도 짐은 봐야겠어.”\n\n');
       });
       return;
     }
@@ -2131,6 +2145,11 @@ class Component extends DCLogic {
       arrOf(out.unitem).forEach(function (it) { if (its[it]) { delete its[it]; parts.push('잃음: ' + itemName(it)); } });
       d.player.items = its;
     }
+    /* 재고: 사고 나면 품절 — RESTOCK.weeks ± spread 주 뒤 보충 */
+    if (opt && opt.stock && good) {
+      var rw = Math.max(1, RESTOCK.weeks + Math.round((Math.random() * 2 - 1) * RESTOCK.spread));
+      d.player.restock = Object.assign({}, d.player.restock || {}); d.player.restock[opt.stock] = (d.player.daysLived || 0) + rw;
+    }
     /* 대서소 신청: 몇 주 뒤에 결과 */
     if (opt && opt.apply && good) this.startIssue(d, opt.apply, parts);
     /* 행상 허가증: 일거리로 번 돈 +1 */
@@ -2166,6 +2185,7 @@ class Component extends DCLogic {
     }
     else if (o && o.next) { d.event = o.next; d.screen = 'event'; }
     else if (d.travel) this.doTravel(d);
+    else if (d.train) this.trainStep(d);
     else this.nextInto(d);
     this.commit(d);
     /* '다음으로'(전투 개시가 아닐 때)도 자동 저장 */
@@ -2199,14 +2219,38 @@ class Component extends DCLogic {
       return;
     }
     p.money -= t.fare;
+    /* 기차에 오른다 → 기차 안 사건 TRAIN_RIDE.events 개 → 도착 (TRAIN_RIDE.weeks 주 경과) */
+    d.train = { to: to, from: from, line: t.line, left: TRAIN_RIDE.events, used: [] };
+    d.loc = 'train';
+    var parts = ['소지금 -' + t.fare + '원' + (t.passNote ? ' (여행증명서 반값)' : ''), t.line, CITIES[to].name + '행'];
+    d.outcome = { title: CITIES[to].name + '행 기차', text: fill(this.pick(TRAIN_TEXT.board)), summary: parts.join(' · '), fight: null };
+    this.log(d, t.line + ' — ' + CITIES[from].name + '에서 ' + CITIES[to].name + '행 기차에 올랐다. ' + parts.join(', '), 'story');
+  }
+  /* 기차 안: 남은 사건이 있으면 하나 (겹치지 않게), 다 겪었으면 도착 */
+  trainStep(d) {
+    var tr = d.train, self = this;
+    if (tr.left > 0) {
+      var pool = TRAIN_EVENTS.filter(function (id) { return EVENTS[id] && tr.used.indexOf(id) < 0 && self.tagsOk(d.player, EVENTS[id]); });
+      if (pool.length) {
+        var id = this.pick(pool);
+        d.train = Object.assign({}, tr, { left: tr.left - 1, used: tr.used.concat([id]) });
+        d.loc = 'train'; d.event = Object.assign({ id: id }, EVENTS[id]); d.screen = 'event';
+        this.log(d, tr.line + ' 객차 안 — ' + EVENTS[id].title, 'sys');
+        return;
+      }
+    }
+    this.trainArrive(d);
+  }
+  trainArrive(d) {
+    var tr = d.train, p = d.player, to = tr.to;
+    var fill = function (x) { return x.replace('{from}', CITIES[tr.from].name).replace('{to}', CITIES[to].name); };
+    d.train = null;
     this.moveCity(d, to);
-    d.loc = cityDef(to).station;
-    var nt = d.time + t.slots, late = nt > 2;
-    d.time = Math.min(2, nt); d.slotUsed = true;
-    var text = fill(this.pick(TRAIN_TEXT.board)) + '\n' + fill(this.pick(TRAIN_TEXT.arrive)) + (late ? '\n' + TRAIN_TEXT.late : '');
-    var parts = ['소지금 -' + t.fare + '원' + (t.passNote ? ' (여행증명서 반값)' : ''), t.line, CITIES[to].name + ' 도착', '감시도 ' + (p.heat || 0)];
-    d.outcome = { title: CITIES[to].name + '행 기차', text: text, summary: parts.join(' · '), fight: null };
-    this.log(d, t.line + ' — ' + CITIES[from].name + '에서 ' + CITIES[to].name + '(으)로. ' + parts.join(', '), 'story');
+    this.addDays(d, TRAIN_RIDE.weeks);
+    d.loc = cityDef(to).station; d.time = 0; d.slotUsed = true; d.event = null; d.screen = 'outcome';
+    var parts = [tr.line, CITIES[to].name + ' 도착', TRAIN_RIDE.weeks + '주 경과', '감시도 ' + (p.heat || 0)];
+    d.outcome = { title: CITIES[to].name + ' 도착', text: fill(this.pick(TRAIN_TEXT.arrive)), summary: parts.join(' · '), fight: null };
+    this.log(d, CITIES[to].name + '에 닿았다. ' + parts.join(', '), 'story');
   }
 
   /* ───── 전투 ───── */
@@ -2231,7 +2275,7 @@ class Component extends DCLogic {
     var ex0 = Array.isArray(A.exit) ? A.exit : [A.exit, A.exit];
     var leadSide = Math.sign(rel[0].r) || 1;
     var far = Math.max.apply(null, rel.map(function (o) { return Math.abs(o.r); }));
-    var nEx = gp(G.exits), exRels = [];
+    var nEx = A.noExits ? 0 : gp(G.exits), exRels = [], dense = A.dense || 1;
     for (var tries = 0; exRels.length < nEx && tries < 60; tries++) {
       var exSide, exD;
       if (!exRels.length) {
@@ -2245,7 +2289,7 @@ class Component extends DCLogic {
       exRels.push(rr);
     }
     /* 포위: surroundGap 확률로 한쪽 적보다 안쪽에 샛길이 하나 더 (적이 먼저 닿으면 막힌다) */
-    if (form === 'surround' && Math.random() < G.surroundGap) {
+    if (!A.noExits && form === 'surround' && Math.random() < G.surroundGap) {
       var gapOf = function (sd) { var g = rel.filter(function (o) { return Math.sign(o.r) === sd; }).map(function (o) { return Math.abs(o.r); }); return g.length ? Math.min.apply(null, g) : 99; };
       var gs = gapOf(-1) > gapOf(1) ? -1 : 1, gg = Math.min(gapOf(gs), G.exitFar);
       if (gg >= 4.5) { var ir = gs * (3 + Math.random() * (gg - 4)); if (!exRels.some(function (q) { return Math.abs(q - ir) < G.exitGap; })) exRels.push(ir); }
@@ -2273,7 +2317,7 @@ class Component extends DCLogic {
     var exits = exRels.map(function (r, i) { return { at: clampX(px + r * scale), name: exNames[i] }; })
       .sort(function (a, b) { return a.at - b.at; });
     /* 4) 엄폐물: 개수 무작위 · 서로 coverGap, 나와 coverNear, 출구와 1.5m 이상 떨어지게 */
-    var nCv = gp(G.covers), cvAt = [];
+    var nCv = gp(G.covers) * dense, cvAt = [];
     for (var ct = 0; cvAt.length < nCv && ct < 80; ct++) {
       var at = Math.round((1 + Math.random() * (LEN - 2)) * 10) / 10;
       if (Math.abs(at - px) < G.coverNear) continue;
@@ -2281,49 +2325,53 @@ class Component extends DCLogic {
       if (exits.some(function (x) { return Math.abs(x.at - at) < 1.5; })) continue;
       cvAt.push(at);
     }
-    var cvNames = namesFor(A.coverNames || (A.covers || []).map(function (cv) { return cv.name; }), G.coverPool, cvAt.length);
+    var cvNames = namesFor(A.coverNames || (A.covers || []).map(function (cv) { return cv.name; }), A.noExits ? A.coverNames : G.coverPool, cvAt.length);
     var covers = cvAt.sort(function (a, b) { return a - b; }).map(function (at, i) { return { at: at, name: cvNames[i], obscure: Math.random() < VEIL.coverChance }; });
     /* 5) 시야 방해물: 엄폐물·출구·서로와 veilGap 이상, 나와 1m 이상 */
-    var nVl = gp(G.veils || [0]), vlAt = [];
+    var nVl = gp(G.veils || [0]) * dense, vlAt = [];
     for (var vt = 0; vlAt.length < nVl && vt < 80; vt++) {
       var va = Math.round((1 + Math.random() * (LEN - 2)) * 10) / 10;
       if (Math.abs(va - px) < 1) continue;
       if (vlAt.concat(cvAt).concat(exits.map(function (x) { return x.at; })).some(function (q) { return Math.abs(q - va) < G.veilGap; })) continue;
       vlAt.push(va);
     }
-    var vlNames = namesFor(A.veilNames, G.veilPool, vlAt.length);
+    var vlNames = namesFor(A.veilNames, A.noExits ? A.veilNames : G.veilPool, vlAt.length);
     var veils = vlAt.sort(function (a, b) { return a - b; }).map(function (at, i) { return { at: at, name: vlNames[i] }; });
     /* 6) 이동 방해물: 나·적과 1.2m 이상, 출구·엄폐물·서로와 hurdleGap 이상 */
-    var nHd = gp(G.hurdles || [0]), hdAt = [];
+    var nHd = (gp(G.hurdles || [0]) + (A.dense ? 1 : 0)) * dense, hdAt = [];
     for (var ht = 0; hdAt.length < nHd && ht < 80; ht++) {
       var ha = Math.round((1 + Math.random() * (LEN - 2)) * 10) / 10;
       if (Math.abs(ha - px) < 1.2 || foes.some(function (f) { return Math.abs(f.x - ha) < 1.2; })) continue;
       if (hdAt.concat(cvAt).concat(exits.map(function (x) { return x.at; })).some(function (q) { return Math.abs(q - ha) < G.hurdleGap; })) continue;
       hdAt.push(ha);
     }
-    var hdPool = HURDLES.slice().sort(function () { return Math.random() - 0.5; });
+    var hdPool = (A.hurdles || HURDLES).slice().sort(function () { return Math.random() - 0.5; });
     var hurdles = hdAt.sort(function (a, b) { return a - b; }).map(function (at, i) { return Object.assign({ at: at }, hdPool[i % hdPool.length]); });
     /* 7) 겹친 방해물 · 임시 방해물 (OBSTACLES) — 아래 placeObstacle 이 세 목록에 함께 넣는다 */
     var tmpArena = { len: LEN, covers: covers, veils: veils, hurdles: hurdles, exits: exits };
     var nPerm = gp(OBST_GEN.perm), nTemp = gp(OBST_GEN.temp);
-    var permPool = OBSTACLES.filter(function (o) { return !o.temp; }).sort(function () { return Math.random() - 0.5; });
-    var tempPool = OBSTACLES.filter(function (o) { return o.temp; }).sort(function () { return Math.random() - 0.5; });
+    var permPool = (A.permObst || OBSTACLES.filter(function (o) { return !o.temp; })).slice().sort(function () { return Math.random() - 0.5; });
+    var tempPool = (A.tempObst || OBSTACLES.filter(function (o) { return o.temp; })).slice().sort(function () { return Math.random() - 0.5; });
+    if (A.dense) nPerm += 1;
     for (var oi = 0; oi < nPerm && oi < permPool.length; oi++) self.placeObstacle(tmpArena, permPool[oi], px, foes, false);
     for (var ti = 0; ti < nTemp && ti < tempPool.length; ti++) self.placeObstacle(tmpArena, tempPool[ti], px, foes, true);
     covers.sort(function (a, b) { return a.at - b.at; }); veils.sort(function (a, b) { return a.at - b.at; }); hurdles.sort(function (a, b) { return a.at - b.at; });
     d.combat = { foes: foes, target: foes[0].uid, uidSeq: uid, round: 1, shot: false, cd: {},
       arena: { name: A.name, len: LEN, lo: 0, hi: LEN, exits: exits, crowd: !!A.crowd, covers: covers, veils: veils, hurdles: hurdles,
-        pool: { cover: (A.coverNames || (A.covers || []).map(function (cv) { return cv.name; })).concat(G.coverPool), veil: (A.veilNames || []).concat(G.veilPool), exit: (A.exitNames || [A.exitName]).filter(Boolean).concat(G.exitPool) } },
+        noExits: !!A.noExits, dense: A.dense || 1, hurdlePool: A.hurdles || null, permPool: A.permObst || null, tempPool: A.tempObst || null,
+        pool: { cover: (A.coverNames || (A.covers || []).map(function (cv) { return cv.name; })).concat(A.noExits ? [] : G.coverPool), veil: (A.veilNames || []).concat(A.noExits ? [] : G.veilPool), exit: (A.exitNames || [A.exitName]).filter(Boolean).concat(G.exitPool) } },
       px: px, free: 0, inCover: false, coverSide: 0, crouch: false,
       alarm: alarm && foes.some(function (f) { return f.t.whistle; }) ? TACTIC.alarm : null, backups: 0, form: form,
       official: OFFICIALS.indexOf(foes[0].id) >= 0 };
     this.ensureArena(d.combat, G.startSpan);
     this.syncTarget(d.combat);
-    d.screen = 'combat'; d.cbTab = 'skill'; d.tip = null;
+    d.screen = 'combat'; d.cbTab = 'skill'; d.tip = null; d.foeCard = null;
     var names = foes.map(function (f) { return f.name; }).join(', ');
     this.log(d, '전투 개시 — ' + names + ' · ' + A.name + (foes.length > 1 ? (form === 'surround' ? ' · 앞뒤로 포위당했다!' : ' · 한쪽에서 몰려온다') : '') + ' · 거리 ' + this.fmtM(this.distOf(d.combat)), 'foe');
     var exTxt = exits.map(function (x) { return (x.at < px ? '왼쪽 ' : '오른쪽 ') + self.fmtM(x.at - px) + ' ' + x.name + (self.pathCost(d.combat, d.player, x.at).blocked ? '(적이 막음)' : ''); });
-    this.log(d, '빠져나갈 길 ' + exits.length + '곳 — ' + exTxt.join(' · ') + (covers.length ? ' · 엄폐물 ' + covers.map(function (cv) { return cv.name; }).join('·') : '') + (veils.length ? ' · 시야를 가리는 것 ' + veils.map(function (v) { return v.name; }).join('·') : '') + (hurdles.length ? ' · 길을 막는 것 ' + hurdles.map(function (h) { return h.name + '(' + STAT_LABEL[h.stat] + ')'; }).join('·') : '') + (covers.concat(veils).concat(hurdles).some(function (x) { return x.temp; }) ? ' · (‘잠시’가 붙은 것은 곧 사라진다)' : ''), 'sys');
+    /* 시작 안내에는 가까운 것(12m 안)만, 같은 이름은 한 번만 */
+    var near = function (arr) { var seen = {}; return arr.filter(function (x) { if (Math.abs(x.at - px) > 12 || seen[x.name]) return false; seen[x.name] = 1; return true; }); };
+    this.log(d, (A.noExits ? '달리는 기차 안 — 빠져나갈 곳이 없다' : '빠져나갈 길 ' + exits.length + '곳 — ' + exTxt.join(' · ')) + (near(covers).length ? ' · 엄폐물 ' + near(covers).map(function (cv) { return cv.name; }).join('·') : '') + (near(veils).length ? ' · 시야를 가리는 것 ' + near(veils).map(function (v) { return v.name; }).join('·') : '') + (near(hurdles).length ? ' · 길을 막는 것 ' + near(hurdles).map(function (h) { return h.name + '(' + STAT_LABEL[h.stat] + ')'; }).join('·') : '') + (covers.concat(veils).concat(hurdles).some(function (x) { return x.temp; }) ? ' · (‘잠시’가 붙은 것은 곧 사라진다)' : ''), 'sys');
     if (d.combat.alarm) this.log(d, '호루라기 소리! 증원이 ' + d.combat.alarm + '합 뒤 도착한다.', 'bad');
     /* 관헌의 태세: 모두 '생포'로 시작, 격화도는 감시도에서 (STANCE) */
     var heat0 = d.player.heat || 0;
@@ -2423,17 +2471,18 @@ class Component extends DCLogic {
     var spot = function (gap) { for (var t = 0; t < 40; t++) { var x = Math.round((a + 0.5 + Math.random() * (b - a - 1)) * 10) / 10; if (!taken().some(function (q) { return Math.abs(q - x) < gap; })) return x; } return null; };
     if (b > ar.hi) ar.hi = b; if (a < ar.lo) ar.lo = a;
     /* 출구: 다른 출구와 exitGap 이상 떨어진 자리에만 */
-    if (Math.random() < G.cExit) {
+    var dn = ar.dense || 1;
+    if (!ar.noExits && Math.random() < G.cExit) {
       for (var t = 0; t < 20; t++) {
         var ex = Math.round((a + 1 + Math.random() * (b - a - 2)) * 10) / 10;
         if (ar.exits.some(function (x) { return Math.abs(x.at - ex) < G.exitGap; })) continue;
         ar.exits.push({ at: ex, name: pick(ar.pool.exit) }); break;
       }
     }
-    for (var i = gp(G.cCovers); i > 0; i--) { var at = spot(G.coverGap); if (at !== null) ar.covers.push({ at: at, name: pick(ar.pool.cover), obscure: Math.random() < VEIL.coverChance }); }
-    for (var j = gp(G.cVeils); j > 0; j--) { var va = spot(G.veilGap); if (va !== null) ar.veils.push({ at: va, name: pick(ar.pool.veil) }); }
-    for (var h = gp(G.cHurdles); h > 0; h--) { var ha = spot(G.hurdleGap); if (ha !== null) ar.hurdles.push(Object.assign({ at: ha }, pick(HURDLES))); }
-    if (Math.random() < G.cCombo) { var po = OBSTACLES.filter(function (o) { return !o.temp; }); this.placeObstacle(ar, pick(po), c.px, c.foes, false, null, [a, b]); }
+    for (var i = gp(G.cCovers) * dn; i > 0; i--) { var at = spot(G.coverGap); if (at !== null) ar.covers.push({ at: at, name: pick(ar.pool.cover), obscure: Math.random() < VEIL.coverChance }); }
+    for (var j = gp(G.cVeils) * dn; j > 0; j--) { var va = spot(G.veilGap); if (va !== null) ar.veils.push({ at: va, name: pick(ar.pool.veil) }); }
+    for (var h = (gp(G.cHurdles) + (dn > 1 ? 1 : 0)) * dn; h > 0; h--) { var ha = spot(G.hurdleGap); if (ha !== null) ar.hurdles.push(Object.assign({ at: ha }, pick(ar.hurdlePool || HURDLES))); }
+    if (Math.random() < G.cCombo * dn) { var po = ar.permPool || OBSTACLES.filter(function (o) { return !o.temp; }); this.placeObstacle(ar, pick(po), c.px, c.foes, false, null, [a, b]); }
     ['exits', 'covers', 'veils', 'hurdles'].forEach(function (k) { ar[k].sort(function (x, y) { return x.at - y.at; }); });
   }
   /* 방해물 하나를 전장에 놓는다: 성질마다 covers/veils/hurdles 에 같은 oid 로 넣는다 · temp 면 남은 합(ttl) */
@@ -2468,7 +2517,7 @@ class Component extends DCLogic {
     });
     var nTemp = {}; ['covers', 'veils', 'hurdles'].forEach(function (k) { (ar[k] || []).forEach(function (x) { if (x.temp) nTemp[x.oid] = 1; }); });
     if (Object.keys(nTemp).length < OBST_GEN.maxTemp && Math.random() < OBST_GEN.spawn) {
-      var pool = OBSTACLES.filter(function (o) { return o.temp; }), o = pool[Math.floor(Math.random() * pool.length)];
+      var pool = ar.tempPool || OBSTACLES.filter(function (o) { return o.temp; }), o = pool[Math.floor(Math.random() * pool.length)];
       var placed = this.placeObstacle(ar, o, c.px, c.foes, true);
       if (placed) {
         ['covers', 'veils', 'hurdles'].forEach(function (k) { ar[k].sort(function (a, b) { return a.at - b.at; }); });
@@ -2598,7 +2647,8 @@ class Component extends DCLogic {
     if (!e.inCover && cv && hasAnyGun(p) && roll() < P.cover) return A('takeCover');
     if (c.inCover && this.coverFaces(c, e) && e.aim <= 0 && roll() < 0.5) return A('aim');
     if (Math.abs(dist - T.pref) > 4 && !e.inCover) return A('shift');
-    return A('shoot');
+    /* 한 발에 두 합 드는 총(헌병 소총 등): 장전·겨누기가 안 됐으면 이번 합은 장전 */
+    return A(T.shotTurns > 1 && !e.ready ? 'ready' : 'shoot');
   }
   /* 적이 이번 합에 닿을 수 있는 엄폐물 (나를 넘어가지 않고) */
   foeCoverSpot(c, e) {
@@ -2686,6 +2736,13 @@ class Component extends DCLogic {
       if (melee && c.inCover) { c.inCover = false; this.log(d, e.name + josaIGa(e.name) + ' 엄폐물 뒤로 파고들어 나를 끌어냈다 — 엄폐가 풀렸다.', 'bad'); }
     } else this.log(d, e.name + '의 공격 — 빗나감' + (!melee && this.coverFaces(c, e) ? ' (엄폐물에 맞았다)' : ''), 'sys');
     e.aim = 0;
+  }
+  /* 지도에서 적을 누르면: 표적으로 삼고 정보 카드를 연다 (표적을 다시 누르면 닫는다) */
+  pickFoe(uid) {
+    var s = this.state; if (!s.combat) return;
+    if (s.combat.target === uid) { this.setState({ foeCard: s.foeCard === uid ? null : uid }); return; }
+    if (s.rolling || s.qte) return;
+    var d = this.draft(); d.combat.target = uid; this.syncTarget(d.combat); d.foeCard = uid; this.setState(d);
   }
   setTarget(uid) {
     var s = this.state; if (s.rolling || s.qte || !s.combat) return;
@@ -2998,7 +3055,7 @@ class Component extends DCLogic {
         this.foeAttack(d, e);
       } else if (e.grabbed > 0) {
         /* 잡힌 적은 자리를 옮기지 못한다: 손이 닿으면 그 자리에서 때리고, 아니면 버둥거린다 */
-        if (dist <= reach && ['attack', 'charge', 'approach', 'grab', 'shoot', 'aim', 'shift', 'blockExit', 'flank'].indexOf(it.type) >= 0) this.foeAttack(d, e);
+        if (dist <= reach && ['attack', 'charge', 'approach', 'grab', 'shoot', 'aim', 'shift', 'blockExit', 'flank'].indexOf(it.type) >= 0 || it.type === 'ready') this.foeAttack(d, e);
         else this.log(d, e.name + josaIGa(e.name) + ' 붙잡힌 채 버둥거린다.', 'foe');
       } else if (it.type === 'flee') {
         e.out = true; e.fled = true;
@@ -3048,10 +3105,11 @@ class Component extends DCLogic {
       } else {
         if (dist <= reach) this.foeAttack(d, e);
         else if (it.type === 'aim') { e.aim = TACTIC.aim; this.log(d, e.name + josaIGa(e.name) + ' 숨을 고르며 겨눈다.', 'foe'); }
+        else if (it.type === 'ready' || (T.shotTurns > 1 && !e.ready && it.type === 'shoot')) { e.ready = true; this.log(d, e.name + josaIGa(e.name) + ' 노리쇠를 당겨 장전하고 총을 겨눈다. (다음 합에 쏜다)', 'foe'); }
         else {
           /* 움직였으면 이번엔 쏘지 않는다 (이동과 공격은 한 번에 하나) */
           if (Math.abs(dist - T.pref) > 4 && !(e.grabbed > 0) && !e.inCover) { this.foeMove(c, e, T.pref); this.log(d, e.name + josaIGa(e.name) + ' 자리를 옮긴다. 거리 ' + this.fmtM(this.distOf(c, e)), 'foe'); }
-          else this.foeAttack(d, e);
+          else { this.foeAttack(d, e); if (T.shotTurns > 1) e.ready = false; }
         }
       }
       if (e.blind > 0) e.blind--;
@@ -3883,9 +3941,12 @@ class Component extends DCLogic {
           } else if (o.apply && ISSUE[o.apply]) {
             var IS = ISSUE[o.apply];
             tag.push('결과는 ' + (showOdds ? (IS.weeks - IS.spread) + '~' + (IS.weeks + IS.spread) + '주 뒤' : '약 ' + IS.weeks + '주 뒤') + ' · ' + (IS.auto && self.condOk(p, IS.auto, s) ? '판정 없이 발급' : STAT_LABEL[IS.stat] + ' 판정' + (showOdds ? ' ' + self.tgt(diffTarget(p[IS.stat], IS.diff)) + '%' : '') + ' · 실패하면 수수료만 날림'));
+          } else if (o.cert === 'fake_id') {
+            tag.push(showOdds ? '통할 확률 ' + Math.round(CERT.fakePass * 100) + '% · 들통 ' + Math.round(CERT.fakeCaught * 100) + '%' : '안 통하면 몸수색 · 들통나면 큰일');
           } else if (o.cert === 'residence') {
             tag.push(showOdds ? '통할 확률 ' + Math.round(CERT.residencePass * 100) + '% · 안 통하면 몸수색 (놓칠 확률 +' + Math.round(CERT.residenceMiss * 100) + '%)' : '안 통하면 몸수색');
           } else if (!o.check && !o.cost) tag.push(o.ok && o.ok.fight ? '전투 발생' : '판정 없음');
+          var so = self.soldOut(p, o); if (so) { lacking = true; tag = ['다 팔렸다 · 아직 안 들어왔다' + (showOdds ? ' (' + so + '주 뒤)' : '')]; }
           var why = self.optReason(o, p);
           return { label: o.label, tag: tag.join(' · '), why: why, hasWhy: !!why, hasChance: hasChance, chanceText: chanceText, tagColor: /전투|발각/.test(tag.join(' ')) ? KIND_COLOR.fight : '#5B5246', num: ['一', '二', '三', '四', '五', '六', '七'][i] || String(i + 1), disabled: rolling || lacking, choose: function () { self.choose(i); } };
         }) };
@@ -3909,7 +3970,7 @@ class Component extends DCLogic {
       btn: o.fight ? '전투 개시' : o.next ? '계속' : '다음으로', btnBg: o.fight ? accent : '#1E1B16', cont: function () { self.cont(); },
       canStash: !o.fight };
 
-    var cbv = { tabs: [], tabSkill: false, tabMove: false, tabAct: false, noActions: false, detail: false, detailText: '', toggleDetail: function () {}, stepText: '', name: '', title: '', desc: '', hp: 0, maxHp: 1, hpPct: 0, statLine: '', round: 0, guard: false, actions: [], groups: [], status: [], hasStatus: false,
+    var cbv = { cardOn: false, cardL: 'auto', cardR: 'auto', cardTop: 6, cardClose: function () {}, arrowL: { off: true, op: 0.35, tip: '', go: function () {} }, arrowR: { off: true, op: 0.35, tip: '', go: function () {} }, tabs: [], tabSkill: false, tabMove: false, tabAct: false, noActions: false, detail: false, detailText: '', toggleDetail: function () {}, stepText: '', name: '', title: '', desc: '', hp: 0, maxHp: 1, hpPct: 0, statLine: '', round: 0, guard: false, actions: [], groups: [], status: [], hasStatus: false,
       field: { feedMine: [], feedFoe: [], feedMineLabel: '', vFoes: [], offL: [], offR: [], walls: [], vTicks: [], vCovers: [], vVeils: [], veilOn: false, veilText: '', name: '', dist: '', px: 0, persText: '', readLv: '', shaken: false, offerOn: false, foeCoverOn: false, foes: [], foeList: [], multi: false, surrounded: false, held: false, heldText: '', vExits: [], covers: [], ticks: [], ap: [], apText: '', attacksText: '', coverText: '', hasCover: false, alarmOn: false, alarmText: '', intent: '', hitText: '', moves: [] } };
     if (s.combat && p) {
       var e = s.combat.enemy, cmb = s.combat;
@@ -4007,8 +4068,8 @@ class Component extends DCLogic {
       var offL = [], offR = [];
       var viewFoes = [];
       this.alive(cmb).forEach(function (f) {
-        var on = f.uid === cmb.target, pick = guard('foe:' + f.uid, function () { self.setTarget(f.uid); }), fTip = tipH('foe:' + f.uid).in;
-        if (inView(f.x)) viewFoes.push({ tipIn: fTip, l: VP(f.x), on: on, ring: on ? '#E3B04B' : '#F6EFDF', size: on ? 28 : 22, half: on ? 14 : 11, tag: f.name.slice(0, 1), name: f.name + (f.backup ? '(증원)' : ''), labelColor: on ? '#1E1B16' : '#5B5246', weight: on ? 800 : 600, pick: pick, title: f.name + ' · 체력 ' + Math.max(0, f.hp) + '/' + f.maxHp + ' · ' + self.fmtM(self.distOf(cmb, f)) + (on ? ' (표적)' : ' — 눌러서 표적으로') });
+        var on = f.uid === cmb.target, pick = guard('foe:' + f.uid, function () { self.pickFoe(f.uid); }), fTip = tipH('foe:' + f.uid).in;
+        if (inView(f.x)) viewFoes.push({ tipIn: fTip, l: VP(f.x), on: on, ring: on ? '#E3B04B' : '#F6EFDF', z: on ? 4 : 3, size: on ? 38 : 30, half: on ? 19 : 15, hpPct: Math.max(0, Math.round(f.hp / f.maxHp * 100)), intent: f.intent ? f.intent.text : '', tag: f.name.slice(0, 1), name: f.name + (f.backup ? '(증원)' : ''), labelColor: on ? '#1E1B16' : '#5B5246', weight: on ? 800 : 600, pick: pick, title: f.name + ' · 체력 ' + Math.max(0, f.hp) + '/' + f.maxHp + ' · ' + self.fmtM(self.distOf(cmb, f)) + (on ? ' (표적)' : ' — 눌러서 표적으로') });
         else (f.x < vl ? offL : offR).push({ tipIn: fTip, text: (f.x < vl ? '◀ ' : '') + f.name + ' ' + self.fmtM(f.x - me) + (f.x < vl ? '' : ' ▶'), bg: on ? '#1E1B16' : '#9E2B20', fg: on ? '#E3B04B' : '#F6EFDF', pick: pick, isFoe: true });
       });
       var vExits = [];
@@ -4060,7 +4121,14 @@ class Component extends DCLogic {
       var tabs = [{ k: 'skill', label: '기술', n: nSk }, { k: 'move', label: '이동', n: moves.length }, { k: 'act', label: '행동', n: nAct }].map(function (t) {
         var on = t.k === tabNow; return { tipIn: tipH('tab:' + t.k).in, label: t.label, n: t.n, on: on, bg: on ? '#1E1B16' : '#F6EFDF', fg: on ? '#F6EFDF' : '#1E1B16', pick: guard('tab:' + t.k, function () { self.setState({ cbTab: t.k }); }) };
       });
-      cbv = { name: e.name, title: e.title, desc: e.desc, hp: Math.max(0, e.hp), maxHp: e.maxHp,
+      var cardSide = e.x < cmb.px ? 'L' : 'R', mkArrow = function (dir) {
+        var lim = dir > 0 ? limR - cmb.px : cmb.px - limL, off = rolling || !!cmb.held || lim < 0.05;
+        var hN = hdNote(cmb.px + dir * Math.min(step, Math.max(0, lim)));
+        return { off: off && !s.infoMode, op: off ? 0.35 : 1, tip: cmb.held ? '붙잡혀 움직일 수 없다' : lim < 0.05 ? '적이 막고 있다' : '약 ' + Math.min(step, lim).toFixed(1) + 'm · 행동력 1' + hN, go: guard('move', function () { self.move(dir > 0 ? 'R' : 'L'); }) };
+      };
+      cbv = { cardOn: s.foeCard === cmb.target, cardL: cardSide === 'L' ? '58px' : 'auto', cardR: cardSide === 'R' ? '58px' : 'auto', cardTop: 6 + (cardSide === 'L' ? offL.length : offR.length) * 21,
+        cardClose: function () { self.setState({ foeCard: null }); }, arrowL: mkArrow(-1), arrowR: mkArrow(1),
+        name: e.name, title: e.title, desc: e.desc, hp: Math.max(0, e.hp), maxHp: e.maxHp,
         tabs: tabs, tabSkill: tabNow === 'skill', tabMove: tabNow === 'move', tabAct: tabNow === 'act', noActions: !nAct,
         detail: !!s.cbDetail, detailText: s.cbDetail ? '간단히' : '자세히', toggleDetail: function () { self.setState({ cbDetail: !self.state.cbDetail }); },
         stepText: '한 걸음 약 ' + step.toFixed(1) + 'm (조금씩 달라진다)',

@@ -340,7 +340,7 @@ Object.keys(CITIES).forEach(function (to) {
     name: function () { return CITIES[to].name + '행 기차'; },
     sub: function (p) {
       var t = trainOf((p && p.city) || START_CITY, to);
-      return t.line + ' · 3등 ' + t.fare + '원' + ((p.money || 0) < t.fare ? ' (돈이 모자란다)' : '') + ' · 역에서 일을 한 번 겪고 떠난다';
+      return t.line + ' · 3등 ' + t.fare + '원' + ((p.money || 0) < t.fare ? ' (돈이 모자란다)' : '') + ' · 역에서 한 번, 기차 안에서 두 번 일을 겪는다 · 1주 걸림';
     },
     next: function (p) { return LOCS[cityDef(p.city).station].name + '에서 ' + CITIES[to].name + '행 기차를 탄다'; },
     loc: function (p) { return cityDef(p && p.city).station; },
@@ -969,3 +969,206 @@ LOCS.bs_market.events.push('bs_jangguk', 'bs_tujeon');
 OPTION_ALIGN['jn_tram|고등계 증표를 슬쩍 보인다'] = { kr: -4 };
 OPTION_ALIGN['py_shoes|행상 허가증을 내밀고 장수 편을 든다'] = { kr: 3 };
 OPTION_ALIGN['py_hooe|행상 허가증을 대고 소년을 제 조수라 한다'] = { kr: 3 };
+
+/* ───── 민족 광명회 (회장 정만) ─────
+   가입: 타협도 사건 al_kr_society (민족 타협도 150 이상, 한 번) → 태그 gm_member
+   이후 사건은 모두 일반 사건(모든 도시의 거리) — 태그가 있어야 나온다(needTag), 다음 단계 태그가 생기면 안 나온다(hideTag)
+   gm_member → gm_s1 밀정의 정체 → gm_s2 밀정 처단 → gm_s3 토호열신 응징 → gm_s4 조선인 경부보 처단 → gm_core 간부 / gm_humble 평대원
+   곁가지: gm_armory 결사의 무기고(가입 후, 한 번) · gm_raid 은신처 급습(gm_s2 뒤, 한 번) · gm_courier 광명회의 연락(가입 후, 되풀이) */
+Object.assign(EVENTS, {
+  gm_order1: { title: '첫 지령: 밀정의 얼굴', needTag: 'gm_member', hideTag: 'gm_s1',
+    text: '국밥을 다 비우자 주인이 그릇을 치우며 뚝배기 밑에 쪽지를 밀어 넣는다.\n〈광명. 표적 하 서방 — 사진관 주인. 고등계에 동포 이름을 판다는 소문. 사실인지 확인할 것. 정.〉\n하 서방이라면 동네 사람 누구나 아는 얼굴이다. 아이들 돌 사진을 싸게 찍어 주던 사람.',
+    options: [
+      { label: '하 서방을 미행한다', check: { stat: 'agi', diff: 'normal' },
+        ok: { text: '사흘을 따라다녔다. 사흘째 밤, 하 서방이 경찰서 뒷문으로 들어가는 것을 보았다. 나올 때 그의 손에는 두툼한 봉투가 들려 있었다.\n다음 날, 그가 사진을 찍어 준 집 둘이 고등계에 끌려갔다.\n국밥집 주인에게 본 대로 전했다. 주인이 말없이 고개를 끄덕인다.', tag: 'gm_s1', fx: { kr: 3, days: 7 } },
+        ng: { text: '골목을 돌던 하 서방이 갑자기 뒤를 돌아본다. 급히 몸을 숨겼지만, 그의 눈이 잠깐 당신 쪽에 머물렀다.\n오늘은 물러나야 한다.', fx: { heat: 1 } } },
+      { label: '술자리에서 떠본다', cost: { money: 2 }, check: { stat: 'int', diff: 'normal' },
+        ok: { text: '막걸리 몇 사발에 하 서방의 입이 풀린다. “요즘 세상에 줄을 잘 서야지. 내가 아는 나리가 경찰서에….”\n그가 무심코 꺼낸 이름들은 모두 지난달 끌려간 사람들이었다.\n확인은 끝났다.', tag: 'gm_s1', fx: { kr: 3 } },
+        ng: { text: '하 서방은 술만 받아 마시고 입을 꾹 다물었다. 오히려 당신에게 이것저것 캐묻는다.\n술값만 날렸다.', fx: { heat: 1 } } },
+      { label: '아직은 손대지 않는다', ok: { text: '쪽지를 아궁이에 넣었다. 확신 없이 남을 의심하고 싶지는 않다.\n하지만 지령은 다시 올 것이다.' } }
+    ] },
+  gm_order2: { title: '밀정 처단', needTag: 'gm_s1', hideTag: 'gm_s2',
+    text: '이번 쪽지는 짧다.\n〈하 서방. 처단. 정.〉\n쪽지 밑에 작은 종이 꾸러미가 하나 더 있다. 펼쳐 보니 하얀 가루. 그리고 하 서방이 매일 밤 다니는 길이 그려진 약도.\n그가 퇴근길에 고등계 형사와 동행한다는 소문도 있다.',
+    options: [
+      { label: '퇴근길 골목에서 기다린다', ok: { text: '가로등이 깨진 골목. 하 서방이 나타났다 — 형사 하나가 함께다.\n숨을 멈추고, 달려들었다.', tag: 'gm_s2', ambush: true, fight: 'hyungsa', fx: { kr: 8, heat: 3 } } },
+      { label: '독을 탄 술을 건넨다', check: { stat: 'int', diff: 'hard' },
+        ok: { text: '단골 선술집. 하 서방 옆자리에 앉아 술을 권했다. 그가 잔을 비우고, 비틀거리며 집으로 갔다.\n이튿날 아침, 사진관 셔터가 내려진 채 열리지 않았다.\n국밥집 주인이 당신 그릇에 고기를 한 점 더 얹는다.', tag: 'gm_s2', fx: { kr: 6, heat: 2 } },
+        ng: { text: '잔을 내밀던 손이 떨렸다. 하 서방이 잔을 내려놓고 당신을 빤히 본다.\n“…자네, 무슨 짓을.” 그가 호루라기를 꺼낸다.', fight: 'hyungsa', dist: 2, fx: { heat: 2 } } },
+      { label: '죽이는 대신 떠나라고 경고한다', check: { stat: 'str', diff: 'normal' },
+        ok: { text: '사진관 암실에서 그의 멱살을 잡았다. “사흘 준다. 이 동네를 떠나라. 다시 동포 이름을 입에 올리면 그땐 끝이다.”\n이튿날, 사진관은 텅 비어 있었다.\n정만의 전갈이 왔다. 〈다음엔 끝까지 하시오.〉', tag: 'gm_s2', fx: { kr: 3, heat: 1 } },
+        ng: { text: '하 서방이 당신 손을 뿌리치고 뒷문으로 달아났다. 그 길로 경찰서에 갔을 것이다.', fx: { heat: 3 } } },
+      { label: '아직 못 하겠다', ok: { text: '약도를 접어 품에 넣었다. 손이 떨려서 오늘은 안 된다.\n하 서방의 사진관에는 여전히 불이 켜져 있다.' } }
+    ] },
+  gm_tobo: { title: '토호열신의 곳간', needTag: 'gm_s2', hideTag: 'gm_s3',
+    text: '정만의 지령.\n〈윤 참봉. 소작료를 일곱 할로 올리고, 못 내는 집은 딸을 데려간다. 군자금 청은 순사를 불러 답했다. 처리할 것.〉\n윤 참봉의 기와집은 동네 끝에 있다. 높은 담, 무쇠 자물쇠가 달린 곳간, 몽둥이를 든 머슴들.',
+    options: [
+      { label: '곳간을 털어 소작인들에게 나눈다', check: { stat: 'agi', diff: 'normal' },
+        ok: { text: '그믐밤, 담을 넘어 곳간 자물쇠를 땄다. 쌀가마를 소달구지에 실어 소작인 마을 어귀마다 내려놓았다.\n아침에 윤 참봉의 고함이 온 동네에 울렸다. 소작인 마을에서는 오랜만에 밥 짓는 연기가 올랐다.', tag: 'gm_s3', fx: { money: 4, kr: 8, heat: 2 } },
+        ng: { text: '곳간 문을 여는 순간 개가 짖었다. 머슴들이 몽둥이를 들고 몰려나온다.', fight: 'wangpae_gang', dist: 3 } },
+      { label: '군자금을 내라고 을러댄다', check: { stat: 'str', diff: 'normal' },
+        ok: { text: '사랑방에 들이닥쳐 윤 참봉 앞에 단도를 꽂았다. “광명회요. 군자금을 내시오. 그리고 소작료는 다섯 할로 내리시오.”\n참봉이 벌벌 떨며 돈궤를 연다. 절반은 광명회로, 일부는 당신 몫으로 돌아왔다.', tag: 'gm_s3', fx: { money: 10, kr: 4, heat: 2 } },
+        ng: { text: '참봉이 비명을 지르자 머슴들이 몰려온다.', fight: 'wangpae_gang', dist: 2, fx: { heat: 1 } } },
+      { label: '윤 참봉을 처단한다', ok: { text: '밤늦게 사랑채 문을 열었다. 머슴들이 몽둥이를 들고 앞을 막아선다.', tag: 'gm_s3', ambush: true, fight: 'wangpae_gang', fx: { kr: 6, heat: 4 } } },
+      { label: '때를 기다린다', ok: { text: '담 너머 곳간을 한참 바라보다 돌아섰다. 아직은 때가 아니다.' } }
+    ] },
+  gm_police: { title: '조선인 경부보', needTag: 'gm_s3', hideTag: 'gm_s4',
+    text: '정만이 직접 쓴 쪽지. 붓끝이 거칠다.\n〈최달수. 고등계 경부보. 조선 사람이면서 동지 일곱을 잡아 고문했다. 그중 둘은 살아 나오지 못했다. 광명회의 이름으로 처단한다.〉\n최달수는 매일 저녁 같은 요릿집에 들렀다가 인력거를 타고 관사로 간다.',
+    options: [
+      { label: '요릿집 앞에서 노린다', ok: { text: '인력거꾼이 손잡이를 드는 순간, 당신이 앞을 막았다.\n최달수가 품에서 권총을 뽑는다. 요릿집에서 형사들이 뛰어나온다.', tag: 'gm_s4', ambush: true, fight: 'raid_light', fx: { kr: 10, heat: 4 } } },
+      { label: '관사에 경고장과 총알 한 발을 보낸다', check: { stat: 'int', diff: 'normal' },
+        ok: { text: '〈최달수. 네가 죽인 동지 둘의 이름을 기억하라. — 光明〉\n편지와 함께 총알 한 발을 관사 문틈에 끼워 두었다.\n일주일 뒤, 최달수가 전근을 청해 북쪽 국경으로 떠났다는 소문이 돌았다. 피는 흘리지 않았지만 그는 다시 이 도시의 동지를 잡지 못한다.', tag: 'gm_s4', fx: { kr: 4, heat: 1 } },
+        ng: { text: '관사 앞에서 순사에게 검문을 당했다. 편지는 버렸지만 얼굴을 보였다.', fx: { heat: 3 } } },
+      { label: '거사를 미룬다', ok: { text: '요릿집 맞은편 찻집에서 최달수가 웃으며 술잔을 드는 것을 지켜보기만 했다.\n오늘은 아니다.' } }
+    ] },
+  gm_jeongman: { title: '정만', needTag: 'gm_s4', hideTag: ['gm_core', 'gm_humble'],
+    text: '새벽, 방앗간 뒷방. 등잔 아래에 정만이 앉아 있다. 마흔 남짓, 왼손 손가락 둘이 없다. 그가 당신에게 잔을 채워 준다.\n“동지 덕에 이 도시의 개들이 겁을 먹었소. 밀정이 줄고, 참봉은 소작료를 내렸고, 최달수는 달아났지.”\n그가 잔을 비우고 당신을 똑바로 본다.\n“간부 자리가 비었소. 동지들의 이름과 무기고, 군자금이 모두 동지 손에 맡겨지오. 잡히면 가장 먼저 죽는 자리이기도 하오.”',
+    options: [
+      { label: '간부가 되겠다고 한다', ok: { text: '정만이 품에서 작은 놋쇠 도장을 꺼내 당신 손바닥에 올려놓는다. ‘光明’.\n“이제부터 동지가 지령을 내리는 쪽이오.”\n방앗간을 나서는 새벽, 동쪽 하늘이 희부옇게 밝아 온다.', tag: 'gm_core', fx: { kr: 10, money: 10, ammo: 6, heat: 2 } } },
+      { label: '평대원으로 남겠다고 한다', ok: { text: '“나는 지령을 받는 쪽이 맞소. 남 목숨까지 짊어질 그릇은 못 되오.”\n정만이 껄껄 웃는다. “그것도 아는 사람이 드물지.” 그가 구급약 꾸러미를 건넨다. “다치지 마시오. 동지는 귀하오.”', tag: 'gm_humble', fx: { kr: 5, medkit: 2 } } }
+    ] },
+  gm_armory: { title: '결사의 무기고', needTag: 'gm_member', hideTag: 'gm_armory',
+    text: '장터 엿장수가 엿판을 건네며 눈짓한다. 엿판 밑에 쪽지.\n〈오늘 밤 자정, 서문 밖 방앗간. 光明.〉\n방앗간 안, 등잔 하나. 광명회 청년이 쌀가마 하나를 칼로 가른다. 쌀 대신 기름 먹인 천 뭉치가 쏟아진다. 천을 풀자 권총 한 자루와 탄환이 나온다.\n“만주에서 어렵게 들여온 것이오. 정만 선생께서 동지에게 맡기라 하셨소. 함부로 쓰지 말고, 들키지도 마시오.”',
+    options: [
+      { label: '권총을 맡는다', ok: { text: '모제르 권총을 품에 넣었다. 청년이 당신의 손을 꽉 쥔다. “이 총이 겨눌 곳은 하나뿐이오.”\n돌아오는 길, 순사의 호루라기 소리마다 심장이 내려앉았다. 검문에 걸리면 끝이다.', tag: 'gm_armory', weapon: 'mauser', fx: { ammo: 5, kr: 5, heat: 2 } } },
+      { label: '탄환만 받아 둔다', ok: { text: '“총은 다른 동지에게 주시오. 나는 탄환만 숨겨 두겠소.”\n청년이 고개를 끄덕이며 탄환 꾸러미를 건넨다. “필요할 때 쓰시오.”', tag: 'gm_armory', fx: { ammo: 8, kr: 3, heat: 1 } } },
+      { label: '무기 대신 약을 청한다', ok: { text: '“나는 총보다 다친 동지를 돌보는 쪽이 맞소.”\n청년이 잠시 말이 없더니, 구석에서 약 상자를 꺼내 준다. “그것도 싸움이오.”', tag: 'gm_armory', fx: { medkit: 2, kr: 4 } } }
+    ] },
+  gm_raid: { title: '은신처 급습', needTag: 'gm_s2', hideTag: 'gm_raid',
+    text: '방앗간 뒷방에서 동지 셋과 다음 거사를 의논하던 밤. 바깥에서 개 짖는 소리가 뚝 그친다.\n누군가 창호지에 구멍을 뚫고 내다보더니 하얗게 질린다. “형사들이다. 앞뒤로 막았어.”\n등잔불을 끄는 순간, 문짝이 발길질에 흔들린다.',
+    options: [
+      { label: '동지들이 빠질 때까지 막아선다', ok: { text: '“먼저 가시오!” 동지들을 뒷창으로 밀어내고, 부서지는 문 앞에 섰다.', tag: 'gm_raid', fight: 'raid', dist: 2, fx: { kr: 8 } } },
+      { label: '지붕으로 달아난다', check: { stat: 'agi', diff: 'normal' },
+        ok: { text: '들보를 밟고 지붕으로 올라 기와를 타고 달렸다. 뒤에서 총성이 두 번 울렸다.\n다음 날 들으니 동지 하나가 잡혀갔다. 당신 이름은 끝내 불지 않았다고 한다.', tag: 'gm_raid', fx: { heat: 2, kr: 2 } },
+        ng: { text: '기왓장이 미끄러졌다. 마당에 떨어지자 형사들이 덮친다.', tag: 'gm_raid', fight: 'raid_light', dist: 1 } },
+      { label: '서류부터 아궁이에 던진다', check: { stat: 'int', diff: 'normal' },
+        ok: { text: '동지 명단과 암호표를 아궁이에 던져 넣었다. 종이가 다 타는 것을 보고서야 뒷문으로 빠졌다.\n형사들은 재만 뒤적였다. 광명회는 이번에도 살아남았다.', tag: 'gm_raid', fx: { kr: 6, heat: 1 } },
+        ng: { text: '서류가 다 타기 전에 문이 부서졌다.', tag: 'gm_raid', fight: 'raid', dist: 1 } }
+    ] },
+  gm_courier: { title: '광명회의 연락', needTag: 'gm_member',
+    text: '엿장수가 엿 한 가락을 덤으로 얹어 준다. 엿 속에 돌돌 만 종이가 박혀 있다.\n〈전갈. 남문 밖 주막 주모에게. 光明.〉\n순사들이 오늘따라 길목마다 서 있다.',
+    options: [
+      { label: '전갈을 나른다', check: { stat: 'agi', diff: 'easy' },
+        ok: { text: '장꾼들 틈에 섞여 남문을 지났다. 주모가 엿을 받아 들고 대신 동전 꾸러미를 쥐여 준다. “수고했소.”', fx: { money: 2, kr: 2 } },
+        ng: { text: '검문에 걸릴 뻔해 엿을 삼켜 버렸다. 전갈은 전하지 못했다.', fx: { heat: 1 } } },
+      { label: '오늘은 위험하다며 돌려준다', ok: { text: '엿을 돌려주자 엿장수가 고개를 끄덕인다. “다른 동지에게 맡기지.”' } }
+    ] }
+});
+['jongno', 'honmachi', 'station', 'py_market', 'py_river', 'py_station', 'bs_pier', 'bs_jangsu', 'bs_market'].forEach(function (l) {
+  LOCS[l].events.push('gm_order1', 'gm_order2', 'gm_tobo', 'gm_police', 'gm_jeongman', 'gm_armory', 'gm_raid', 'gm_courier');
+});
+
+/* 민족 광명회 곁가지 추가분 — 모두 한 번씩 (자기 태그가 생기면 다시 안 나옴)
+   gm_hide 쫓기는 동지 · gm_fund 군자금 모금 · gm_doubt 밀정 의심(gm_s1 뒤, 고등계 증표가 있으면 다른 결과) · gm_print 격문 등사 · gm_family 잡혀간 동지의 가족(gm_s2 뒤) */
+Object.assign(EVENTS, {
+  gm_hide: { title: '쫓기는 동지', needTag: 'gm_member', hideTag: 'gm_hide',
+    text: '자정 넘어 셋방 문이 세 번, 쉬고 두 번 울린다. 광명회 신호다.\n문을 열자 낯익은 청년이 쓰러지듯 들어온다. 옆구리를 움켜쥔 손가락 사이로 피가 배어 나온다.\n“순사 칼에… 하룻밤만, 하룻밤만 숨겨 주시오.”\n멀리서 호루라기 소리가 골목을 훑고 지나간다.',
+    options: [
+      { label: '다락에 숨기고 상처를 싸맨다', show: { min: { medkit: 1 } },
+        ok: { text: '구급약을 털어 상처를 동여매고 다락에 눕혔다. 새벽녘 순사 둘이 골목을 뒤졌지만 당신 방 문은 그냥 지나쳤다.\n아침에 청년이 사라지고 없었다. 머리맡에 〈은혜 잊지 않겠소〉라는 쪽지만 남았다.', tag: 'gm_hide', fx: { medkit: -1, kr: 8, heat: 1 } } },
+      { label: '다락에 숨긴다', check: { stat: 'int', diff: 'normal' },
+        ok: { text: '이불 더미 뒤 다락에 그를 밀어 넣었다. 순사가 문을 두드렸을 때, 졸린 얼굴로 하품을 하며 문을 열었다.\n“아무도 못 봤소.” 순사가 방 안을 한 번 훑어보고 돌아갔다.', tag: 'gm_hide', fx: { kr: 6, heat: 1 } },
+        ng: { text: '순사가 방바닥의 핏자국을 보았다. “이건 뭐야!”\n다락에서 청년이 뛰어내려 창문으로 몸을 던진다. 순사가 당신 멱살을 잡는다.', tag: 'gm_hide', fight: 'junsa', dist: 1, fx: { heat: 2 } } },
+      { label: '문을 닫는다', ok: { text: '“미안하오. 여기도 눈이 많소.”\n문을 닫았다. 문 너머에서 비틀거리는 발소리가 멀어진다.\n며칠 뒤 국밥집 주인이 당신 그릇을 말없이 탁 내려놓았다.', tag: 'gm_hide', fx: { kr: -6 } } }
+    ] },
+  gm_fund: { title: '군자금 모금', needTag: 'gm_member', hideTag: 'gm_fund',
+    text: '정만의 지령.\n〈만주의 동지들이 겨울을 넘길 솜옷이 없소. 군자금을 모으시오. 강요하지 말 것 — 우리는 토호가 아니오.〉\n장꾼들, 포목점 주인, 인력거꾼들. 모두 넉넉지 않은 살림이다.',
+    options: [
+      { label: '내 돈을 먼저 내놓는다', cost: { money: 8 }, ok: { text: '먼저 당신 주머니를 털어 보자기에 담았다. 그걸 본 포목점 주인이 말없이 돈궤를 열고, 인력거꾼이 동전 몇 닢을 보탰다.\n보자기는 생각보다 두둑해졌다. 엿장수가 그것을 받아 들며 고개를 숙인다.', tag: 'gm_fund', fx: { kr: 10 } } },
+      { label: '장터를 돌며 사람들을 설득한다', check: { stat: 'int', diff: 'normal' },
+        ok: { text: '“만주에서 얼어 죽는 건 우리 형제요, 우리 아들이오.”\n하루 종일 장터를 돌았다. 국밥 한 그릇 값, 짚신 한 켤레 값이 모여 보자기가 찼다.\n정만의 전갈이 왔다. 〈수고했소. 솜옷 서른 벌이 북으로 갔소.〉', tag: 'gm_fund', fx: { kr: 6, money: 1 } },
+        ng: { text: '사람들이 고개를 젓거나 못 들은 척한다. 한 노인이 귀띔한다. “조심하게. 저기 장터 끝 사내, 경찰서 끄나풀이야.”\n오늘은 접어야 했다.', fx: { heat: 2 } } },
+      { label: '일본인 상점 금고를 노린다', check: { stat: 'agi', diff: 'hard' },
+        ok: { text: '혼마치 잡화점 뒷문. 장부 서랍 속 지폐 다발을 챙겨 나왔다.\n정만은 돈을 받고도 한참 말이 없었다. “이번엔 받겠소. 하지만 우리 일이 도둑질로 보이면 안 되오.”', tag: 'gm_fund', fx: { money: 6, kr: 3, heat: 3 } },
+        ng: { text: '뒷문 빗장이 걸려 있었다. 덜컥거리는 소리에 가게 안에서 불이 켜진다. 순사를 부르는 소리.', tag: 'gm_fund', fight: 'junsa', dist: 3, fx: { heat: 2 } } }
+    ] },
+  gm_doubt: { title: '밀정 의심', needTag: 'gm_s1', hideTag: 'gm_doubt',
+    text: '방앗간 뒷방에 불려 갔다. 동지 셋이 굳은 얼굴로 앉아 있다. 가운데 사내가 입을 연다.\n“지난주 동지 둘이 잡혀갔소. 그 집을 아는 사람은 다섯. 그중 하나가 당신이오.”\n등잔불 아래, 사내의 손이 탁자 밑으로 내려가 있다.',
+    options: [
+      { label: '내 행적을 하나하나 밝힌다', check: { stat: 'int', diff: 'normal' },
+        ok: { text: '그날 어디서 누구와 있었는지, 몇 시에 셋방에 들어갔는지 낱낱이 댔다. 국밥집 주인이 증인이 되어 주었다.\n사흘 뒤, 진짜 밀정이 따로 밝혀졌다. 의심했던 사내가 찾아와 술잔을 내밀었다. “미안하오, 동지.”', tag: 'gm_doubt', fx: { kr: 6 } },
+        ng: { text: '말을 할수록 꼬였다. 사내들이 서로 눈짓한다. “당분간 지령은 없소. 지켜보겠소.”\n문을 나서는 등 뒤가 서늘했다.', tag: 'gm_doubt', fx: { kr: -8 } },
+        alt: [{ when: { items: ['tokko_badge'] }, check: false, ok: { text: '행적을 대려 품속 수첩을 꺼내는데, 놋쇠 증표가 함께 딸려 나와 탁자 위를 굴렀다.\n방 안이 얼어붙는다. 고등계 협력 증표.\n“…역시.” 사내가 탁자 밑에서 손을 뺀다. 칼이 들려 있다.', tag: ['gm_doubt', 'gm_expelled'], untag: 'gm_member', fight: 'youths', dist: 1, fx: { kr: -30 } } }] },
+      { label: '시험해 보라고 한다', ok: { text: '“말로는 못 믿겠지. 무슨 일이든 시키시오. 그걸로 증명하겠소.”\n사내들이 고개를 끄덕인다. 그날 밤 당신은 홀로 경찰서 앞 전봇대에 광명회 격문을 붙였다. 다음 날 의심은 거두어졌다.', tag: 'gm_doubt', fx: { kr: 5, heat: 3 } } },
+      { label: '화를 내며 나가 버린다', ok: { text: '“목숨 걸고 한 일을 이렇게 갚소?” 문을 박차고 나왔다.\n누구도 따라 나오지 않았다. 한동안 지령이 끊길 것이다.', tag: 'gm_doubt', fx: { kr: -4 } } }
+    ] },
+  gm_print: { title: '격문 등사', needTag: 'gm_member', hideTag: 'gm_print',
+    text: '엿장수가 보자기 하나를 맡긴다. 안에는 등사판과 잉크 한 통, 원고 한 장.\n〈동포여, 밀정을 경계하라. 동족을 파는 자는 광명의 칼을 피하지 못하리라. — 民族光明會〉\n“오백 장. 사흘 안에. 찍은 건 장날에 뿌리시오.”',
+    options: [
+      { label: '밤새 찍어 장날에 뿌린다', check: { stat: 'agi', diff: 'normal' },
+        ok: { text: '사흘 밤 동안 등사판을 밀었다. 손바닥이 잉크로 시커매졌다.\n장날 정오, 종루 위에서 격문을 뿌렸다. 하얀 종이가 눈처럼 장터에 쏟아졌다. 순사들이 호루라기를 불 때 당신은 이미 군중 속이었다.', tag: 'gm_print', fx: { kr: 8, heat: 3 } },
+        ng: { text: '종루 계단을 내려오는데 순사와 눈이 마주쳤다. 품에 남은 격문 뭉치가 불룩하다.', tag: 'gm_print', fight: 'junsa', dist: 2, fx: { heat: 3 } } },
+      { label: '찍어서 품에 지니고 다니며 나눈다', ok: { text: '찍은 격문을 품에 넣고 다니며 믿을 만한 사람에게 한 장씩 건넸다.\n남은 뭉치는 아직 품속에 있다. 검문에 걸리면 끝이다.', tag: 'gm_print', flag: 'leaflet', fx: { kr: 5 } } },
+      { label: '등사판을 돌려보낸다', ok: { text: '“지금은 순사 눈이 너무 많소.” 보자기를 엿장수에게 돌려주었다.\n엿장수가 아쉬운 얼굴로 다른 동지를 찾아갔다.', tag: 'gm_print' } }
+    ] },
+  gm_family: { title: '잡혀간 동지의 가족', needTag: 'gm_s2', hideTag: 'gm_family',
+    text: '하 서방 일 뒤로, 광명회 동지 하나가 끌려갔다. 서대문 형무소로 넘어갔다는 소식뿐이다.\n그의 집을 찾아갔다. 쪽방에 아낙과 어린 남매가 웅크리고 있다. 쌀독은 비었고, 아궁이는 며칠째 식어 있다.\n아낙이 당신을 알아보고 입술을 깨문다. “…그 사람은 언제 나와요?”',
+    options: [
+      { label: '가진 돈을 털어 준다', cost: { money: 6 }, ok: { text: '돈을 아낙 손에 쥐여 주었다. “쌀부터 사시오. 그 사람은… 꼭 나올 거요.”\n아이들이 당신 바짓가랑이를 잡는다. 대답할 말이 없었다.', tag: 'gm_family', fx: { kr: 10 } } },
+      { label: '면회를 다녀와 소식을 전한다', check: { stat: 'int', diff: 'hard' },
+        ok: { text: '먼 친척이라 둘러대고 형무소 면회를 얻어 냈다. 철창 너머 동지는 야위었지만 눈빛은 살아 있었다. “아무것도 안 불었소. 식구들을 부탁하오.”\n그 말을 그대로 아낙에게 전했다. 아낙이 처음으로 울었다.', tag: 'gm_family', fx: { kr: 8, heat: 2 } },
+        ng: { text: '형무소 간수가 서류를 훑더니 당신 이름을 따로 적는다. “친척? 다음에 다시 오시오.”\n면회는 못 했고, 이름만 남겼다.', fx: { heat: 3 } } },
+      { label: '광명회에 도움을 청하라고 일러 준다', ok: { text: '엿장수에게 가는 길을 일러 주었다. “거기 가서 내 이름을 대시오.”\n아낙이 고개를 숙인다. 당신은 그 집을 나서며 다시 오겠다는 말을 하지 못했다.', tag: 'gm_family', fx: { kr: 2 } } }
+    ] }
+});
+['jongno', 'honmachi', 'station', 'py_market', 'py_river', 'py_station', 'bs_pier', 'bs_jangsu', 'bs_market'].forEach(function (l) {
+  LOCS[l].events.push('gm_hide', 'gm_fund', 'gm_doubt', 'gm_print', 'gm_family');
+});
+/* 밀정으로 낙인찍혀 쫓겨나면(gm_expelled) 광명회 사건은 모두 끊긴다 */
+Object.keys(EVENTS).filter(function (id) { return /^gm_/.test(id); }).forEach(function (id) {
+  var h = EVENTS[id].hideTag; h = h ? (Array.isArray(h) ? h.slice() : [h]) : [];
+  if (h.indexOf('gm_expelled') < 0) h.push('gm_expelled');
+  EVENTS[id].hideTag = h;
+});
+
+/* ───── 기차 안 ─────
+   기차에 오르면 TRAIN_RIDE.events 개의 기차 사건(TRAIN_EVENTS 중 겹치지 않게)을 겪고 도착한다. 도착까지 TRAIN_RIDE.weeks 주가 흐른다.
+   기차 안 싸움은 ARENAS.train — 출구가 없고 방해물이 많다. 개발자 탭에서는 '3등 객차' 묶음에 보인다 */
+var TRAIN_RIDE = { events: 2, weeks: 1 };
+var TRAIN_EVENTS = ['tr_check', 'tr_pickpocket', 'tr_ronin', 'tr_refugee'];
+LOCS.train = { name: '3등 객차', hanja: '列車', sub: '달리는 기차 안',
+  events: TRAIN_EVENTS.slice(), work: [],
+  desc: '나무 의자가 줄지어 놓인 3등 객차. 석탄 연기와 땀 냄새, 보따리와 닭장이 통로를 메운다. 달리는 동안은 내릴 곳이 없다.' };
+Object.assign(EVENTS, {
+  tr_check: { title: '객차 검문', kind: 'fight', inspector: '헌병',
+    text: '객차 문이 덜컥 열리고 헌병 둘이 들어온다. 맨 앞의 헌병이 소리친다. “검문이다! 도민증과 짐을 내놓아라!”\n승객들이 일제히 고개를 숙인다. 헌병이 한 줄씩 짐을 풀어 헤치며 다가온다.\n달리는 기차 안이다. 달아날 곳은 없다.',
+    options: [
+      { label: '도민증을 내민다', check: { stat: 'edu', diff: 'normal' },
+        ok: { text: '헌병이 도민증을 한참 들여다보더니 던지듯 돌려준다. “다음.”' },
+        ng: { text: '“본적이 어디라고? 말이 다르잖아.” 헌병이 당신 팔을 잡아끈다. “짐부터 풀어!”', fx: { heat: 1 } } },
+      { label: '변소에 숨는다', check: { stat: 'agi', diff: 'normal' },
+        ok: { text: '헌병이 앞자리에서 실랑이하는 틈에 변소로 들어가 빗장을 걸었다. 문고리가 두어 번 덜컹거리다 조용해졌다.\n한참 뒤 나와 보니 검문은 다음 칸으로 넘어가 있었다.' },
+        ng: { text: '변소 문이 잠겨 있었다. 돌아서는데 헌병과 눈이 마주쳤다. “거기 너! 어디 가!”', fight: 'kenpei', dist: 4 } },
+      { label: '헌병을 덮친다', ok: { text: '헌병이 옆자리 노인의 보따리를 내던지는 순간, 몸을 날렸다.\n승객들이 비명을 지르며 의자 밑으로 숨는다.', ambush: true, fight: 'kenpei' } },
+      { label: '짐을 순순히 내놓는다', comply: true,
+        ok: { text: '헌병이 보따리를 뒤집어 털더니 침을 뱉고 지나간다. “다음.”' },
+        ng: { text: '“이건 뭐냐!”\n짐 속에서 {item}이(가) 나왔다. 헌병이 총검을 겨눈다. 승객들이 비명을 지르며 물러선다.', fight: 'kenpei' } }
+    ] },
+  tr_pickpocket: { title: '졸음 속의 손',
+    text: '기차의 흔들림에 깜빡 졸았다. 품속이 서늘하다 싶어 눈을 뜨니, 옆자리 사내의 손이 당신 주머니에서 빠져나가고 있다.\n사내가 태연하게 일어서 다음 칸으로 걸어간다.',
+    options: [
+      { label: '뒤쫓아 붙잡는다', check: { stat: 'agi', diff: 'normal' },
+        ok: { text: '연결 통로에서 사내의 뒷덜미를 낚아챘다. 사내가 지갑을 내던지고 다음 칸으로 달아났다.\n주운 지갑에는 당신 돈에 웃돈까지 들어 있었다. 남의 것까지 털고 다닌 모양이다.', fx: { money: 2 } },
+        ng: { text: '통로의 보따리에 걸려 넘어졌다. 고개를 드니 사내가 칼을 빼 들고 돌아서 있다.', fight: 'thief', dist: 2 } },
+      { label: '큰 소리로 소매치기라 외친다', check: { stat: 'str', diff: 'easy' },
+        ok: { text: '“소매치기다!” 고함에 승객 몇이 일어나 사내를 막아섰다. 사내가 돈을 바닥에 던지고 달아난다.' },
+        ng: { text: '아무도 나서지 않았다. 사내는 유유히 사라졌다. 돈이 꽤 비었다.', fx: { money: -3 } } },
+      { label: '그냥 둔다', ok: { text: '괜히 소란을 피우면 차장이 오고, 차장이 오면 헌병이 온다. 입술을 깨물고 창밖만 봤다.', fx: { money: -2 } } }
+    ] },
+  tr_ronin: { title: '술 취한 낭인',
+    text: '건너편 자리에서 술 냄새가 진동한다. 일본도를 무릎에 가로놓은 낭인이 조선인 노부부에게 시비를 건다.\n“요보! 이 자리는 내 자리다. 일어나!” 노인이 허리를 굽히는데도 낭인이 칼집으로 노인의 어깨를 찌른다.\n객차 안이 숨을 죽인다.',
+    options: [
+      { label: '내 자리를 내주며 달랜다', check: { stat: 'int', diff: 'normal' },
+        ok: { text: '“나리, 이 자리가 더 넓습니다.” 술병까지 내밀자 낭인이 껄껄 웃으며 옮겨 앉는다.\n노부부가 당신에게 삶은 감자 두 알을 쥐여 준다.', fx: { hp: 1, kr: 2 } },
+        ng: { text: '“조선 놈이 감히 훈계를?” 낭인이 칼을 뽑는다.', fight: 'ronin', dist: 2 } },
+      { label: '낭인의 손목을 잡는다', ok: { text: '칼집을 쥔 손목을 낚아챘다. 낭인의 눈이 뒤집힌다.\n승객들이 비명을 지르며 통로 양쪽으로 몰린다.', ambush: true, fight: 'ronin', fx: { kr: 3 } } },
+      { label: '못 본 척한다', ok: { text: '창밖만 보았다. 노인이 결국 통로에 쪼그려 앉았다.\n객차 안 누구도 서로를 보지 않았다.', fx: { kr: -2 } } }
+    ] },
+  tr_refugee: { title: '만주로 가는 사람들',
+    text: '통로에 한 가족이 웅크려 있다. 고향 땅을 동척에 빼앗기고 만주로 간다고 한다. 아이 하나가 열이 펄펄 끓는다.\n어미가 젖은 수건으로 아이 이마를 닦으며 연신 중얼거린다. “조금만 참아라, 조금만….”',
+    options: [
+      { label: '구급약을 나눠 준다', show: { min: { medkit: 1 } },
+        ok: { text: '해열에 쓰는 가루약을 물에 타 아이에게 먹였다. 새벽녘 아이의 열이 내렸다.\n어미가 당신 손을 붙잡고 한참 울었다. 아비가 품에서 꺼낸 마른 북어 한 마리를 억지로 쥐여 준다.', fx: { medkit: -1, kr: 6, hp: 1 } } },
+      { label: '돈을 쥐여 준다', cost: { money: 3 }, ok: { text: '“만주 가서 약부터 사시오.” 동전을 쥐여 주었다. 아비가 몇 번이고 허리를 굽힌다.', fx: { kr: 4 } } },
+      { label: '창밖을 본다', ok: { text: '창밖으로 빼앗긴 들판이 끝없이 지나갔다.\n아이의 기침 소리가 밤새 이어졌다.' } }
+    ] }
+});

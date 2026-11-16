@@ -122,6 +122,29 @@ var ARENAS = {
   station:  { name: '경성역 광장', len: 30, start: 15, exit: [10, 16], exitName: '대합실 출입구',
               covers: [{ at: 23, name: '분수대' }],
               coverNames: ['분수대', '짐 더미', '인력거 대기줄', '철제 난간'], exitNames: ['대합실 출입구', '화물 통로', '선로 건널목'], veilNames: ['기관차 증기', '대합실 인파', '신문 가판'] },
+  /* 기차 안: 출구가 없고(noExits) 방해물이 많다(dense) · 방해물 이름과 종류는 기차 전용 */
+  train:    { name: '달리는 3등 객차', len: 22, start: 6, exit: [3, 8], exitName: '', noExits: true, dense: 2,
+              covers: [], coverNames: ['나무 의자 등받이', '객차 칸막이', '석탄 난로', '차장실 문', '짐 궤짝', '변소 문짝'],
+              veilNames: ['새어 든 석탄 연기', '김 서린 유리창', '흔들리는 보따리 더미', '빽빽한 승객들', '매달린 손잡이 줄'],
+              hurdles: [
+                { name: '통로를 막은 보따리 더미', stat: 'str', diff: 'easy', ok: '보따리 더미를 밀어젖히고 지나갔다', ng: '보따리에 발이 걸려 고꾸라졌다' },
+                { name: '객차 연결 통로', stat: 'agi', diff: 'normal', ok: '덜컹거리는 연결판을 훌쩍 건넜다', ng: '연결판이 덜컹 흔들려 난간을 붙잡고 멈췄다' },
+                { name: '쏟아진 석탄 자루', stat: 'agi', diff: 'easy', ok: '굴러다니는 석탄을 밟지 않고 건넜다', ng: '석탄을 밟고 미끄러졌다' },
+                { name: '통로에 웅크린 피난민 가족', stat: 'agi', diff: 'normal', ok: '아이들 머리 위로 조심스레 넘어갔다', ng: '아이가 울음을 터뜨려 차마 넘지 못했다' },
+                { name: '닭장 짐짝', stat: 'str', diff: 'normal', ok: '닭장을 들어 옆으로 밀쳤다', ng: '닭들이 푸드덕거려 물러섰다' },
+                { name: '뒤엉킨 짐 선반 그물', stat: 'agi', diff: 'hard', ok: '내려앉은 그물을 몸을 비틀어 빠져나갔다', ng: '그물에 팔이 감겼다' }
+              ],
+              permObst: [
+                { name: '짐을 쌓아 올린 좌석', cover: true, hurdle: { stat: 'str', diff: 'easy', ok: '짐 더미를 타 넘었다', ng: '짐 더미가 무너져 내렸다' } },
+                { name: '커튼 친 칸막이', cover: true, veil: true },
+                { name: '보따리 진 장꾼 무리', veil: true, hurdle: { stat: 'str', diff: 'normal', ok: '장꾼들을 어깨로 밀고 지나갔다', ng: '장꾼들에게 떠밀렸다' } }
+              ],
+              tempObst: [
+                { name: '터널 속 어둠', veil: true, temp: [1, 2], come: '기차가 터널로 들어선다 — 객차 안이 캄캄해진다', gone: '터널을 빠져나왔다. 빛이 쏟아진다' },
+                { name: '역류한 석탄 연기', veil: true, temp: [1, 3], come: '창틈으로 시커먼 석탄 연기가 밀려든다', gone: '연기가 빠져나갔다' },
+                { name: '급정거로 쏟아진 짐', hurdle: { stat: 'agi', diff: 'easy', ok: '쏟아진 짐 사이를 건넜다', ng: '짐에 걸려 넘어졌다' }, temp: [2, 4], come: '기차가 끼익 급정거한다 — 선반의 짐이 통로로 쏟아진다', gone: '승객들이 짐을 주워 올렸다' },
+                { name: '우르르 일어선 승객들', veil: true, hurdle: { stat: 'str', diff: 'normal', ok: '일어선 승객들을 헤치고 지나갔다', ng: '승객들에게 떠밀렸다' }, temp: [1, 3], come: '소란에 승객들이 우르르 일어선다', gone: '승객들이 다시 자리에 주저앉았다' }
+              ] },
   default:  { name: '북촌 골목', len: 24, start: 8, exit: [3, 8], exitName: '담장 틈',
               covers: [{ at: 5, name: '돌담 모퉁이' }, { at: 14, name: '장독대' }],
               coverNames: ['돌담 모퉁이', '장독대', '우물가', '장작더미'], exitNames: ['담장 틈', '쪽문', '개구멍', '지붕 위'], veilNames: ['빨래 줄', '아궁이 연기', '짚단 더미'] }
@@ -248,12 +271,12 @@ var INTENT_TEXT = {
   stunned: '정신을 못 차리고 있다', attack: '덤벼들려 한다', approach: '다가오려 한다', charge: '곧장 달려들려 한다',
   grab: '멱살을 잡으려 한다', flank: '옆으로 돌아 반대편을 노린다', blockExit: '출구 쪽을 막으려 한다',
   retreat: '뒤로 물러서려 한다', flee: '달아나려 한다', subdue: '덤벼들려 한다', bind: '덤벼들려 한다', closein: '다가오려 한다', takeCover: '엄폐물 뒤로 숨으려 한다', aim: '숨을 고르며 겨누려 한다',
-  shift: '자리를 옮기려 한다 (이번엔 쏘지 않는다)', shoot: '총을 쏘려 한다', intimidate: '겁을 주려 한다', offer: '항복을 권하려 한다', whistle: '호루라기로 증원을 부르려 한다'
+  shift: '자리를 옮기려 한다 (이번엔 쏘지 않는다)', ready: '노리쇠를 당겨 장전한다 (다음 합에 쏜다)', shoot: '총을 쏘려 한다', intimidate: '겁을 주려 한다', offer: '항복을 권하려 한다', whistle: '호루라기로 증원을 부르려 한다'
 };
 var INTENT_HINT = {
   attack: '몸에 힘이 들어간다', approach: '발끝이 이쪽을 향한다', charge: '어깨가 앞으로 쏠린다', grab: '손을 뻗을 듯 어깨가 들썩인다',
   subdue: '몸에 힘이 들어간다', bind: '몸에 힘이 들어간다', closein: '발끝이 이쪽을 향한다', flank: '눈길이 내 옆쪽으로 흐른다', blockExit: '출구 쪽을 힐끗 본다', retreat: '무게가 뒤로 실린다', flee: '뒷걸음질 칠 기색이다',
-  takeCover: '주변 엄폐물을 살핀다', aim: '숨이 가라앉는다', shift: '발을 옮길 기색이다', shoot: '방아쇠에 손가락이 걸려 있다',
+  takeCover: '주변 엄폐물을 살핀다', aim: '숨이 가라앉는다', shift: '발을 옮길 기색이다', ready: '총을 고쳐 잡는다', shoot: '방아쇠에 손가락이 걸려 있다',
   intimidate: '입을 열려 한다', offer: '말을 걸려 한다', whistle: '가슴팍의 무언가를 더듬는다'
 };
 var TAUNT_LINES = ['조선 놈 하나쯤 여기서 죽어도 아무도 모른다.', '무릎 꿇으면 목숨은 살려 주지.', '네 식구들 얼굴도 다 알고 있다.', '헛힘 쓰지 마라. 끝났어.'];
@@ -282,7 +305,8 @@ var ENCOUNTERS = {
 var FOE_TACTICS = {
   junsa:     { style: 'melee', reach: 1.5, speed: 4, start: 4, whistle: true, grab: 0.3 },
   hbojo:     { style: 'melee', reach: 1.5, speed: 4, start: 4, whistle: true, grab: 0.35 },
-  kenpei:    { style: 'gun', pref: 10, reach: 2, speed: 3, start: 8 },
+  /* shotTurns: 총 한 발에 드는 합 (2 = 한 합은 장전·겨누기, 다음 합에 발사) */
+  kenpei:    { style: 'gun', pref: 10, reach: 2, speed: 3, start: 8, shotTurns: 2 },
   hyungsa:   { style: 'gun', pref: 5, reach: 1.5, speed: 3, start: 5, whistle: true, grab: 0.3 },
   ronin:     { style: 'melee', reach: 2, speed: 4, start: 3 },
   thief:     { style: 'melee', reach: 1.2, speed: 5, start: 2 },

@@ -455,14 +455,14 @@ Object.assign(ALIGN_EVENTS, {
       { label: '고맙게 받는다', ok: { text: '꾸러미 안에는 구급약과 주먹밥, 그리고 동전 몇 닢.\n“고맙소. 이 은혜는….” “은혜는 무슨.” 엿장수가 손을 내젓는다. “우리끼리 안 돕고 누가 돕겠나.”', fx: { medkit: 1, money: 2, hp: 2 } } },
       { label: '더 어려운 사람에게 돌려 달라고 한다', ok: { text: '“마음은 고맙지만, 나보다 더 배곯는 사람이 많소. 저 아래 과부댁 아이들한테 주시오.”\n엿장수가 껄껄 웃는다. “이러니 동네 사람들이 자네 얘기를 하지.”\n그날 이후 장터 사람들이 당신을 보면 먼저 인사를 건넨다.', fx: { kr: 8, heat: -1 } } }
     ] },
-  al_kr_society: { title: '비밀결사의 권유', kind: 'align', cond: function (p) { return p.kr >= 150; },
-    text: '밤늦게 셋방 문을 두드리는 소리. 낯선 청년이 모자를 벗는다. 단정한 양복 차림, 눈빛이 날카롭다.\n“여러 동지에게서 당신 이야기를 들었소. 우리는 이름을 밝힐 수 없는 모임이오.”\n그가 방 안을 한 번 둘러보고, 문고리를 걸고, 목소리를 낮춘다.\n“군자금을 모으고, 밀서를 나르고, 때로는 더 위험한 일도 하오. 당신 같은 사람이 필요하오.”\n잠깐의 침묵.\n“다만, 한 번 들어오면 돌아갈 수 없소. 잡히면 고문을 견뎌야 하고, 동지의 이름을 불어서는 안 되오.”',
+  al_kr_society: { title: '민족 광명회', kind: 'align', cond: function (p) { return p.kr >= 150 && !(p.flags && p.flags.gm_offer); },
+    text: '밤늦게 셋방 문을 두드리는 소리. 낯선 청년이 모자를 벗는다. 단정한 양복 차림, 눈빛이 날카롭다.\n“여러 동지에게서 당신 이야기를 들었소. 우리는 ‘민족 광명회’라 하오.”\n그가 방 안을 한 번 둘러보고, 문고리를 걸고, 목소리를 낮춘다.\n“동포를 팔아먹는 밀정, 백성 등골을 빼먹는 토호열신, 제 동족을 잡아 가두는 조선인 순사. 우리는 그런 자들을 처단하오. 회장은 정만 선생이시오.”\n잠깐의 침묵.\n“한 번 들어오면 돌아갈 수 없소. 잡히면 고문을 견뎌야 하고, 동지의 이름은 무덤까지 가져가야 하오. 이 제안은 단 한 번뿐이오.”',
     options: [
-      { label: '결사에 들어간다', ok: { text: '청년이 작은 칼로 손가락 끝을 벤다. 당신도 따라 했다. 핏방울이 한지 위에 나란히 떨어진다.\n“오늘부터 당신은 동지요.”\n그가 남긴 보따리에는 탄환 몇 발과 연락 암호가 적힌 종이가 들어 있었다.\n이제 당신은 혼자가 아니다. 그리고 더 이상 평범한 조선인도 아니다.', fx: { ammo: 4, kr: 15, heat: 2 } } },
-      { label: '시험해 보라고 한다', check: { stat: 'int', diff: 'normal' },
-        ok: { text: '“말로는 누구나 동지라 하오. 당신이 밀정이 아니라는 걸 어떻게 아오?”\n청년이 처음으로 웃는다. “그 말을 하는 걸 보니 믿을 만하군.”\n그가 남긴 쪽지의 주소에서, 당신은 몇몇 동지의 얼굴을 익혔다.', fx: { kr: 8, int: 1 } },
-        ng: { text: '“의심이 많은 건 좋소. 하지만 우리에겐 시간이 없소.”\n청년이 모자를 쓰고 일어선다. “다음에 다시 찾아오겠소. 몸조심하시오.”' } },
-      { label: '아직은 때가 아니라고 한다', ok: { text: '“나는… 아직 그만한 각오가 없소.”\n청년이 고개를 끄덕인다. “솔직해서 좋소. 각오 없이 들어온 사람이 제일 위험하오.”\n“마음이 서면 장터 엿장수에게 말하시오.”', fx: { kr: -2 } } }
+      { label: '광명회에 들어간다', ok: { text: '청년이 작은 칼로 손가락 끝을 벤다. 당신도 따라 했다. 핏방울이 한지 위 ‘光明’ 두 글자 옆에 나란히 떨어진다.\n“오늘부터 당신은 광명회 동지요. 지령은 국밥집 주인을 통해 갈 것이오.”\n그가 남긴 보따리에는 탄환 몇 발과 연락 암호가 적힌 종이가 들어 있었다.\n이제 당신은 혼자가 아니다. 그리고 더 이상 평범한 조선인도 아니다.', tag: 'gm_member', flag: 'gm_offer', fx: { ammo: 4, kr: 15, heat: 2 } } },
+      { label: '정만 선생을 직접 뵙고 정하겠다고 한다', check: { stat: 'int', diff: 'normal' },
+        ok: { text: '“목숨을 거는 일이오. 누구 밑에서 싸우는지는 알아야겠소.”\n청년이 처음으로 웃는다. “그 말을 하는 걸 보니 믿을 만하군.”\n이틀 뒤 새벽, 방앗간 뒷방. 마흔 남짓, 왼손 손가락 둘이 없는 사내가 당신을 맞았다. 정만이다.\n“동지의 눈을 보니 됐소.” 그가 당신 손을 꽉 쥔다. 그날로 당신은 광명회 동지가 되었다.', tag: 'gm_member', flag: 'gm_offer', fx: { kr: 12, int: 1, heat: 1 } },
+        ng: { text: '“의심이 많은 건 좋소. 하지만 선생은 아무나 만나지 않소.”\n청년이 모자를 쓰고 일어선다. “우리 일은 없던 걸로 하시오. 몸조심하시오.”\n그 뒤로 그는 다시 찾아오지 않았다.', flag: 'gm_offer' } },
+      { label: '아직은 때가 아니라고 한다', ok: { text: '“나는… 아직 그만한 각오가 없소.”\n청년이 고개를 끄덕인다. “솔직해서 좋소. 각오 없이 들어온 사람이 제일 위험하오.”\n문이 닫히고, 발소리가 멀어진다. 다시 올 것 같지는 않다.', flag: 'gm_offer', fx: { kr: -2 } } }
     ] },
   /* 민족 타협도 낮음 */
   al_kr_shunned: { title: '등 돌린 이웃', kind: 'align', cond: function (p) { return p.kr <= -100; },
@@ -492,7 +492,7 @@ Object.assign(ALIGN_EVENTS, {
 /* ───── 타협도 사건: 일본어 · 총 ─────
    al_jp_lesson: 일제 타협도 90 이상 · 일본어를 모를 때 — 일본어(lang:ja)를 배울 수 있다
    al_jp_gun: 일제 타협도 130 이상 — 경찰서에서 총과 총포 소지 허가증을 내준다 (한 번)
-   al_kr_gun: 민족 타협도 130 이상 — 비밀결사가 총을 맡긴다 (한 번 · 불법) */
+   결사의 무기고는 민족 광명회 사건(cities.js 끝)으로 옮김 */
 Object.assign(ALIGN_EVENTS, {
   al_jp_lesson: { title: '국어 강습회', kind: 'align', cond: function (p) { return p.jp >= 90 && !(p.tags && p.tags['lang:ja']) && !(p.flags && p.flags.ja_lesson_quit); },
     text: '면사무소 게시판 앞에 사람들이 모여 있다. 붉은 테두리를 두른 벽보.\n〈국어(國語) 강습회 — 매주 사흘 저녁, 보통학교 교실. 수강료 없음. 성적 우수자는 관청 일자리에 추천함.〉\n‘국어’란 일본어를 말한다. 벽보 옆에 서 있던 서기가 당신을 알아보고 다가온다.\n“주임님께서 특별히 자네 이름을 적어 두라 하셨네. 말이 통해야 일도 시키고 할 것 아닌가.”',
@@ -512,13 +512,6 @@ Object.assign(ALIGN_EVENTS, {
       { label: '사냥용이면 받겠다고 한다', ok: { text: '“사람 쏠 일은 없었으면 합니다. 산짐승이나 쫓게 엽총이면 족합니다.”\n주임이 콧방귀를 뀌면서도 엽총과 허가증을 내준다. “엽총으로도 사람은 죽어.”', weapon: 'hunting', item: 'gun_permit', flag: 'al_jp_gun', fx: { ammo: 4, jp: 2, kr: -3 } } },
       { label: '총은 사양한다', ok: { text: '“제 손에 총이 쥐어지면 더 위험해질 것 같습니다.”\n주임이 창고 문을 잠그며 어깨를 으쓱한다. “아쉽군. 마음 바뀌어도 이번 한 번뿐이야.”', flag: 'al_jp_gun', fx: { jp: -3, kr: 2 } } }
     ] },
-  al_kr_gun: { title: '결사의 무기고', kind: 'align', cond: function (p) { return p.kr >= 130 && !(p.flags && p.flags.al_kr_gun); },
-    text: '장터 엿장수가 엿판을 건네며 눈짓한다. 엿판 밑에 쪽지.\n〈오늘 밤 자정, 서문 밖 방앗간.〉\n방앗간 안, 등잔 하나. 지난번 그 청년이 쌀가마 하나를 칼로 가른다. 쌀 대신 기름 먹인 천 뭉치가 쏟아진다. 천을 풀자 권총 한 자루와 탄환이 나온다.\n“만주에서 어렵게 들여온 것이오. 동지에게 맡기오. 함부로 쓰지 말고, 들키지도 마시오.”',
-    options: [
-      { label: '권총을 맡는다', ok: { text: '모제르 권총을 품에 넣었다. 청년이 당신의 손을 꽉 쥔다. “이 총이 겨눌 곳은 하나뿐이오.”\n돌아오는 길, 순사의 호루라기 소리마다 심장이 내려앉았다. 검문에 걸리면 끝이다.', weapon: 'mauser', flag: 'al_kr_gun', fx: { ammo: 5, kr: 5, heat: 2 } } },
-      { label: '탄환만 받아 둔다', ok: { text: '“총은 다른 동지에게 주시오. 나는 탄환만 숨겨 두겠소.”\n청년이 고개를 끄덕이며 탄환 꾸러미를 건넨다. “필요할 때 쓰시오.”', flag: 'al_kr_gun', fx: { ammo: 8, kr: 3, heat: 1 } } },
-      { label: '무기 대신 약을 청한다', ok: { text: '“나는 총보다 다친 동지를 돌보는 쪽이 맞소.”\n청년이 잠시 말이 없더니, 구석에서 약 상자를 꺼내 준다. “그것도 싸움이오.”', flag: 'al_kr_gun', fx: { medkit: 2, kr: 4 } } }
-    ] }
 });
 ['al_informant', 'al_comrades', 'al_brand', 'al_watch'].forEach(function (id) { ALIGN_EVENTS[id].kind = 'align'; });
 var ERA_EVENTS = ['era_flogging', 'era_1919', 'era_cinema', 'era_name', 'era_draft', 'era_metal'];
@@ -604,21 +597,28 @@ var EVENTS = {
         ng: { text: '외침은 전차 종소리에 묻혔다.\n어깨를 받혀 길바닥에 나뒹굴었다.', fx: { hp: -4 } } }
     ] },
   /* discount: 태그가 있으면 이 사건의 돈 비용에 rate 를 곱한다(올림). 예) 오카다와의 연줄 → 반값 */
+  /* stock: 산 물건은 품절 → 석 달 안팎(RESTOCK) 뒤 다시 들어온다, 물건마다 따로 */
   hn_shop: { title: '오카다 상회', kind: 'shop', discount: { tag: 'okada', rate: 0.5, label: '오카다 반값' },
     text: '본정 뒷골목, 간판도 없는 잡화상. 문을 열면 방울이 딸랑 운다.\n앞방에는 성냥, 담배, 비누 같은 것들이 먼지를 뒤집어쓰고 있지만, 단골들은 안다. 진짜 장사는 뒷방에서 한다는 걸.\n안경 너머로 오카다 영감이 손님을 훑어본다. 서툰 조선말에 일본말이 섞인다.\n“이랏샤이. 무엇을 찾으시오? …돈만 맞으면, 나는 국적을 묻지 않소.”',
     options: [
-      { label: '호신용 권총을 산다', cost: { money: 20 }, hideWeapon: 'browning',
-        ok: { text: '오카다가 기름종이에 싼 낡은 브라우닝을 꺼낸다. 탄환 여섯 발이 딸려 온다.\n품속이 묵직해졌다.', weapon: 'browning', fx: { ammo: 6, heat: 1 } } },
-      { label: '단도를 산다', cost: { money: 8 }, hideWeapon: 'knife',
-        ok: { text: '칼집까지 검게 칠한 단도. 소매 속에 쏙 들어간다.\n“손 조심하시오.” 오카다가 웃는다.', weapon: 'knife' } },
-      { label: '몽둥이를 산다', cost: { money: 3 }, hideWeapon: 'club',
-        ok: { text: '손때 묻은 박달나무 몽둥이.\n들고 다녀도 누가 뭐라 하진 않는다. 아직은.', weapon: 'club' } },
-      { label: '뒷방의 남부 권총을 산다', cost: { money: 30 }, hideWeapon: 'nambu', needTag: 'okada',
-        ok: { text: '오카다가 문을 걸어 잠그고, 마룻장 밑에서 경찰용 남부 권총을 꺼낸다.\n“출처는 묻지 마시오. 나도 당신 이름은 묻지 않았으니.”', weapon: 'nambu', fx: { ammo: 6, heat: 1 } } },
-      { label: '탄환 6발을 산다', cost: { money: 6 }, needFlag: 'gun',
-        ok: { text: '탄환 여섯 발을 손수건에 싸서 품에 넣었다.\n오카다는 장부에 아무것도 적지 않았다.', fx: { ammo: 6 } } },
-      { label: '구급약을 산다', cost: { money: 5 }, ok: { text: '붕대 한 두름과 옥도정기 한 병을 챙겼다.\n“다치지 마시오. 죽은 손님은 다시 안 오니.”', fx: { medkit: 1 } } },
-      { label: '그냥 나간다', ok: { text: '오카다의 눈길을 등 뒤로 느끼며 가게를 나섰다.\n방울이 다시 딸랑 울렸다.' } }
+      { label: '호신용 권총을 산다', stock: 'okada_browning', cost: { money: 20 }, hideWeapon: 'browning',
+        ok: { flag: 'okada_known', text: '오카다가 기름종이에 싼 낡은 브라우닝을 꺼낸다. 탄환 여섯 발이 딸려 온다.\n품속이 묵직해졌다.', weapon: 'browning', fx: { ammo: 6, heat: 1 } } },
+      { label: '단도를 산다', stock: 'okada_knife', cost: { money: 8 }, hideWeapon: 'knife',
+        ok: { flag: 'okada_known', text: '칼집까지 검게 칠한 단도. 소매 속에 쏙 들어간다.\n“손 조심하시오.” 오카다가 웃는다.', weapon: 'knife' } },
+      { label: '몽둥이를 산다', stock: 'okada_club', cost: { money: 3 }, hideWeapon: 'club',
+        ok: { flag: 'okada_known', text: '손때 묻은 박달나무 몽둥이.\n들고 다녀도 누가 뭐라 하진 않는다. 아직은.', weapon: 'club' } },
+      { label: '뒷방의 남부 권총을 산다', stock: 'okada_nambu', cost: { money: 30 }, hideWeapon: 'nambu', needTag: 'okada',
+        ok: { flag: 'okada_known', text: '오카다가 문을 걸어 잠그고, 마룻장 밑에서 경찰용 남부 권총을 꺼낸다.\n“출처는 묻지 마시오. 나도 당신 이름은 묻지 않았으니.”', weapon: 'nambu', fx: { ammo: 6, heat: 1 } } },
+      { label: '탄환 6발을 산다', stock: 'okada_ammo', cost: { money: 6 }, needFlag: 'gun',
+        ok: { flag: 'okada_known', text: '탄환 여섯 발을 손수건에 싸서 품에 넣었다.\n오카다는 장부에 아무것도 적지 않았다.', fx: { ammo: 6 } } },
+      { label: '인삼정을 산다', stock: 'okada_ginseng', cost: { money: 15 },
+        ok: { flag: 'okada_known', text: '오카다가 뒷방 약장에서 검은 환약 한 통을 꺼낸다. “개성 인삼을 고아 빚은 것이오. 한 통 다 먹으면 몸이 달라지지.”\n한 달을 아껴 먹었다. 숨이 덜 차고, 맞아도 덜 휘청거린다.', fx: { maxHp: 1, hp: 1 } } },
+      { label: '녹용 대보탕을 산다', stock: 'okada_deer', cost: { money: 40 },
+        ok: { flag: 'okada_known', text: '“만주 녹용이오. 관청 나리들도 줄 서서 사 가는 물건이지.”\n오카다가 손수 달인 탕약 스무 첩을 보자기에 싸 준다. 다 먹고 나니 몸에 쇠심줄이 박힌 것 같다.', fx: { maxHp: 2, hp: 2 } } },
+      { label: '위조 도민증을 산다', stock: 'okada_fakeid', cost: { money: 30 }, show: { noItems: ['fake_id'] },
+        ok: { flag: 'okada_known', item: 'fake_id', text: '오카다가 문을 걸어 잠그고 서랍 밑 비밀 칸에서 도민증 한 장을 꺼낸다. 사진 자리에 당신 얼굴을 붙이고, 인주를 묻힌 도장을 꾹 누른다.\n“진짜와 똑같소. 다만 눈 밝은 순사를 만나면 그건 내 알 바 아니오.”' } },
+      { label: '구급약을 산다', stock: 'okada_medkit', cost: { money: 5 }, ok: { flag: 'okada_known', text: '붕대 한 두름과 옥도정기 한 병을 챙겼다.\n“다치지 마시오. 죽은 손님은 다시 안 오니.”', fx: { medkit: 1 } } },
+      { label: '그냥 나간다', ok: { flag: 'okada_known', text: '오카다의 눈길을 등 뒤로 느끼며 가게를 나섰다.\n방울이 다시 딸랑 울렸다.' } }
     ] },
   hn_dept: { title: '백화점 잡역부', kind: 'work',
     text: '남대문통에 우뚝 선 미쓰코시 백화점. 정문에는 금단추 제복을 입은 문지기가 서서 조선 사람 행색을 위아래로 훑는다.\n뒷문 하역장으로 돌아가니 조선인 잡역부를 하루 품으로 쓴다는 종이가 붙어 있다. 줄을 선 사람만 스무 명은 넘는다.\n콧수염 난 일본인 지배인이 장부를 들고 나와 말한다.\n“일본말 할 줄 아는 자는 매장으로. 나머지는 창고. 굼뜬 놈은 바로 내보낸다.”',

@@ -270,7 +270,7 @@ var DEV_TOOL = (function () {
   if (typeof document === 'undefined' || !document.addEventListener) return api;
 
   /* ═════════════════ 화면 ═════════════════ */
-  var FXK = { money: '돈', hp: '체력', ammo: '탄환', medkit: '구급약', heat: '감시도', days: '지난주', jp: '일제타협', kr: '민족타협',
+  var FXK = { money: '돈', maxHp: '최대체력', hp: '체력', ammo: '탄환', medkit: '구급약', heat: '감시도', days: '지난주', jp: '일제타협', kr: '민족타협',
     str: '근력', agi: '민첩', int: '지능', edu: '교육', acc: '정확', con: '건강' };
   var FXR = {}; Object.keys(FXK).forEach(function (k) { FXR[FXK[k]] = k; FXR[k] = k; });
   var KINDS = [['', '일반'], ['work', '일거리'], ['fight', '싸움'], ['link', '연줄'], ['align', '타협도'], ['quest', '이야기'], ['shop', '가게']];
@@ -1301,9 +1301,15 @@ var DEV_TOOL = (function () {
   /* claude.ai 화면 안(다른 사이트의 iframe)인지: 이때는 폴더 선택 창이 막힌다 */
   function inFrame() { try { return window.self !== window.top; } catch (err) { return true; } }
   /* claude.ai 판의 기능(저장소 db · 내려받기)을 쓸 수 있으면 그 이름공간, 아니면 null */
+  /* window.claude 는 이 화면이 아니라 감싼 화면(부모)에 있을 수도 있다 */
+  function claudeApi() {
+    var ws = [window]; try { if (window.parent && window.parent !== window) ws.push(window.parent); } catch (e) {} try { if (window.top && ws.indexOf(window.top) < 0) ws.push(window.top); } catch (e) {}
+    for (var i = 0; i < ws.length; i++) { try { var c = ws[i].claude; if (c && typeof c.use === 'function') return c; } catch (err) {} }
+    return null;
+  }
   function cap(name) {
-    var c = window.claude;
-    if (!c || typeof c.use !== 'function') return Promise.resolve(null);
+    var c = claudeApi();
+    if (!c) return Promise.resolve(null);
     return Promise.resolve(c.use(name)).catch(function () { return null; });
   }
   /* Claude 에게 보내기: 아티팩트의 db 문서 devtool/patch 에 수정본을 넣는다 (Claude 가 바로 읽음) */
@@ -1311,7 +1317,7 @@ var DEV_TOOL = (function () {
     var p = fullPatch(), text = JSON.stringify(p);
     if (text.length > 240000) return Promise.reject(new Error('수정본이 너무 큽니다 (' + Math.round(text.length / 1024) + 'KB). ‘복사’로 대화창에 붙여 넣어 주세요.'));
     return cap('db').then(function (db) {
-      if (!db) throw new Error('이 화면에서는 보낼 수 없습니다');
+      if (!db) throw new Error('이 화면에서는 보낼 수 없습니다 — 아래 ‘복사’를 눌러 Claude 대화창에 붙여 넣어 주세요');
       return db.doc('devtool/patch').set({ json: text, saved: p.saved, count: localCount() });
     });
   }
@@ -1330,7 +1336,8 @@ var DEV_TOOL = (function () {
   function renderSheet() {
     var text = JSON.stringify(fullPatch(), null, 1), n = localCount();
     var framed = inFrame(), canFolder = typeof window.showDirectoryPicker === 'function' && !framed;
-    var canSend = !!(window.claude && typeof window.claude.use === 'function');
+    /* claude.ai 화면 안이면 늘 보여 준다 (못 보내면 그때 ‘복사’를 안내) */
+    var canSend = !!claudeApi() || framed;
     var out = h('textarea', { class: 'mono ijd-out', readonly: true, value: text, rows: 8, onfocus: function (e) { e.target.select(); } });
     var imp = h('textarea', { class: 'mono ijd-out', rows: 4, placeholder: '여기에 patch.json 내용을 붙여 넣고 ‘불러오기’' });
     return h('div', { class: 'ijd-sheet', onclick: function (e) { if (e.target.classList.contains('ijd-sheet')) { S.sheet = null; render(); } } }, [h('div', { class: 'ijd-card ijd-sheetbox' }, [

@@ -5,11 +5,13 @@ var STAT_KEYS = ['str', 'agi', 'int', 'edu', 'acc', 'con'];
 var STAT_LABEL = { str: '근력', agi: '민첩', int: '지능', edu: '교육', acc: '정확', con: '건강' };
 /* 건강 → 최대 체력, 잠잘 때 회복량 */
 function maxHpOf(con) { return 6 + Math.round(con / 4); }
-function restHealOf(con) { return 4 + Math.floor(con / 25); }
-var FX_LABEL = { hp: '체력', ammo: '탄환', money: '소지금', medkit: '구급약', heat: '감시도', days: '경과 주' };
+/* 한 주를 마치며 셋방에서 회복하는 체력 (돈이 없으면 BROKE_HEAL) — 일부러 적게: 회복 사건·구급약이 필요하다 */
+function restHealOf(con) { return 2 + Math.floor(con / 40); }
+var BROKE_HEAL = 1;
+var FX_LABEL = { maxHp: '최대 체력', hp: '체력', ammo: '탄환', money: '소지금', medkit: '구급약', heat: '감시도', days: '경과 주' };
 var TIMES = ['오전', '오후', '밤'];
-/* 달력: 1개월 = 5주 고정, 12월 다음은 새해 */
-var WEEKS_PER_MONTH = 5;
+/* 달력: 1개월 = 4주 고정, 12월 다음은 새해 */
+var WEEKS_PER_MONTH = 4;
 /* 메인 화면 '설명' 팝업 내용 (title: 소제목, lines: 한 줄씩) */
 var HELP_ITEMS = [
   { title: '어떤 게임인가', lines: ['1910년부터 1945년까지, 식민지 조선에서 한 사람이 살아가는 이야기다.', '정해진 목표는 없다. 오래 살아남고, 어떤 길을 걸을지 스스로 고른다.'] },
@@ -133,9 +135,11 @@ var HEAT_MAX = 20; /* 감시도 최대치 (도시마다 따로) */
 var SAVE_KEY = 'ilje.save.v1', SAVE_VER = 1; /* SAVE_KEY: 예전 한 칸 저장 (있으면 1번 칸으로 옮김) */
 var SAVE_SLOTS = 5, SAVE_SLOT_KEY = 'ilje.save.slot'; /* 저장 칸 수 · 칸별 키 = SAVE_SLOT_KEY + 번호 */
 var SAVE_SKIP = ['life', 'base', 'edStage', 'raw', 'importText', 'saveMsg', 'saveOk', 'dice', 'rolling', 'qte', 'tip', 'infoMode',
-  'nameOpen', 'nameDraft', 'rerollWarn', 'helpOpen', 'creditOpen', 'resumeOpen', 'invMsg', 'slotDel', 'hudOpen', 'seedDraft', 'seedMsg', 'pickSlot'];
+  'nameOpen', 'nameDraft', 'rerollWarn', 'helpOpen', 'creditOpen', 'resumeOpen', 'invMsg', 'slotDel', 'hudOpen', 'seedDraft', 'seedMsg', 'pickSlot', 'foeCard'];
 /* 증명서별 수치 */
 var CERT = { residencePass: 0.2, residenceMiss: 0.1,
+  /* 위조 도민증(오카다 상회): 내보이면 fakePass 확률로 통과 · 그 전에 fakeCaught 확률로 위조가 들통나 빼앗기고 감시도 +fakeHeat 뒤 몸수색 */
+  fakePass: 0.5, fakeCaught: 0.2, fakeHeat: 2,
   /* 위조 의심: 몸수색 때(또는 거주증명서를 내보일 때) 지닌 증명서마다 이 확률로 빼앗김 · 고등계 증표는 제외 */
   forgery: 0.04, forgeryHeat: 1,
   /* 대서소 발급: 기준 주 수 ± 편차(주) 뒤에 결과가 나온다 · 일본어(lang:ja)를 알아야 신청 가능 */
@@ -156,6 +160,9 @@ var ITEMS = {
   residence: { name: '거주증명서', kind: 'doc', short: '검문에서 가끔 통함',
     desc: '관청 도장이 찍힌 거주증명서. 이 땅에 주소를 둔 ‘선량한 백성’이라는 종이 한 장.',
     effect: '불심검문·역 검문에서 내보이면 가끔(20%) 몸수색 없이 통과 · 안 통해도 몸수색이 덜 꼼꼼해 불법 소지품을 놓칠 확률 +10% · 순사의 트집이 조금 줄어듦 · 관헌과의 전투에서 무고 주장 +5' },
+  fake_id: { name: '위조 도민증', kind: 'doc', short: '검문에서 반쯤 통함 · 들키면 큰일',
+    desc: '오카다 상회 뒷방에서 산 도민증. 도장도 사진도 그럴듯하지만, 눈 밝은 순사라면….',
+    effect: '불심검문·역 검문에서 내보이면 절반쯤 몸수색 없이 통과 · 다섯 번에 한 번꼴로 위조가 들통나 빼앗기고 감시도 +2' },
   travel_pass: { name: '여행증명서', kind: 'doc', short: '기차 반값 · 역 검문 없음',
     desc: '도 경계를 넘나드는 여행을 허가하는 증명서. 목적지와 용무가 적혀 있다.',
     effect: '도시 사이 기차표 반값 · 기차를 타러 갈 때 역 앞 불심검문을 만나지 않음' },
@@ -196,7 +203,10 @@ var TAG_MEANING = {
   friend: '기댈 동무가 있음', western: '서양인과 왕래함', missionary: '선교사에게 배움', christ_religion: '교회와 닿음', buddha_religion: '절과 닿음', big_religion: '대종교와 닿음', religion: '산사에서 지내 봄', temple: '산사에서 지내 봄',
   okada: '오카다와의 연줄', kimgu: '임시정부 요인과 닿음', kimjwajin: '독립군 사령관과 닿음', kimgeushick: '파리 위원부 요인과 닿음', Leesangjae: '교육운동가와 닿음', near_kpg: '임시정부 근처에서 자람',
   zainichi: '재일 조선인', manchuria_trip: '만주까지 가 봄', runaway: '집을 나가 봄', local_hero: '동네에 이름이 남', wrestler: '씨름판에서 이겨 봄', brawler: '주먹다짐에 익숙함',
-  noodle_debt: '국숫집에 외상이 있음'
+  noodle_debt: '국숫집에 외상이 있음',
+  gm_member: '민족 광명회 동지', gm_s1: '밀정 하 서방의 정체를 알아냄', gm_s2: '밀정을 처단함', gm_s3: '토호 윤 참봉을 응징함', gm_s4: '경부보 최달수를 처단함',
+  gm_core: '광명회 간부', gm_humble: '광명회 평대원', gm_armory: '광명회의 무기를 받음', gm_raid: '광명회 은신처 급습을 겪음',
+  gm_hide: '쫓기는 동지를 만남', gm_fund: '광명회 군자금 모금에 나섬', gm_doubt: '광명회에서 밀정 의심을 받음', gm_print: '광명회 격문을 맡음', gm_family: '잡혀간 동지의 가족을 만남', gm_expelled: '광명회에서 밀정으로 낙인찍힘'
 };
 /* 태생 표의 태그 → 화면에 보일 뜻 (출신지 태그는 항목 이름이 이미 말하므로 뺌 · 뜻이 없는 태그도 뺌) */
 function traitWords(tags) {
@@ -258,6 +268,9 @@ var SCORE = {
   success: ['end_success', 'end_freed', 'end_letter'],
   tiers: [150, 400, 800, 1400, 2200, 3200]
 };
+/* 재고 보충: 선택지에 stock: '이름' 이 있으면 사고 나서 품절 — weeks ± spread 주 뒤 다시 들어온다 (물건마다 따로)
+   언제 들어오는지는 화면에 나오지 않는다 (가 봐야 안다 · showOdds 를 켜면 남은 주가 보임) */
+var RESTOCK = { weeks: 3 * WEEKS_PER_MONTH, spread: WEEKS_PER_MONTH };
 var META_KEY = 'ilje.meta';
 function loadMeta() { try { var m = JSON.parse(window.localStorage.getItem(META_KEY) || 'null'); if (m && typeof m === 'object') { m.tokens = m.tokens || {}; return m; } } catch (err) {} return { tokens: {}, best: 0 }; }
 function saveMeta(m) { try { window.localStorage.setItem(META_KEY, JSON.stringify(m)); } catch (err) {} }
