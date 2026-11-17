@@ -8,11 +8,11 @@
 <title>일제치하</title>
 <script src="support.js?v=a098be6b14"></script>
 <!-- 데이터: core · combat · world · events · cities · stories · devtool -->
-<script src="data/core.js?v=e11bee99c2"></script>
-<script src="data/combat.js?v=1d40de1fb0"></script>
+<script src="data/core.js?v=d30f4d473c"></script>
+<script src="data/combat.js?v=16a1c5abf3"></script>
 <script src="data/world.js?v=3ff0ed463e"></script>
 <script src="data/events.js?v=401b715b94"></script>
-<script src="data/cities.js?v=77c1feccaa"></script>
+<script src="data/cities.js?v=6a494ae60e"></script>
 <script src="data/stories.js?v=b10fbb0187"></script>
 <script src="data/devtool.js?v=a72fec94ae"></script>
 </head>
@@ -468,6 +468,7 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <div class="{{L.asideClass}}" style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 16px; padding-right: {{L.originPadR}}">
 <div style="font-size: 13px; letter-spacing: 0.3em; color: {{accent}}; font-weight: 700">태생 · 열 번의 주사위</div>
 <h2 style="margin: 0; font-family: 'Song Myung', serif; font-weight: 400; font-size: {{L.h2}}; line-height: 1.3">어떤 삶을 지나 여기에 왔는가</h2>
+<div style="align-self: flex-start; font-size: 14px; font-weight: 800; color: #7E5A12; border: 1.5px solid #7E5A12; background: #FBF7EE; padding: 4px 12px">{{tokLine}}</div>
 <div style="display: flex; flex-direction: column; border-top: 2px solid #1E1B16">
 <sc-for list="{{bgRows}}" as="b" hint-placeholder-count="10">
 <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; padding: 10px 0; border-bottom: 1px solid #B9AB8E">
@@ -475,12 +476,11 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <span style="flex: 0 0 52px; font-family: 'Nanum Gothic Coding', monospace; font-size: 15px; font-weight: 700; color: #2C4A5C">{{b.r}}</span>
 <span style="flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 2px"><span style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap"><span style="font-size: 16px; font-weight: 800">{{b.name}}</span><sc-if value="{{b.special}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 800; letter-spacing: 0.1em; background: #E3B04B; color: #1E1B16; padding: 2px 7px">특별 태생</span></sc-if></span><span style="font-size: 13px; line-height: 1.6; color: #3A342B">{{b.desc}}</span><sc-if value="{{b.showTag}}" hint-placeholder-val="{{ false }}"><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 11px; color: #8A7E6A">{{b.tagText}}</span></sc-if></span>
 <span style="flex: 0 1 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right"><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 13px; font-weight: 700; color: {{b.color}}">{{b.mods}}</span><sc-if value="{{b.hasTraits}}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; font-weight: 700; line-height: 1.5; color: #7E5A12">{{b.traitText}}</span></sc-if></span>
-<sc-if value="{{b.canPick}}" hint-placeholder-val="{{ false }}"><button class="choice" type="button" onClick="{{b.pick}}" title="{{b.pickTip}}" style="flex: 0 0 auto; min-height: 32px; padding: 3px 10px; background: #FBF7EE; color: #7E5A12; border: 1.5px solid #7E5A12; font-family: 'Nanum Myeongjo', serif; font-size: 12.5px; font-weight: 800; white-space: nowrap">골라 바꾸기 · {{b.tokN}}장</button></sc-if>
+<sc-if value="{{b.canPick}}" hint-placeholder-val="{{ false }}"><button class="choice" type="button" onClick="{{b.pick}}" title="{{b.pickTip}}" style="flex: 0 0 auto; min-height: 32px; padding: 3px 10px; background: #FBF7EE; color: #7E5A12; border: 1.5px solid #7E5A12; font-family: 'Nanum Myeongjo', serif; font-size: 12.5px; font-weight: 800; white-space: nowrap">골라 바꾸기</button></sc-if>
 </div>
 </sc-for>
 </div>
 <div style="font-size: 14px; color: #5B5246">최종 능력치와 소지품은 위쪽 인물 정보에 반영되어 있다.</div>
-<div style="font-size: 13.5px; line-height: 1.6; color: #7E5A12; font-weight: 700">{{tokLine}}</div>
 <!-- 시드: 같은 시드면 같은 태생 (게임 진행은 매번 다름) -->
 <div class="ks-seed" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 10px 12px; border: 1px dashed #8A7E6A; background: #FBF7EE">
 <span style="font-size: 13px; font-weight: 800; color: #5B5246" title="같은 시드를 넣으면 같은 태생(능력치 · 소지품 · 첫 기술)이 나온다. 시대 · 날짜와 게임 진행은 매번 다르다.">시드</span>
@@ -1276,7 +1276,7 @@ class Component extends DCLogic {
     var parts = this.scoreParts(d.player), total = parts.reduce(function (a, x) { return a + x.pts; }, 0);
     var n = SCORE.tiers.filter(function (t) { return total >= t; }).length;
     var STAGES = this.state.life || LIFE_STAGES, got = [], meta = loadMeta();
-    for (var i = 0; i < n; i++) { var st = STAGES[Math.floor(Math.random() * STAGES.length)]; got.push(st.id); meta.tokens[st.id] = (meta.tokens[st.id] || 0) + 1; }
+    meta.tok = (meta.tok || 0) + n; got = n;
     var best = total > (meta.best || 0); if (best) meta.best = total;
     saveMeta(meta);
     var next = SCORE.tiers.filter(function (t) { return total < t; })[0];
@@ -1289,13 +1289,13 @@ class Component extends DCLogic {
   applyPick(slot, idx) {
     var s = this.state; if (s.screen !== 'origin') return;
     var row = (s.bg || []).filter(function (r) { return r.slot === slot; })[0]; if (!row) return;
-    var meta = loadMeta(); if (!(meta.tokens[row.stage] > 0)) { this.setState({ pickSlot: null, seedMsg: '이 단계의 선택권이 없다' }); return; }
+    var meta = loadMeta(); if (!(meta.tok > 0)) { this.setState({ pickSlot: null, seedMsg: '태생 선택권이 없다' }); return; }
     var ps = parseSeed(s.seed || '');
     if (ps.base.length > SEED_BASE) { this.setState({ pickSlot: null, seedMsg: '이 시드는 너무 길어 골라 쓸 수 없다 — 다시 태어난 뒤에 써 보자' }); return; }
     var ovr = (ps.ovr || []).slice(); while (ovr.length < SEED_OVR) ovr.push(0);
     if (slot >= SEED_OVR) return;
     ovr[slot] = idx + 1;
-    meta.tokens[row.stage]--; saveMeta(meta);
+    meta.tok--; saveMeta(meta);
     var d = this.draft(); d.pickSlot = null; d.rerollWarn = null;
     this.applyBackground(d, encodeSeed(ps.base, ovr));
     var nr = (d.bg || []).filter(function (r) { return r.slot === slot; })[0];
@@ -1965,7 +1965,7 @@ class Component extends DCLogic {
   /* 증명서: 검문(조사에 순응 선택지가 있는 사건)에서 내보일 수 있는 선택지를 붙인다 */
   certOptions(ev, p) {
     var hasComply = (ev.options || []).some(function (o) { return o.comply; });
-    if (!hasComply || ev.cornered || ev.kind === 'align' || !p) return [];
+    if (!hasComply || ev.cornered || ev.noCert || ev.kind === 'align' || !p) return [];
     var out = [];
     if (hasItem(p, 'tokko_badge')) out.push({ label: '고등계 협력 증표를 내보인다', cert: 'tokko_badge', show: { items: ['tokko_badge'] } });
     if (hasItem(p, 'residence')) out.push({ label: '거주증명서를 내보인다', cert: 'residence', show: { items: ['residence'] } });
@@ -4156,9 +4156,8 @@ class Component extends DCLogic {
     }
 
     var en = ENDINGS[s.ending] || { kicker: '', title: '', text: '' };
-    var meta0 = s.screen === 'origin' || s.screen === 'end' ? loadMeta() : { tokens: {} }, sc = s.scoreInfo;
-    var tokKeys = Object.keys(meta0.tokens || {}).filter(function (k) { return meta0.tokens[k] > 0; });
-    var tokLine = tokKeys.length ? '태생 선택권 — ' + tokKeys.map(function (k) { return self.stageLabel(k) + ' ' + meta0.tokens[k] + '장'; }).join(' · ') + ' (각 단계 칸의 ‘골라 바꾸기’로 쓴다)' : '';
+    var meta0 = s.screen === 'origin' ? loadMeta() : { tok: 0 }, sc = s.scoreInfo;
+    var tokLine = '태생 선택권 ' + (meta0.tok || 0) + '장' + (meta0.tok ? ' — 단계 칸의 ‘골라 바꾸기’로 아무 단계에나 쓴다' : '');
     /* 선택권 고르기 창 */
     var pickRow = s.pickSlot != null ? (s.bg || []).filter(function (r) { return r.slot === s.pickSlot; })[0] : null;
     var pickStage = pickRow ? (s.life || LIFE_STAGES).filter(function (x) { return x.id === pickRow.stage; })[0] : null;
@@ -4171,7 +4170,7 @@ class Component extends DCLogic {
     }) : [];
     var endv = { kicker: en.kicker, title: en.title, text: en.text, hasScore: !!sc, total: sc ? sc.total + '점' : '',
       parts: sc ? sc.parts.filter(function (x) { return x.n; }).map(function (x) { return { label: SCORE.label[x.k], n: x.n + SCORE.unit[x.k], pts: x.pts }; }) : [],
-      gotText: sc ? (sc.got.length ? '태생 선택권 ' + sc.got.length + '장을 얻었다 — ' + sc.got.map(function (g) { return self.stageLabel(g); }).join(' · ') : '이번 삶으로는 선택권을 얻지 못했다') + (sc.best ? ' · 최고 점수!' : '') : '',
+      gotText: sc ? (sc.got ? '태생 선택권 ' + sc.got + '장을 얻었다' : '이번 삶으로는 선택권을 얻지 못했다') + (sc.best ? ' · 최고 점수!' : '') : '',
       nextText: sc ? (sc.next ? '다음 선택권까지 ' + (sc.next - sc.total) + '점 · ' : '') + '최고 점수 ' + sc.bestScore + '점 · 선택권은 다음 삶의 태생 화면에서 쓴다' : '',
       stat: p && s.ending ? cityDef(p.city).name + '에서 ' + p.daysLived + '주를 살아냈다 · 마지막 주 ' + this.dateLabel(s.date) : '' };
 
@@ -4212,8 +4211,8 @@ class Component extends DCLogic {
       tabItemsGo: function () { self.menuTab('items'); }, tabSkillsGo: function () { self.menuTab('skills'); }, tabActGo: function () { self.menuTab('act'); },
       invKicker: s.invTab === 'skills' ? '기술' : '소지품', invTitle: s.invTab === 'skills' ? '무엇을 익혀 나설 것인가' : '무엇을 지니고 나설 것인가', closeInventory: function () { self.closeInventory(); },
       /* 태그는 내부 판단용이라 숨긴다 (Tweaks 의 showOdds 를 켜면 제작 확인용으로 보임) */
-      bgRows: (s.bg || []).map(function (b) { var tk = (meta0.tokens || {})[b.stage] || 0; return Object.assign({}, b, {
-        canPick: b.slot != null && b.slot < SEED_OVR && tk > 0, tokN: tk, pickTip: self.stageLabel(b.stage) + ' 선택권으로 이 칸의 항목을 직접 고른다', pick: function () { self.openPick(b.slot); }, hasTraits: !!(b.traits && b.traits.length), traitText: (b.traits || []).join(' · '), showTag: !!(self.props.showOdds ?? false) && !!b.tagText, color: b.mods === '변화 없음' ? '#5B5246' : b.mods.indexOf('-') >= 0 ? (b.mods.indexOf('+') >= 0 ? '#7A5A12' : '#9E2B20') : '#3F5E2F' }); }),
+      bgRows: (s.bg || []).map(function (b) { var tk = meta0.tok || 0; return Object.assign({}, b, {
+        canPick: b.slot != null && b.slot < SEED_OVR && tk > 0, tokN: tk, pickTip: '태생 선택권 1장으로 이 칸(' + self.stageLabel(b.stage) + ')의 항목을 직접 고른다', pick: function () { self.openPick(b.slot); }, hasTraits: !!(b.traits && b.traits.length), traitText: (b.traits || []).join(' · '), showTag: !!(self.props.showOdds ?? false) && !!b.tagText, color: b.mods === '변화 없음' ? '#5B5246' : b.mods.indexOf('-') >= 0 ? (b.mods.indexOf('+') >= 0 ? '#7A5A12' : '#9E2B20') : '#3F5E2F' }); }),
       beginLife: function () { self.askName(); },
       nameOpen: !!s.nameOpen, nameDraft: s.nameDraft || '', nameMax: NAME_MAX,
       nameChange: function (ev) { self.setState({ nameDraft: String(ev && ev.target ? ev.target.value : '').slice(0, NAME_MAX) }); },
@@ -4223,7 +4222,7 @@ class Component extends DCLogic {
       rerollWarnOn: !!(s.rerollWarn && s.rerollWarn.length) && s.screen === 'origin',
       rerollWarnText: (s.rerollWarn || []).map(function (k) { return STAT_LABEL[k] + ' ' + STAT_MAX + '%'; }).join(' · '),
       rerollWarnMax: STAT_MAX,
-      tokLine: tokLine, pickOn: !!pickRow, pickTitle: pickRow ? pickRow.label + ' — 무엇으로 바꿀까' : '', pickNow: pickRow ? pickRow.name : '', pickTok: pickRow ? ((meta0.tokens || {})[pickRow.stage] || 0) : 0,
+      tokLine: tokLine, pickOn: !!pickRow, pickTitle: pickRow ? pickRow.label + ' — 무엇으로 바꿀까' : '', pickNow: pickRow ? pickRow.name : '', pickTok: pickRow ? (meta0.tok || 0) : 0,
       pickList: pickList, pickClose: function () { self.closePick(); },
       rerollConfirm: function () { self.reroll(true); },
       rerollCancel: function () { self.setState({ rerollWarn: null }); },

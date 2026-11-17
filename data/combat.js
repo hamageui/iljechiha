@@ -463,6 +463,7 @@ var CONTRABAND = [
   { id: 'blade', name: '칼', has: function (p) { var w = ownedWeapons(p); return ['knife', 'saber'].some(function (id) { return w[id]; }); },
     spot: function (p) { return ownedWeapons(p).saber ? 0.95 : 0.6; } },
   { id: 'ammo', name: '탄환', has: function (p) { return (p.ammo || 0) > 0 && !hasItem(p, 'gun_permit'); }, spot: function (p) { return (p.ammo || 0) >= 10 ? 0.7 : 0.45; } },
+  { id: 'tg_ms', name: '『망국통감』 원고', has: function (p) { return !!(p.items && p.items.tg_ms); }, spot: function () { return 0.75; } },
   { id: 'leaflet', name: '격문', has: function (p) { return !!(p.flags && p.flags.leaflet); }, spot: function () { return 0.6; } }
 ];
 /* ───── 몸수색 (조사에 순응) ─────

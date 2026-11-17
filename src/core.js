@@ -160,6 +160,9 @@ var ITEMS = {
   residence: { name: '거주증명서', kind: 'doc', short: '검문에서 가끔 통함',
     desc: '관청 도장이 찍힌 거주증명서. 이 땅에 주소를 둔 ‘선량한 백성’이라는 종이 한 장.',
     effect: '불심검문·역 검문에서 내보이면 가끔(20%) 몸수색 없이 통과 · 안 통해도 몸수색이 덜 꼼꼼해 불법 소지품을 놓칠 확률 +10% · 순사의 트집이 조금 줄어듦 · 관헌과의 전투에서 무고 주장 +5' },
+  tg_ms: { name: '『망국통감』 원고 뭉치', kind: 'thing', short: '검문에 걸리면 끝',
+    desc: '윤 진사가 맡긴 한 뼘 두께의 한지 묶음. 나라가 팔려 간 내력이 적혀 있다.',
+    effect: '몸수색 때 불법 소지품으로 걸린다 · 장기 이야기 『망국통감』에서 쓴다' },
   fake_id: { name: '위조 도민증', kind: 'doc', short: '검문에서 반쯤 통함 · 들키면 큰일',
     desc: '오카다 상회 뒷방에서 산 도민증. 도장도 사진도 그럴듯하지만, 눈 밝은 순사라면….',
     effect: '불심검문·역 검문에서 내보이면 절반쯤 몸수색 없이 통과 · 다섯 번에 한 번꼴로 위조가 들통나 빼앗기고 감시도 +2' },
@@ -204,6 +207,8 @@ var TAG_MEANING = {
   okada: '오카다와의 연줄', kimgu: '임시정부 요인과 닿음', kimjwajin: '독립군 사령관과 닿음', kimgeushick: '파리 위원부 요인과 닿음', Leesangjae: '교육운동가와 닿음', near_kpg: '임시정부 근처에서 자람',
   zainichi: '재일 조선인', manchuria_trip: '만주까지 가 봄', runaway: '집을 나가 봄', local_hero: '동네에 이름이 남', wrestler: '씨름판에서 이겨 봄', brawler: '주먹다짐에 익숙함',
   noodle_debt: '국숫집에 외상이 있음',
+  tg_diary: '의병 진중일기를 구함', tg_memory: '조약의 전말을 받아 적음', tg_paper: '압수된 신문철을 구함', tg_copy1: '『망국통감』 필사본 한 부를 마침', tg_copy2: '『망국통감』 필사본 두 부를 마침',
+  yr_c1: '급사 오석이가 짐 수를 적는 걸 봄', yr_c2: '갑판장 조 영감이 빚에 쪼들리는 걸 봄', yr_c3: '오석이 누이가 수상경찰서에서 일하는 걸 봄', yr_hot: '수상경찰의 의심을 삼',
   gm_member: '민족 광명회 동지', gm_s1: '밀정 하 서방의 정체를 알아냄', gm_s2: '밀정을 처단함', gm_s3: '토호 윤 참봉을 응징함', gm_s4: '경부보 최달수를 처단함',
   gm_core: '광명회 간부', gm_humble: '광명회 평대원', gm_armory: '광명회의 무기를 받음', gm_raid: '광명회 은신처 급습을 겪음',
   gm_hide: '쫓기는 동지를 만남', gm_fund: '광명회 군자금 모금에 나섬', gm_doubt: '광명회에서 밀정 의심을 받음', gm_print: '광명회 격문을 맡음', gm_family: '잡혀간 동지의 가족을 만남', gm_expelled: '광명회에서 밀정으로 낙인찍힘'
@@ -259,7 +264,7 @@ function cleanSeed(v) { var s = String(v || '').toUpperCase().replace(/[^A-Z0-9]
 function seedLabel(s) { if (s.length === SEED_LEN) return s.match(/.{1,4}/g).join('-'); return s.length > 4 ? s.slice(0, 4) + '-' + s.slice(4) : s; }
 
 /* ───── 점수 · 태생 선택권 ─────
-   죽으면 그 삶을 점수로 매기고, 점수 구간마다 ‘태생 선택권’ 하나 (단계는 무작위).
+   죽으면 그 삶을 점수로 매기고, 점수 구간마다 ‘태생 선택권’ 하나 (공통 — 어느 단계에나 쓴다).
    선택권은 브라우저에 남고(다음 삶에서도), 태생 화면에서 그 단계의 굴림 하나를 원하는 항목으로 바꾼다 — 바꿀 때마다 시드가 새로 생긴다. */
 var SCORE = {
   per: { weeks: 8, money: 1, kills: 20, medkit: 10, weapons: 25, ammo: 2, quests: 150, questEnds: 40, docs: 15 },
@@ -272,7 +277,18 @@ var SCORE = {
    언제 들어오는지는 화면에 나오지 않는다 (가 봐야 안다 · showOdds 를 켜면 남은 주가 보임) */
 var RESTOCK = { weeks: 3 * WEEKS_PER_MONTH, spread: WEEKS_PER_MONTH };
 var META_KEY = 'ilje.meta';
-function loadMeta() { try { var m = JSON.parse(window.localStorage.getItem(META_KEY) || 'null'); if (m && typeof m === 'object') { m.tokens = m.tokens || {}; return m; } } catch (err) {} return { tokens: {}, best: 0 }; }
+/* 태생 선택권은 공통 (tok: 장 수, 어느 단계에나 쓴다) — 예전 단계별 선택권(tokens)은 합쳐서 옮긴다 */
+function loadMeta() {
+  try {
+    var m = JSON.parse(window.localStorage.getItem(META_KEY) || 'null');
+    if (m && typeof m === 'object') {
+      m.tok = Math.max(0, m.tok || 0);
+      if (m.tokens) { Object.keys(m.tokens).forEach(function (k) { m.tok += Math.max(0, m.tokens[k] || 0); }); delete m.tokens; saveMeta(m); }
+      return m;
+    }
+  } catch (err) {}
+  return { tok: 0, best: 0 };
+}
 function saveMeta(m) { try { window.localStorage.setItem(META_KEY, JSON.stringify(m)); } catch (err) {} }
 /* 시드 문자열 → 0~1 난수 함수 (cyrb53 해시 + mulberry32) */
 function seedRng(str) {
