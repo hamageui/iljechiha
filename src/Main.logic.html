@@ -203,6 +203,13 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 </section>
 </sc-if>
 
+<!-- 맨 왼쪽 위 작은 '메인으로' — 어느 화면에서든 메인 화면으로 (지금 상태는 저장해 둔다 · 전투 중이면 한 번 더 눌러야 한다) -->
+<sc-if value="{{mainBtn.on}}" hint-placeholder-val="{{ true }}">
+<div style="flex: none; display: flex; align-items: center; gap: 8px; padding: 4px 8px 0">
+<button class="choice" type="button" onClick="{{mainBtn.go}}" title="메인 화면으로" style="min-height: 28px; padding: 3px 10px; background: {{mainBtn.bg}}; color: {{mainBtn.fg}}; border: 1px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 12px; font-weight: 800; letter-spacing: 0.05em">{{mainBtn.text}}</button>
+<sc-if value="{{mainBtn.warn}}" hint-placeholder-val="{{ false }}"><span role="status" style="font-size: 12px; color: #9E2B20; font-weight: 700">전투는 저장되지 않는다 · 싸우기 전으로 돌아간다</span></sc-if>
+</div>
+</sc-if>
 <sc-if value="{{isPlaying}}" hint-placeholder-val="{{ true }}">
 <div ref="{{playRef}}" class="{{L.playClass}}" style="flex: 1 1 auto; min-height: 0; padding: 8px; box-sizing: border-box; overflow-y: {{L.playOverflow}}; display: flex; flex-direction: {{L.playDir}}; flex-wrap: nowrap; gap: {{L.playGap}}; align-items: {{L.playAlign}}">
 <!-- 휴대폰: 프로필을 화면 맨 위에 늘 붙여 둔다 (체력 · 돈 · 구급약 · 무기). ▾ 단추로 이름 · 날짜 · 감시도 · 능력치를 펼친다 -->
@@ -640,8 +647,11 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <div onMouseEnter="{{cv.tin}}" onMouseLeave="{{tipOut}}" onClick="{{cv.ttap}}" style="cursor: help; position: absolute; transform: translateX(-50%); transition: left .3s ease; left: {{cv.l}}%; bottom: {{cv.top}}px; font-size: 11px; color: #5B5246; white-space: nowrap">{{cv.name}}</div>
 </sc-for>
 <sc-if value="{{cb.field.vDistOn}}" hint-placeholder-val="{{ true }}">
-<div style="position: absolute; left: {{cb.field.vDistL}}%; width: {{cb.field.vDistW}}%; bottom: 76px; border-top: 1.5px dashed #5B5246; transition: left .3s ease, width .3s ease"></div>
-<div onMouseEnter="{{T.dist.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.dist.tap}}" style="cursor: help; position: absolute; transform: translateX(-50%); transition: left .3s ease; left: {{cb.field.vDistC}}%; bottom: 80px; font-family: 'Nanum Gothic Coding', monospace; font-size: 12px; font-weight: 700; color: #1E1B16; background: #EDE3CD; padding: 0 4px">{{cb.field.dist}}</div>
+<!-- 거리선: 나·표적 머리 위로 높이 띄운다 (양 끝 기둥은 점선) -->
+<div aria-hidden="true" style="position: absolute; left: {{cb.field.vDistL}}%; bottom: 98px; height: 64px; border-left: 1.5px dotted #5B5246; transition: left .3s ease"></div>
+<div aria-hidden="true" style="position: absolute; left: calc({{cb.field.vDistL}}% + {{cb.field.vDistW}}%); bottom: 98px; height: 64px; border-left: 1.5px dotted #5B5246; transition: left .3s ease"></div>
+<div aria-hidden="true" style="position: absolute; left: {{cb.field.vDistL}}%; width: {{cb.field.vDistW}}%; bottom: 162px; border-top: 2px solid #1E1B16; transition: left .3s ease, width .3s ease"></div>
+<div onMouseEnter="{{T.dist.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.dist.tap}}" style="cursor: help; position: absolute; transform: translate(-50%, 50%); transition: left .3s ease; left: {{cb.field.vDistC}}%; bottom: 162px; font-family: 'Nanum Gothic Coding', monospace; font-size: 14px; font-weight: 700; color: #F6EFDF; background: #1E1B16; padding: 2px 8px; z-index: 2">{{cb.field.dist}}</div>
 </sc-if>
 <div onMouseEnter="{{T.me.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.me.tap}}" style="cursor: help; position: absolute; transform: translateX(-50%); transition: left .3s ease; left: {{cb.field.vMe}}%; bottom: 24px; display: flex; flex-direction: column; align-items: center; gap: 2px; z-index: 3">
 <span style="font-size: 11px; font-weight: 800; color: #2C4A5C">나</span>
@@ -654,6 +664,10 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <span style="display: block; width: 36px; height: 4px; background: #B9AB8E"><span style="display: block; height: 100%; width: {{fm.hpPct}}%; background: #9E2B20"></span></span>
 <span style="pointer-events: auto; width: {{fm.size}}px; height: {{fm.size}}px; border-radius: 50%; background: #9E2B20; border: 3px solid {{fm.ring}}; box-sizing: border-box; color: #F6EFDF; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center">{{fm.tag}}</span>
 </button>
+</sc-for>
+<!-- 이동 탭 대신: 출구·엄폐물·막아선 적 위에 뜨는 행동 단추 (도주 · 몸 숨기러 · 피해 가기) -->
+<sc-for list="{{cb.field.mapActs}}" as="ma" hint-placeholder-count="1">
+<button class="choice" type="button" disabled="{{ma.off}}" onClick="{{ma.go}}" onMouseEnter="{{ma.tipIn}}" onMouseLeave="{{tipOut}}" aria-label="{{ma.aria}}" style="position: absolute; transform: translateX(-50%); transition: left .3s ease; left: {{ma.l}}%; bottom: {{ma.b}}px; z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 0; min-height: 30px; padding: 3px 10px; background: {{ma.bg}}; color: {{ma.fg}}; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 12.5px; font-weight: 800; white-space: nowrap; line-height: 1.25; opacity: {{ma.op}}">{{ma.text}}</button>
 </sc-for>
 <sc-if value="{{cb.field.hasOffL}}" hint-placeholder-val="{{ false }}">
 <div style="position: absolute; left: 4px; top: 6px; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; z-index: 4">
@@ -811,7 +825,7 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px">
 <sc-for list="{{cb.actions}}" as="o" hint-placeholder-count="2">
 <button class="choice ks-opt" type="button" onMouseEnter="{{o.tipIn}}" onMouseLeave="{{tipOut}}" disabled="{{o.disabled}}" onClick="{{o.choose}}" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 54px; padding: 8px 12px; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; text-align: left">
-<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 16px; font-weight: 800">{{o.label}}</span><span style="font-size: 12px; color: #5B5246">{{o.short}}</span><sc-if value="{{cb.detail}}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; color: #5B5246; font-family: 'Nanum Gothic Coding', monospace; line-height: 1.45">{{o.tag}}</span></sc-if></span>
+<span style="font-size: 16px; font-weight: 800; min-width: 0">{{o.label}}</span>
 <sc-if value="{{o.hasChance}}" hint-placeholder-val="{{ true }}"><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 15px; font-weight: 700; color: #2C4A5C; white-space: nowrap">{{o.chanceText}}</span></sc-if>
 </button>
 </sc-for>
@@ -1152,6 +1166,19 @@ class Component extends DCLogic {
   closeEditor() { this.setState({ screen: 'title', raw: {} }); }
   /* 태생 화면 → 메인 화면 (이번 태생은 버린다) */
   toTitle() { if (this.state.screen !== 'origin') return; this.setState(this.fresh()); }
+  /* 메인으로: 어느 화면에서든 메인 화면으로 · 살아 있는 게임은 지금 상태를 그 칸에 저장해 둔다 (이어하기로 돌아온다)
+     전투 중에는 전투를 저장하지 않으므로 한 번 더 눌러야 간다 (싸우기 전 자동 저장으로 돌아간다) */
+  goMain() {
+    var s = this.state;
+    if (s.screen === 'title') return;
+    if (s.screen === 'combat' && !s.mainArm) { this.setState({ mainArm: true }); return; }
+    if (this._timer) { clearTimeout(this._timer); clearInterval(this._timer); this._timer = null; }
+    if (this._qteTimer) { clearTimeout(this._qteTimer); this._qteTimer = null; }
+    if (this._trackTimer) { clearInterval(this._trackTimer); this._trackTimer = null; }
+    var alive = s.player && s.player.hp > 0 && ['origin', 'editor', 'end', 'combat'].indexOf(s.screen) < 0;
+    if (alive && !s.rolling && !s.qte) this.autoSave(Object.assign({}, s, { mainArm: false }));
+    this.setState(Object.assign(this.fresh(), { life: s.life, base: s.base, mainArm: false }));
+  }
   /* 글자 칸(태그·ID): 입력 중엔 친 그대로 보여 주고, 바로 정리해서 반영 */
   textField(key, value, apply) {
     var self = this, raw = this.state.raw || {};
@@ -2405,13 +2432,13 @@ class Component extends DCLogic {
       official: OFFICIALS.indexOf(foes[0].id) >= 0 };
     this.ensureArena(d.combat, G.startSpan);
     this.syncTarget(d.combat);
-    /* 전투 물건: 안경은 전투가 시작될 때 쓰고 사라진다 (이번 전투 명중 +) */
+    /* 전투 물건: 돋보기는 전투가 시작될 때 쓰고 사라진다 (이번 전투 명중 +) */
     d.combat.hitBonus = 0; d.combat.nextHit = 0; d.combat.umbrella = 0; d.combat.pburn = 0;
     if (hasItem(d.player, 'glasses')) {
       d.combat.hitBonus = GEAR.glasses.hit; this.useUp(d, 'glasses', 1);
-      this.log(d, '대모테 안경을 고쳐 썼다 — 이번 전투 명중 +' + GEAR.glasses.hit + '. (싸움이 끝나면 깨져 버린다)', 'good');
+      this.log(d, '돋보기를 코끝에 걸쳤다 — 이번 전투 명중 +' + GEAR.glasses.hit + '. (싸움이 끝나면 테가 휘어 못 쓰게 된다)', 'good');
     }
-    d.screen = 'combat'; d.cbTab = 'skill'; d.tip = null; d.foeCard = null;
+    d.screen = 'combat'; d.cbTab = 'skill'; d.tip = null; d.foeCard = null; d.mainArm = false;
     var names = foes.map(function (f) { return f.name; }).join(', ');
     this.log(d, '전투 개시 — ' + names + ' · ' + A.name + (foes.length > 1 ? (form === 'surround' ? ' · 앞뒤로 포위당했다!' : ' · 한쪽에서 몰려온다') : '') + ' · 거리 ' + this.fmtM(this.distOf(d.combat)), 'foe');
     var exTxt = exits.map(function (x) { return (x.at < px ? '왼쪽 ' : '오른쪽 ') + self.fmtM(x.at - px) + ' ' + x.name + (self.pathCost(d.combat, d.player, x.at).blocked ? '(적이 막음)' : ''); });
@@ -3121,7 +3148,7 @@ class Component extends DCLogic {
     if (sd === 'jpciv') return 0;
     return ((sd === 'jp' ? p.jp : p.kr) || 0) / ALIGN.talkDiv;
   }
-  /* 성냥·고춧가루 판정: 정확 + mod − 회피의 절반 (안경은 더한다) */
+  /* 성냥·고춧가루 판정: 정확 + mod − 회피의 절반 (돋보기는 더한다) */
   gearChance(c, p, e, kind) { return this.tgt((p.acc || 0) + GEAR[kind].mod - (e.evade || 0) / 2 + (c.hitBonus || 0)); }
   breakChance(c, p) {
     var hf = (c.foes || []).filter(function (f) { return f.uid === c.held; })[0];
@@ -4183,7 +4210,7 @@ class Component extends DCLogic {
       canStash: !o.fight };
 
     var cbv = { cardOn: false, cardL: 'auto', cardR: 'auto', cardTop: 6, cardClose: function () {}, arrowL: { off: true, op: 0.35, tip: '', go: function () {} }, arrowR: { off: true, op: 0.35, tip: '', go: function () {} }, tabs: [], tabSkill: false, tabMove: false, tabAct: false, noActions: false, detail: false, detailText: '', toggleDetail: function () {}, stepText: '', name: '', title: '', desc: '', hp: 0, maxHp: 1, hpPct: 0, statLine: '', round: 0, guard: false, actions: [], groups: [], status: [], hasStatus: false,
-      field: { gearChips: [], feedMine: [], feedFoe: [], feedMineLabel: '', vFoes: [], offL: [], offR: [], walls: [], vTicks: [], vCovers: [], vVeils: [], veilOn: false, veilText: '', name: '', dist: '', px: 0, persText: '', readLv: '', shaken: false, offerOn: false, foeCoverOn: false, foes: [], foeList: [], multi: false, surrounded: false, held: false, heldText: '', vExits: [], covers: [], ticks: [], ap: [], apText: '', attacksText: '', coverText: '', hasCover: false, alarmOn: false, alarmText: '', intent: '', hitText: '', moves: [] } };
+      field: { mapActs: [], gearChips: [], feedMine: [], feedFoe: [], feedMineLabel: '', vFoes: [], offL: [], offR: [], walls: [], vTicks: [], vCovers: [], vVeils: [], veilOn: false, veilText: '', name: '', dist: '', px: 0, persText: '', readLv: '', shaken: false, offerOn: false, foeCoverOn: false, foes: [], foeList: [], multi: false, surrounded: false, held: false, heldText: '', vExits: [], covers: [], ticks: [], ap: [], apText: '', attacksText: '', coverText: '', hasCover: false, alarmOn: false, alarmText: '', intent: '', hitText: '', moves: [] } };
     if (s.combat && p) {
       var e = s.combat.enemy, cmb = s.combat;
       var groups = SKILL_GROUPS.map(function (g) {
@@ -4298,8 +4325,39 @@ class Component extends DCLogic {
       var vExits = [];
       cmb.arena.exits.forEach(function (x) {
         if (inView(x.at)) { var xl = VP(x.at); vExits.push({ l: xl, name: x.name, tx: xl < 12 ? '-3px' : xl > 88 ? 'calc(-100% + 3px)' : '-50%' }); }
-        else (x.at < vl ? offL : offR).push({ text: (x.at < vl ? '◀ ' : '') + x.name + ' ' + self.fmtM(x.at - me) + (x.at < vl ? '' : ' ▶'), bg: '#3F5E2F', fg: '#F6EFDF', pick: tipH('exit').tap, tipIn: tipH('exit').in, isFoe: false });
+        else {
+          var xi = cmb.arena.exits.indexOf(x), xpc = self.pathCost(cmb, p, x.at);
+          (x.at < vl ? offL : offR).push({ text: (x.at < vl ? '◀ ' : '') + x.name + ' ' + self.fmtM(x.at - me) + (xpc.blocked ? ' · 막힘' : ' · 도주') + (x.at < vl ? '' : ' ▶'), bg: '#3F5E2F', fg: '#F6EFDF',
+            pick: guard('move:exit', function () { if (!xpc.blocked && !cmb.held && !rolling) self.move('exit:' + xi); }), tipIn: tipH('move:exit').in, isFoe: false });
+        }
       });
+      /* 지도 위 행동 단추: 출구(도주) · 가장 가까운 엄폐물(몸 숨기러) · 막아선 적(피해 가기) — 이동 탭을 대신한다 */
+      var mapActs = [], lockMv = rolling || !!cmb.held;
+      var addAct = function (x, b, text, sub, k, tipKey, off, col) {
+        mapActs.push({ l: VP(x), b: b, text: text, sub: sub, aria: text + ' · ' + sub, off: (off || lockMv) && !s.infoMode, op: off || lockMv ? 0.55 : 1,
+          bg: col, fg: '#F6EFDF', go: guard(tipKey, function () { self.move(k); }), tipIn: tipH(tipKey).in });
+      };
+      cmb.arena.exits.forEach(function (x, i) {
+        if (!inView(x.at)) return;
+        var pc = self.pathCost(cmb, p, x.at);
+        addAct(x.at, 102, '도주', pc.blocked ? '적이 막고 있다' : (pc.cost > 1 ? '행동력 1씩 ' + pc.cost + '번' : '행동력 1 · 탈출'), 'exit:' + i, 'move:exit', pc.blocked, '#3F5E2F');
+      });
+      var ncv0 = this.reachableCover(cmb, p);
+      if (ncv0) {
+        var cvc = this.pathCost(cmb, p, ncv0.at).cost;
+        if (inView(ncv0.at)) addAct(ncv0.at, (ncv0.obscure ? 72 : 56) + 18, '몸 숨기러', cvc > 1 ? '행동력 1씩 ' + cvc + '번' : '행동력 1', 'cover', 'move:cover', false, '#4A443A');
+        else (ncv0.at < vl ? offL : offR).push({ text: (ncv0.at < vl ? '◀ ' : '') + ncv0.name + ' ' + self.fmtM(ncv0.at - me) + ' · 숨기' + (ncv0.at < vl ? '' : ' ▶'), bg: '#4A443A', fg: '#F6EFDF',
+          pick: guard('move:cover', function () { if (!lockMv) self.move('cover'); }), tipIn: tipH('move:cover').in, isFoe: false });
+      }
+      [1, -1].forEach(function (dd) {
+        var df = self.dodgeFoe(cmb, p, dd); if (!df || !inView(df.x)) return;
+        addAct(df.x, 104, '피해 가기 ' + (dd > 0 ? '→' : '←'), '뒤로 빠진다 · 행동력 1', 'dodge:' + dd, 'move:dodge', false, '#7A3B12');
+      });
+      /* 가까이 붙은 단추는 위로 비켜 쌓는다 */
+      mapActs.sort(function (a, b) { return a.l - b.l; });
+      for (var mi = 1; mi < mapActs.length; mi++) {
+        for (var mj = 0; mj < mi; mj++) if (Math.abs(mapActs[mi].l - mapActs[mj].l) < 13 && Math.abs(mapActs[mi].b - mapActs[mj].b) < 36) mapActs[mi].b = mapActs[mj].b + 38;
+      }
       var walls = [];
       if (vl < LO) walls.push({ l: 0, w: Math.min(100, VP(LO)) });
       if (vr > LEN) walls.push({ l: Math.max(0, VP(LEN)), w: 100 - Math.max(0, VP(LEN)) });
@@ -4311,7 +4369,7 @@ class Component extends DCLogic {
         foes: this.alive(cmb).map(function (f) { var on = f.uid === cmb.target; return { l: pct(f.x), ring: on ? '#E3B04B' : '#F6EFDF', size: on ? 22 : 18, half: on ? 11 : 9, tag: f.name.slice(0, 1) }; }),
         foeList: foeList, multi: foeList.length > 1, surrounded: this.surrounded(cmb),
         vMe: VP(me), vFoes: viewFoes, offL: offL, offR: offR, hasOffL: offL.length > 0, hasOffR: offR.length > 0, walls: walls, vTicks: vticks,
-        vExits: vExits,
+        vExits: vExits, mapActs: mapActs,
         vCovers: cmb.arena.covers.filter(function (cv) { return inView(cv.at); }).map(function (cv) { var tk = tipH(cv.obscure ? 'coverVeil' : 'cover');
           return { l: VP(cv.at), name: cv.name + (cv.temp ? ' ·잠시' + (showOdds ? ' ' + cv.ttl + '합' : '') : ''), h: cv.obscure ? 46 : 30, top: cv.obscure ? 72 : 56, bg: cv.obscure ? 'repeating-linear-gradient(135deg, #8A7E6A 0 5px, #6F6555 5px 9px)' : '#8A7E6A', tin: tk.in, ttap: tk.tap }; }),
         vHurdles: (cmb.arena.hurdles || []).filter(function (h) { return inView(h.at); }).map(function (h) { var tk = tipH('hurdle'); return { l: VP(h.at), name: h.sub ? '' : h.name + (h.temp ? ' ·잠시' + (showOdds ? ' ' + h.ttl + '합' : '') : ''), stat: (h.sub ? '넘기 ' : '') + STAT_LABEL[h.stat] + (showOdds ? ' ' + Math.round(self.hurdleChance(p, h)) + '%' : ''), tin: tk.in, ttap: tk.tap }; }),
@@ -4337,7 +4395,7 @@ class Component extends DCLogic {
         gearChips: (function () {
           var out = [], ar = self.armorLeft(p), mk = function (key, text, col) { out.push({ text: text, c: col, tipIn: tipH(key).in, tipTap: tipH(key).tap }); };
           if (ar > 0) mk('armor', '방어력 ' + ar, '#2C4A5C');
-          if (cmb.hitBonus > 0) mk('glassesOn', '안경 · 명중 +' + cmb.hitBonus, '#3F5E2F');
+          if (cmb.hitBonus > 0) mk('glassesOn', '돋보기 · 명중 +' + cmb.hitBonus, '#3F5E2F');
           if (cmb.nextHit > 0) mk('nextHit', '다음 공격 명중 +' + cmb.nextHit, '#3F5E2F');
           if (cmb.umbrella > 0) mk('umbrellaOn', '우산 · 적 사격 -' + GEAR.umbrella.hit + ' · ' + cmb.umbrella + '합', '#2C4A5C');
           if (cmb.pburn > 0) mk('pburn', '내 옷에 불 · 매 합 -' + cmb.pburn, '#9E2B20');
@@ -4348,9 +4406,9 @@ class Component extends DCLogic {
         held: !!cmb.held, heldText: cmb.held ? '붙잡힘 · ' + ((cmb.foes.filter(function (f) { return f.uid === cmb.held; })[0] || {}).name || '적') + '의 다음 공격 필중 · 이동 불가' : '',
         endTurn: guard('wait', function () { self.endTurn(); }), waitTip: tipH('wait').in
       };
-      var tabNow = ['skill', 'move', 'act'].indexOf(s.cbTab) >= 0 ? s.cbTab : 'skill';
+      var tabNow = ['skill', 'act'].indexOf(s.cbTab) >= 0 ? s.cbTab : 'skill';
       var nSk = groups.reduce(function (a, g) { return a + g.skills.length; }, 0), nAct = acts.filter(function (a) { return !a.hide; }).length;
-      var tabs = [{ k: 'skill', label: '기술', n: nSk }, { k: 'move', label: '이동', n: moves.length }, { k: 'act', label: '행동', n: nAct }].map(function (t) {
+      var tabs = [{ k: 'skill', label: '기술', n: nSk }, { k: 'act', label: '행동', n: nAct }].map(function (t) {
         var on = t.k === tabNow; return { tipIn: tipH('tab:' + t.k).in, label: t.label, n: t.n, on: on, bg: on ? '#1E1B16' : '#F6EFDF', fg: on ? '#F6EFDF' : '#1E1B16', pick: guard('tab:' + t.k, function () { self.setState({ cbTab: t.k }); }) };
       });
       var cardSide = e.x < cmb.px ? 'L' : 'R', mkArrow = function (dir) {
@@ -4426,6 +4484,8 @@ class Component extends DCLogic {
       toggleCredit: function () { self.setState({ creditOpen: !self.state.creditOpen }); },
       helpItems: HELP_ITEMS,
       showTopBar: s.screen !== 'title' && s.screen !== 'editor' && s.screen !== 'origin' && !!s.player,
+      mainBtn: { on: s.screen !== 'title', warn: !!s.mainArm && s.screen === 'combat', text: s.mainArm && s.screen === 'combat' ? '한 번 더 누르면 메인으로' : '‹ 메인으로',
+        bg: s.mainArm && s.screen === 'combat' ? '#9E2B20' : '#FBF7EE', fg: s.mainArm && s.screen === 'combat' ? '#F6EFDF' : '#1E1B16', go: function () { self.goMain(); } },
       isTitle: s.screen === 'title', isPlaying: s.screen !== 'title' && s.screen !== 'editor', isEditor: s.screen === 'editor',
       showEditorBtn: false,
       ed: this.editorVals(), openEditor: function () { self.openEditor(); }, closeEditor: function () { self.closeEditor(); },

@@ -47,14 +47,15 @@ var GLOSSARY = {
   move:      { kind: '행동', title: '이동', text: ['한 번 움직일 때마다 행동력 1. 적이 한 번 움직인다.', '민첩이 높을수록 한 걸음이 길다 (2.2m ~ 3.8m). 실제로 움직이는 거리는 매번 조금씩(±15%) 달라진다.', '붙잡히면 움직일 수 없다.'], rel: ['ap', 'held', 'hurdle'] },
   temp:      { kind: '지형', title: '잠시 있는 방해물', text: ['인력거·연기·소 떼처럼 잠깐 나타났다 몇 합 뒤 사라지는 것. 이름 옆에 ‘잠시’가 붙는다.', '전투를 시작할 때 있거나, 싸우는 도중에 새로 나타난다.', '엄폐물·시야 방해·이동 방해 성질을 여럿 함께 가질 수도 있다. 사라지면 그 뒤에 숨어 있던 것도 드러난다.'], rel: ['cover', 'veil', 'hurdle'] },
   hurdle:    { kind: '지형', title: '이동 방해물', text: ['돌담·도랑·철조망처럼 길을 가로막는 것(갈색 낮은 띠).', '넘어가려면 그 방해물마다 정해진 능력치 판정이 필요하다. 실패하면 그 앞에서 멈춘다.', '적은 판정 없이 넘지만, 방해물 앞에서 멈췄다가 넘는 데 한 합을 통째로 쓴다.'], rel: ['move'] },
-  'move:dodge': { kind: '이동', title: '피해 가기', text: ['막아선 적 하나를 지나쳐 그 뒤로 빠져나간다. 판정 없이 행동력 1.', '적 뒤로 얼마나 멀리 떨어지는지는 무작위 — 민첩과 근력이 높을수록 멀리 간다.', '너무 가까이 떨어지면 바로 다시 붙잡힐 수 있다.'], rel: ['move', 'hurdle'] },
+  'move:dodge': { kind: '이동', title: '피해 가기', text: ['막아선 적 머리 위에 뜨는 단추로 쓴다.', '막아선 적 하나를 지나쳐 그 뒤로 빠져나간다. 판정 없이 행동력 1.', '적 뒤로 얼마나 멀리 떨어지는지는 무작위 — 민첩과 근력이 높을수록 멀리 간다.', '너무 가까이 떨어지면 바로 다시 붙잡힐 수 있다.'], rel: ['move', 'hurdle'] },
   'move:in':    { kind: '이동', title: '다가가기', text: ['표적 쪽으로 한 걸음 다가간다.', '근접 기술의 사거리에 들어가려면 다가가야 한다.'], rel: ['move', 'range'] },
   'move:out':   { kind: '이동', title: '물러나기', text: ['표적 반대쪽으로 한 걸음 물러난다.', '총을 든 쪽은 거리를 벌리는 게 유리할 때가 많다. 등 뒤에 다른 적이 있으면 조심.'], rel: ['move', 'surround'] },
-  'move:cover': { kind: '이동', title: '엄폐물로', text: ['가장 가까운 엄폐물 쪽으로 한 걸음씩 간다.', '닿은 뒤 ‘행동’ 탭의 ‘엄폐’로 몸을 숨긴다.'], rel: ['cover', 'act:cover'] },
-  'move:exit':  { kind: '이동', title: '출구로 도주', text: ['출구 쪽으로 한 걸음씩 달린다. 닿으면 도주 성공.', '가는 동안에도 적은 계속 움직인다.'], rel: ['exit', 'move'] },
+  'move:cover': { kind: '이동', title: '몸 숨기러', text: ['가장 가까운 엄폐물 위에 뜨는 단추로 쓴다. 그쪽으로 한 걸음씩 간다.', '닿은 뒤 ‘행동’ 탭의 ‘엄폐’로 몸을 숨긴다.'], rel: ['cover', 'act:cover'] },
+  'move:exit':  { kind: '이동', title: '도주', text: ['출구 위에 뜨는 단추(화면 밖 출구는 가장자리 꼬리표)로 쓴다. 그쪽으로 한 걸음씩 달리고, 닿으면 도주 성공.', '가는 동안에도 적은 계속 움직인다.'], rel: ['exit', 'move'] },
   'act:cover':  { kind: '행동', title: '엄폐', text: ['엄폐물 뒤로 몸을 숨긴다. 행동력 1.', '더 위협적인 쪽 적의 사격 명중 -35%. 매 합 자동으로 방향을 바꾼다.', '근접 공격은 막지 못하고, 근접 공격에 맞거나 움직이면 풀린다.'], rel: ['cover', 'coverOn'] },
   'act:break':  { kind: '행동', title: '뿌리치기', text: ['붙잡혔을 때만 쓸 수 있다. 행동력 1.', '근력 판정에 성공하면 풀려난다.'], rel: ['held'] },
   'act:surrender': { kind: '행동', title: '항복', text: ['적이 항복을 권했을 때만 쓸 수 있다.', '관헌 앞이면 불법 소지품만 빼앗기고, 관헌이 아닌 상대에게는 돈의 절반을 털린다.', '전투가 끝난다.'], rel: ['offer'] },
+  'act:badge': { kind: '행동', title: '고등계 증표', text: ['품속의 고등계 협력 증표를 내보인다. 행동력 1.', '관헌이면 바로 물러나고, 왈패·낭인 등은 겁먹으면 흩어진다. 공격하기 전에만 쓸 수 있다.', '쓸 때마다 동포의 눈총을 받는다(민족 타협도 하락).'], rel: [] },
   'act:medkit': { kind: '행동', title: '구급약', text: ['구급약 하나를 써서 최대 체력의 10~60%를 회복한다.', '행동력 1. 적이 한 번 움직인다.'], rel: ['ap'] },
   'act:talk':   { kind: '행동', title: '설득', text: ['말로 상대를 물러나게 한다. 행동력 2.', '내가 먼저 공격하기 전에만 쓸 수 있다. 한 번 손을 대면 항복 요구로 바뀐다.', '지능 판정. 상대 쪽 평판이 좋을수록, 적이 적을수록 쉽다.'], rel: ['act:demand', 'ap'] },
   'act:plea':   { kind: '행동', title: '무고 주장', text: ['관헌에게 아무 죄도 없다고 우긴다. 행동력 2.', '지능 판정. 일제 평판이 좋을수록 쉽고, 불법 소지품을 지녔거나 감시도가 높을수록, 실패할수록 어렵다.', '성공하면 전투 없이 풀려난다. 내가 먼저 공격하면 쓸 수 없다.'], rel: ['act:demand', 'ap'] },
@@ -135,7 +136,7 @@ var HEAT_MAX = 20; /* 감시도 최대치 (도시마다 따로) */
 var SAVE_KEY = 'ilje.save.v1', SAVE_VER = 1; /* SAVE_KEY: 예전 한 칸 저장 (있으면 1번 칸으로 옮김) */
 var SAVE_SLOTS = 5, SAVE_SLOT_KEY = 'ilje.save.slot'; /* 저장 칸 수 · 칸별 키 = SAVE_SLOT_KEY + 번호 */
 var SAVE_SKIP = ['life', 'base', 'edStage', 'raw', 'importText', 'saveMsg', 'saveOk', 'dice', 'rolling', 'qte', 'tip', 'infoMode',
-  'nameOpen', 'nameDraft', 'rerollWarn', 'helpOpen', 'creditOpen', 'resumeOpen', 'invMsg', 'slotDel', 'hudOpen', 'seedDraft', 'seedMsg', 'pickSlot', 'foeCard'];
+  'nameOpen', 'nameDraft', 'rerollWarn', 'helpOpen', 'creditOpen', 'resumeOpen', 'invMsg', 'slotDel', 'hudOpen', 'seedDraft', 'seedMsg', 'pickSlot', 'foeCard', 'mainArm'];
 /* 증명서별 수치 */
 var CERT = { residencePass: 0.2, residenceMiss: 0.1,
   /* 위조 도민증(오카다 상회): 내보이면 fakePass 확률로 통과 · 그 전에 fakeCaught 확률로 위조가 들통나 빼앗기고 감시도 +fakeHeat 뒤 몸수색 */
@@ -201,9 +202,9 @@ Object.assign(ITEMS, {
   vest: { name: '솜누비 조끼', kind: 'gear', armor: GEAR.armor.vest, short: '전투 방어력 ' + GEAR.armor.vest,
     desc: '솜을 두툼하게 넣어 누빈 조끼. 저고리 안에 받쳐 입으면 겉으로는 티가 나지 않는다.',
     effect: '전투에서 방어력 ' + GEAR.armor.vest + ' — 받는 피해를 체력보다 먼저 막는다 · 닳은 만큼은 돌아오지 않는다 · 다 닳으면 솜이 터져 못 입는다' },
-  glasses: { name: '대모테 안경', kind: 'gear', short: '다음 전투 명중 +' + GEAR.glasses.hit,
-    desc: '거북 등껍질 무늬 테를 두른 둥근 안경. 쓰면 멀리 있는 것이 또렷해진다. 다만 알이 얇아 쉽게 깨진다.',
-    effect: '다음 전투에서 내 명중 +' + GEAR.glasses.hit + ' · 전투가 시작될 때 쓰고, 그 싸움에서 깨져 사라진다 (한 번)' },
+  glasses: { name: '돋보기', kind: 'gear', short: '다음 전투 명중 +' + GEAR.glasses.hit,
+    desc: '장터 좌판에서 파는 철사테 돋보기. 노인들 신문 읽는 물건이지만, 눈을 가늘게 뜨고 쓰면 표적이 한결 또렷하다. 테가 약해 금방 휜다.',
+    effect: '다음 전투에서 내 명중 +' + GEAR.glasses.hit + ' · 전투가 시작될 때 쓰고, 그 싸움에서 테가 휘어 못 쓰게 된다 (한 번)' },
   match: { name: '성냥', kind: 'gear', short: '근거리 적에게 화상 ' + GEAR.match.burn,
     desc: '인천 성냥공장 상표가 찍힌 성냥. 한 갑에 굵은 개비 세 개를 따로 챙겼다.',
     effect: '전투: ' + GEAR.match.reach + 'm 안의 표적에게 불붙은 성냥을 던져 화상 ' + GEAR.match.burn + ' (행동력 1 · 정확 판정) · 화상은 매 합 그 값만큼 피해, 적은 저나 동료가 한 합을 써서 1씩 끈다 · 대실패하면 내 옷에 불이 옮겨붙는다 · 한 개비씩 쓴다' },
@@ -226,7 +227,7 @@ Object.assign(GLOSSARY, {
   pburn:      { kind: '상태', title: '내 옷에 불', text: ['매 합 화상 값만큼 체력을 잃는다.', '매 합 1씩 저절로 준다.'], rel: ['burn'] },
   armor:      { kind: '상태', title: '방어력', text: ['외투·조끼가 받는 피해를 체력보다 먼저 막는다.', '닳은 방어력은 돌아오지 않는다. 다 닳으면 그 옷은 사라진다.', '화상 피해는 막지 못한다.'], rel: [] },
   umbrellaOn: { kind: '상태', title: '우산을 펼침', text: ['적의 사격 명중 -' + GEAR.umbrella.hit + '.', '표시된 합이 지나면 접힌다.'], rel: ['act:umbrella'] },
-  glassesOn:  { kind: '상태', title: '안경', text: ['이번 전투 내내 내 명중 +' + GEAR.glasses.hit + '.'], rel: [] },
+  glassesOn:  { kind: '상태', title: '돋보기', text: ['이번 전투 내내 내 명중 +' + GEAR.glasses.hit + '.'], rel: [] },
   nextHit:    { kind: '상태', title: '정신이 번쩍', text: ['다음 공격 하나의 명중 +' + GEAR.jintan.hit + '.'], rel: ['act:jintan'] }
 });
 function josaEulReul(w) { w = String(w || ''); var c = w.charCodeAt(w.length - 1) - 0xAC00; return (c >= 0 && c <= 11171 && c % 28) ? '을' : '를'; }
