@@ -322,9 +322,6 @@ var SCORE = {
   success: ['end_success', 'end_freed', 'end_letter', 'end_rise', 'end_saved'],
   tiers: [150, 400, 800, 1400, 2200, 3200]
 };
-/* 재고 보충: 선택지에 stock: '이름' 이 있으면 사고 나서 품절 — weeks ± spread 주 뒤 다시 들어온다 (물건마다 따로)
-   언제 들어오는지는 화면에 나오지 않는다 (가 봐야 안다 · showOdds 를 켜면 남은 주가 보임) */
-var RESTOCK = { weeks: 3 * WEEKS_PER_MONTH, spread: WEEKS_PER_MONTH };
 var META_KEY = 'ilje.meta';
 /* 태생 선택권은 공통 (tok: 장 수, 어느 단계에나 쓴다) — 예전 단계별 선택권(tokens)은 합쳐서 옮긴다 */
 function loadMeta() {

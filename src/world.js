@@ -192,12 +192,14 @@ var PLACES = [
     loc: function (p) { return stashSpot(p.stash.spot).loc; },
     event: function (self, d) { return self.makeStashVisit(d); } },
   /* 오카다 상회: 오카다 연줄이면 처음부터, 아니면 본정에서 한 번 들른 뒤(okada_known)부터 행동 목록에 */
-  { id: 'okada', kicker: '단골 가게',
+  { id: 'okada', kicker: '단골 가게 · 한 달에 한 번',
     open: function (p) { return !!((p.tags && p.tags.okada) || (p.flags && p.flags.okada_known)); },
     name: function () { return '오카다 상회'; },
     sub: function (p) { return '본정 뒷골목 잡화상 · 무기 · 보약 · 위조 도민증' + (p.tags && p.tags.okada ? ' · 오카다와의 연줄로 반값' : ''); },
     loc: function () { return 'honmachi'; },
-    event: function () { return Object.assign({ id: 'hn_shop' }, EVENTS.hn_shop); } },
+    /* 한 달에 한 번 (본정 거리에서 우연히 들른 것도 친다) */
+    locked: function (p, self) { return p && p.okadaMonth === shopKey(self.state.date) ? '요즘 본정에 왜경 단속이 심하다 · 오카다가 당분간 발길을 끊으라 했다 (다음 달에 다시)' : ''; },
+    event: function (self, d) { d.player.okadaMonth = shopKey(d.date); return Object.assign({ id: 'hn_shop' }, EVENTS.hn_shop); } },
   { id: 'shop', kicker: '상점 · 한 달에 한 번',
     open: function (p) { return !!p; },
     name: function (p) { return shopOf(p).name; },

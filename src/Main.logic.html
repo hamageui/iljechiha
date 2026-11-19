@@ -574,7 +574,7 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <sc-for list="{{ev.options}}" as="o" hint-placeholder-count="3">
 <button class="choice ks-opt" type="button" disabled="{{o.disabled}}" onClick="{{o.choose}}" style="display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; padding: 12px 18px 12px 14px; color: #1E1B16; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; text-align: left">
 <span class="ks-num" aria-hidden="true">{{o.num}}</span>
-<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 17px; font-weight: 800">{{o.label}}</span><span style="font-size: 13px; color: {{o.tagColor}}">{{o.tag}}</span><sc-if value="{{o.hasWhy}}" hint-placeholder-val="{{ false }}"><span class="ks-why">{{o.why}}</span></sc-if></span>
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 17px; font-weight: 800">{{o.label}}</span><sc-if value="{{o.hasTag}}" hint-placeholder-val="{{ true }}"><span style="font-size: 13px; color: {{o.tagColor}}">{{o.tag}}</span></sc-if><sc-if value="{{o.hasWhy}}" hint-placeholder-val="{{ false }}"><span class="ks-why">{{o.why}}</span></sc-if></span>
 <sc-if value="{{o.hasChance}}" hint-placeholder-val="{{ true }}"><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 17px; font-weight: 700; color: #2C4A5C; white-space: nowrap">{{o.chanceText}}</span></sc-if>
 </button>
 </sc-for>
@@ -1690,8 +1690,12 @@ class Component extends DCLogic {
     if (!ev) {
       /* 그 거리의 사건 + 어디서나 나오는 공통 사건 (COMMON) */
       var self3 = this, base = Math.random() < 0.45 ? (L.work || []).concat(COMMON.work) : (L.events || []).concat(COMMON.events);
+      /* 오카다 상회는 한 달에 한 번: 이번 달에 들렀으면 본정 거리에서도 나오지 않는다 */
+      var okThisMonth = d.player.okadaMonth === shopKey(d.date);
+      base = base.filter(function (id) { return !(id === 'hn_shop' && okThisMonth); });
       var pool = base.filter(function (id) { return self3.tagsOk(d.player, EVENTS[id]); });
       ev = EVENTS[this.pick(pool.length ? pool : base)];
+      if (ev === EVENTS.hn_shop) d.player.okadaMonth = shopKey(d.date);
     }
     d.loc = locId; d.event = ev; d.screen = 'event';
     this.log(d, TIMES[d.time] + ' · ' + L.name + ' — ' + ev.title, 'sys');
@@ -2020,8 +2024,6 @@ class Component extends DCLogic {
     d.event = null; d.screen = 'outcome';
     this.log(d, ev.title + ' — ' + itemName(opt.cert) + '로 통과', 'sys');
   }
-  /* 재고: 품절이면 남은 주 수, 아니면 0 */
-  soldOut(p, o) { if (!o || !o.stock || !p || !p.restock) return 0; var due = p.restock[o.stock] || 0; return Math.max(0, due - (p.daysLived || 0)); }
   visibleOptions(ev, p) {
     var self = this;
     return this.certOptions(ev, p).concat(ev.options || []).filter(function (o) {
@@ -2038,7 +2040,6 @@ class Component extends DCLogic {
     if (!opt) return;
     var cost = this.costOf(ev, opt, s.player);
     if (cost && cost.money && s.player.money < cost.money) return;
-    if (this.soldOut(s.player, opt)) return;
     if (opt.cert === 'residence') {
       /* 거주증명서: 절반쯤만 통한다 — 안 통하면 그대로 몸수색 */
       var cpl = (ev.options || []).filter(function (o) { return o.comply; })[0];
@@ -2181,11 +2182,6 @@ class Component extends DCLogic {
       Object.keys(ITEMS).forEach(function (id) { var I = ITEMS[id], full = I.armor || I.uses; if (!full) return; if (its[id] && gl[id] == null) gl[id] = full; if (!its[id]) delete gl[id]; });
       d.player.gearLeft = gl;
     }
-    /* 재고: 사고 나면 품절 — RESTOCK.weeks ± spread 주 뒤 보충 */
-    if (opt && opt.stock && good) {
-      var rw = Math.max(1, RESTOCK.weeks + Math.round((Math.random() * 2 - 1) * RESTOCK.spread));
-      d.player.restock = Object.assign({}, d.player.restock || {}); d.player.restock[opt.stock] = (d.player.daysLived || 0) + rw;
-    }
     /* 대서소 신청: 몇 주 뒤에 결과 */
     if (opt && opt.apply && good) this.startIssue(d, opt.apply, parts);
     /* 행상 허가증: 일거리로 번 돈 +1 */
@@ -2208,6 +2204,14 @@ class Component extends DCLogic {
     /* 이어지는 장면: 결과 글을 보여 준 뒤 같은 사건의 다음 장면(글 + 선택지)으로. 싸움이 있으면 장면은 무시 */
     var nst = !out.fight && out.step && ev.steps && ev.steps[out.step];
     var next = nst ? Object.assign({}, ev, { title: nst.title || ev.baseTitle || ev.title, baseTitle: ev.baseTitle || ev.title, text: nst.text || '', options: nst.options || [], scene: out.step }) : null;
+    /* skipOutcome: 결과창 없이 바로 다음 장면으로 — 결과 글·변화는 다음 장면 글 위에 붙인다 */
+    if (next && out.skipOutcome) {
+      var lead = [out.text || '', parts.length ? '(' + parts.join(' · ') + ')' : ''].filter(Boolean).join('\n');
+      if (lead) next = Object.assign({}, next, { text: lead + (next.text ? '\n\n' + next.text : '') });
+      if (out.text) this.log(d, out.text, good ? 'story' : 'sys');
+      d.outcome = null; d.event = next; d.screen = 'event';
+      return;
+    }
     d.outcome = { title: ev.title, text: out.text, summary: parts.join(' · '), fight: out.fight || null, dist: out.dist, alarm: !!out.alarm, questFight: out.questFight || null, ambush: !!out.ambush, next: next };
     d.event = null; d.screen = 'outcome';
     this.log(d, out.text, out.fight ? 'bad' : (good ? 'story' : 'sys'));
@@ -4142,7 +4146,7 @@ class Component extends DCLogic {
           }
           if (o.comply) {
             var found = self.contrabandOf(p), lk = self.lookAwayChance(p), fr = self.frameChance(p);
-            tag.push(!showOdds ? '판정 없음 · 몸과 짐을 내맡긴다'
+            tag.push(!showOdds ? '몸과 짐을 내맡긴다'
               : (found.length ? '불법 소지품(' + found.join(', ') + ') — 작은 것은 놓칠 수도' : '불법 소지품 없음')
                 + (lk ? ' · 들켜도 못 본 척 ' + Math.round(lk * 100) + '%' : '') + (fr ? ' · 누명 ' + Math.round(fr * 100) + '%' : ''));
           } else if (o.bribe) {
@@ -4154,10 +4158,9 @@ class Component extends DCLogic {
             tag.push(showOdds ? '통할 확률 ' + Math.round(CERT.fakePass * 100) + '% · 들통 ' + Math.round(CERT.fakeCaught * 100) + '%' : '안 통하면 몸수색 · 들통나면 큰일');
           } else if (o.cert === 'residence') {
             tag.push(showOdds ? '통할 확률 ' + Math.round(CERT.residencePass * 100) + '% · 안 통하면 몸수색 (놓칠 확률 +' + Math.round(CERT.residenceMiss * 100) + '%)' : '안 통하면 몸수색');
-          } else if (!o.check && !o.cost) tag.push(o.ok && o.ok.fight ? '전투 발생' : '판정 없음');
-          var so = self.soldOut(p, o); if (so) { lacking = true; tag = ['다 팔렸다 · 아직 안 들어왔다' + (showOdds ? ' (' + so + '주 뒤)' : '')]; }
+          } else if (!o.check && !o.cost && o.ok && o.ok.fight) tag.push('전투 발생'); /* 판정 없는 선택지는 아래 글씨를 비운다 */
           var why = self.optReason(o, p);
-          return { label: o.label, tag: tag.join(' · '), why: why, hasWhy: !!why, hasChance: hasChance, chanceText: chanceText, tagColor: /전투|발각/.test(tag.join(' ')) ? KIND_COLOR.fight : '#5B5246', num: ['一', '二', '三', '四', '五', '六', '七'][i] || String(i + 1), disabled: rolling || lacking, choose: function () { self.choose(i); } };
+          return { label: o.label, tag: tag.join(' · '), hasTag: tag.length > 0, why: why, hasWhy: !!why, hasChance: hasChance, chanceText: chanceText, tagColor: /전투|발각/.test(tag.join(' ')) ? KIND_COLOR.fight : '#5B5246', num: ['一', '二', '三', '四', '五', '六', '七'][i] || String(i + 1), disabled: rolling || lacking, choose: function () { self.choose(i); } };
         }) };
     }
 

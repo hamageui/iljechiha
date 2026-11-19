@@ -589,27 +589,27 @@ var EVENTS = {
         ng: { text: '외침은 전차 종소리에 묻혔다.\n어깨를 받혀 길바닥에 나뒹굴었다.', fx: { hp: -4 } } }
     ] },
   /* discount: 태그가 있으면 이 사건의 돈 비용에 rate 를 곱한다(올림). 예) 오카다와의 연줄 → 반값 */
-  /* stock: 산 물건은 품절 → 석 달 안팎(RESTOCK) 뒤 다시 들어온다, 물건마다 따로 */
+  /* 오카다 상회는 한 달에 한 번 (p.okadaMonth = 'y-m' · 행동 목록·본정 거리 어느 쪽으로 들러도) */
   hn_shop: { title: '오카다 상회', kind: 'shop', discount: { tag: 'okada', rate: 0.5, label: '오카다 반값' },
     text: '본정 뒷골목, 간판도 없는 잡화상. 문을 열면 방울이 딸랑 운다.\n앞방에는 성냥, 담배, 비누 같은 것들이 먼지를 뒤집어쓰고 있지만, 단골들은 안다. 진짜 장사는 뒷방에서 한다는 걸.\n안경 너머로 오카다 영감이 손님을 훑어본다. 서툰 조선말에 일본말이 섞인다.\n“이랏샤이. 무엇을 찾으시오? …돈만 맞으면, 나는 국적을 묻지 않소.”',
     options: [
-      { label: '호신용 권총을 산다', stock: 'okada_browning', cost: { money: 20 }, hideWeapon: 'browning',
+      { label: '호신용 권총을 산다', cost: { money: 20 }, hideWeapon: 'browning',
         ok: { flag: 'okada_known', text: '오카다가 기름종이에 싼 낡은 브라우닝을 꺼낸다. 탄환 여섯 발이 딸려 온다.\n품속이 묵직해졌다.', weapon: 'browning', fx: { ammo: 6, heat: 1 } } },
-      { label: '단도를 산다', stock: 'okada_knife', cost: { money: 8 }, hideWeapon: 'knife',
+      { label: '단도를 산다', cost: { money: 8 }, hideWeapon: 'knife',
         ok: { flag: 'okada_known', text: '칼집까지 검게 칠한 단도. 소매 속에 쏙 들어간다.\n“손 조심하시오.” 오카다가 웃는다.', weapon: 'knife' } },
-      { label: '몽둥이를 산다', stock: 'okada_club', cost: { money: 3 }, hideWeapon: 'club',
+      { label: '몽둥이를 산다', cost: { money: 3 }, hideWeapon: 'club',
         ok: { flag: 'okada_known', text: '손때 묻은 박달나무 몽둥이.\n들고 다녀도 누가 뭐라 하진 않는다. 아직은.', weapon: 'club' } },
-      { label: '뒷방의 남부 권총을 산다', stock: 'okada_nambu', cost: { money: 30 }, hideWeapon: 'nambu', needTag: 'okada',
+      { label: '뒷방의 남부 권총을 산다', cost: { money: 30 }, hideWeapon: 'nambu', needTag: 'okada',
         ok: { flag: 'okada_known', text: '오카다가 문을 걸어 잠그고, 마룻장 밑에서 경찰용 남부 권총을 꺼낸다.\n“출처는 묻지 마시오. 나도 당신 이름은 묻지 않았으니.”', weapon: 'nambu', fx: { ammo: 6, heat: 1 } } },
-      { label: '탄환 6발을 산다', stock: 'okada_ammo', cost: { money: 6 }, needFlag: 'gun',
+      { label: '탄환 6발을 산다', cost: { money: 6 }, needFlag: 'gun',
         ok: { flag: 'okada_known', text: '탄환 여섯 발을 손수건에 싸서 품에 넣었다.\n오카다는 장부에 아무것도 적지 않았다.', fx: { ammo: 6 } } },
-      { label: '인삼정을 산다', stock: 'okada_ginseng', cost: { money: 15 },
+      { label: '인삼정을 산다', cost: { money: 15 },
         ok: { flag: 'okada_known', text: '오카다가 뒷방 약장에서 검은 환약 한 통을 꺼낸다. “개성 인삼을 고아 빚은 것이오. 한 통 다 먹으면 몸이 달라지지.”\n한 달을 아껴 먹었다. 숨이 덜 차고, 맞아도 덜 휘청거린다.', fx: { maxHp: 1, hp: 1 } } },
-      { label: '녹용 대보탕을 산다', stock: 'okada_deer', cost: { money: 40 },
+      { label: '녹용 대보탕을 산다', cost: { money: 40 },
         ok: { flag: 'okada_known', text: '“만주 녹용이오. 관청 나리들도 줄 서서 사 가는 물건이지.”\n오카다가 손수 달인 탕약 스무 첩을 보자기에 싸 준다. 다 먹고 나니 몸에 쇠심줄이 박힌 것 같다.', fx: { maxHp: 2, hp: 2 } } },
-      { label: '위조 도민증을 산다', stock: 'okada_fakeid', cost: { money: 30 }, show: { noItems: ['fake_id'] },
+      { label: '위조 도민증을 산다', cost: { money: 30 }, show: { noItems: ['fake_id'] },
         ok: { flag: 'okada_known', item: 'fake_id', text: '오카다가 문을 걸어 잠그고 서랍 밑 비밀 칸에서 도민증 한 장을 꺼낸다. 사진 자리에 당신 얼굴을 붙이고, 인주를 묻힌 도장을 꾹 누른다.\n“진짜와 똑같소. 다만 눈 밝은 순사를 만나면 그건 내 알 바 아니오.”' } },
-      { label: '구급약을 산다', stock: 'okada_medkit', cost: { money: 5 }, ok: { flag: 'okada_known', text: '붕대 한 두름과 옥도정기 한 병을 챙겼다.\n“다치지 마시오. 죽은 손님은 다시 안 오니.”', fx: { medkit: 1 } } },
+      { label: '구급약을 산다', cost: { money: 5 }, ok: { flag: 'okada_known', text: '붕대 한 두름과 옥도정기 한 병을 챙겼다.\n“다치지 마시오. 죽은 손님은 다시 안 오니.”', fx: { medkit: 1 } } },
       { label: '그냥 나간다', ok: { flag: 'okada_known', text: '오카다의 눈길을 등 뒤로 느끼며 가게를 나섰다.\n방울이 다시 딸랑 울렸다.' } }
     ] },
   hn_dept: { title: '백화점 잡역부', kind: 'work',

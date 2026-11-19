@@ -309,6 +309,7 @@ var DEV_TOOL = (function () {
     '＋ 조건부 결과': '태그·능력치·표식 등 조건에 따라 다른 결과를 만듭니다.\n예: 평양 출신(태그:region:northwest)이면 주인이 외상을 해 준다',
     '얻는 표식·태그': '이 결과가 나오면 주인공에게 붙는 표식·태그. 나중 사건의 조건에 쓸 수 있습니다.\n예: 표식:met_kim, 태그:debtor, 태그빼기:debtor, 물건:peddler, 물건빼기:residence',
     '이어지는 장면': '한 사건 안에서 선택을 여러 번 하게 합니다.\n결과에서 장면을 고르면, 결과 글을 보여 준 뒤 그 장면의 글과 선택지가 이어서 나옵니다. 시간은 흐르지 않습니다.\n장면은 이 사건 아래 ‘이어지는 장면’에서 만듭니다. 싸움이 있는 결과에는 쓸 수 없습니다.',
+    '결과창 없이': '켜면 결과창을 건너뛰고 바로 다음 장면으로 넘어갑니다.\n결과 글을 적어 두었다면 다음 장면 글 맨 위에 붙어서 나옵니다(돈·감시도 같은 변화도 괄호로 함께). 결과 글을 비우면 다음 장면 글만 나옵니다.',
     '장면 이름': '장면을 가리키는 이름 (영문 소문자 · 숫자 · _).\n선택지 결과의 ‘이어지는 장면’에 이 이름이 뜹니다.',
     '장면 제목': '이 장면에서 화면 맨 위에 나올 제목. 비우면 사건 제목 그대로.',
     '장면 본문': '이 장면으로 넘어왔을 때 나오는 글.',
@@ -466,8 +467,8 @@ var DEV_TOOL = (function () {
     r = r || {};
     var q = r.quest || {};
     return { text: r.text || '', fx: fxStr(r.fx), qid: q.id || '', qstage: q.stage || '', qwait: q.wait == null ? '' : String(q.wait),
-      qrest: omit(q, ['id', 'stage', 'wait']), fight: r.fight || '', dist: r.dist == null ? '' : String(r.dist), step: r.step || '',
-      gain: gainStr(r), rest: restStr(omit(r, ['text', 'fx', 'quest', 'fight', 'dist', 'step', 'flag', 'tag', 'untag', 'item', 'unitem'])) };
+      qrest: omit(q, ['id', 'stage', 'wait']), fight: r.fight || '', dist: r.dist == null ? '' : String(r.dist), step: r.step || '', skip: !!r.skipOutcome,
+      gain: gainStr(r), rest: restStr(omit(r, ['text', 'fx', 'quest', 'fight', 'dist', 'step', 'skipOutcome', 'flag', 'tag', 'untag', 'item', 'unitem'])) };
   }
   function resBuild(m, what, steps) {
     var r = parseRest(m.rest, what + ' · 기타');
@@ -486,6 +487,7 @@ var DEV_TOOL = (function () {
       if (!steps[m.step]) throw new Error(what + ': 이어지는 장면 “' + m.step + '”이(가) 없습니다');
       if (r.fight) throw new Error(what + ': 싸움이 있는 결과는 다음 장면으로 이어질 수 없습니다 (싸움 또는 장면 중 하나만)');
       r.step = m.step;
+      if (m.skip) r.skipOutcome = true;
     }
     return r;
   }
@@ -857,7 +859,8 @@ var DEV_TOOL = (function () {
         field('싸움', inp(r.fight, function (v) { r.fight = v; mark(); }, { list: 'ijd-fights', placeholder: '없음' })),
         field('싸움 거리', inp(r.dist, function (v) { r.dist = v; mark(); }, { placeholder: '예: 1.5', inputmode: 'decimal' })),
         field('얻는 표식·태그', inp(r.gain, function (v) { r.gain = v; mark(); }, { placeholder: '예: 표식:met_kim, 태그:debtor', autocapitalize: 'off', spellcheck: 'false' })),
-        field('이어지는 장면', sel(r.step, [['', stepKeys.length ? '(여기서 사건 끝)' : '(장면 없음 · 사건 끝)']].concat(stepKeys.map(function (k) { return [k, '→ ' + k]; })), function (v) { r.step = v; mark(); }, { class: 'ijd-stepsel' }))
+        field('이어지는 장면', sel(r.step, [['', stepKeys.length ? '(여기서 사건 끝)' : '(장면 없음 · 사건 끝)']].concat(stepKeys.map(function (k) { return [k, '→ ' + k]; })), function (v) { r.step = v; mark(); render(); }, { class: 'ijd-stepsel' })),
+        r.step ? h('label', { class: 'ijd-f ijd-chk' }, [h('input', { type: 'checkbox', checked: r.skip, onchange: function (e) { r.skip = e.target.checked; mark(); } }), h('span', { class: 'has-tip', tip: TIPS['결과창 없이'], text: '결과창 없이 바로' })]) : null
       ]),
       h('div', { class: 'ijd-grid' }, [
         field('이야기 진행 → 이야기', sel(r.qid, [['', '없음']].concat(Object.keys(QUESTS).map(function (q) { return [q, QUESTS[q].name]; })), function (v) { r.qid = v; mark(); render(); })),
@@ -1302,23 +1305,48 @@ var DEV_TOOL = (function () {
   function inFrame() { try { return window.self !== window.top; } catch (err) { return true; } }
   /* claude.ai 판의 기능(저장소 db · 내려받기)을 쓸 수 있으면 그 이름공간, 아니면 null */
   /* window.claude 는 이 화면이 아니라 감싼 화면(부모)에 있을 수도 있다 */
-  function claudeApi() {
-    var ws = [window]; try { if (window.parent && window.parent !== window) ws.push(window.parent); } catch (e) {} try { if (window.top && ws.indexOf(window.top) < 0) ws.push(window.top); } catch (e) {}
-    for (var i = 0; i < ws.length; i++) { try { var c = ws[i].claude; if (c && typeof c.use === 'function') return c; } catch (err) {} }
-    return null;
+  /* window.claude 는 이 화면(그림판 틀 안)·부모(디자인 편집기)·최상위 중 어디에 있을지 모른다.
+     그림판 틀 안에도 ‘빈 껍데기’ claude 가 있을 수 있어(use 가 늘 null), 첫 번째 것만 믿지 않고 차례로 다 물어본다. */
+  function claudeWins() {
+    var ws = [], add = function (w) { try { if (w && ws.indexOf(w) < 0) ws.push(w); } catch (e) {} };
+    add(window); try { add(window.parent); } catch (e) {} try { add(window.top); } catch (e) {}
+    var out = [];
+    ws.forEach(function (w, i) {
+      var where = w === window ? '이 화면' : (w === window.top ? '최상위' : '부모');
+      try { var c = w.claude; if (c && typeof c.use === 'function') out.push({ c: c, where: where }); else out.push({ c: null, where: where, why: 'claude 없음' }); }
+      catch (e) { out.push({ c: null, where: where, why: '접근 막힘' }); }
+    });
+    return out;
   }
-  function cap(name) {
-    var c = claudeApi();
-    if (!c) return Promise.resolve(null);
-    return Promise.resolve(c.use(name)).catch(function () { return null; });
+  function claudeApi() { var w = claudeWins().filter(function (x) { return x.c; })[0]; return w ? w.c : null; }
+  /* 이름공간 하나 얻기: 쓸 수 있는 곳을 차례로 시도 (각 6초) · 실패하면 어디서 왜 안 됐는지 note 에 남긴다 */
+  function cap(name, note) {
+    var list = claudeWins(), notes = note || [];
+    var tryAt = function (i) {
+      if (i >= list.length) return Promise.resolve(null);
+      var w = list[i];
+      if (!w.c) { notes.push(w.where + ': ' + w.why); return tryAt(i + 1); }
+      var timer, timeout = new Promise(function (res) { timer = setTimeout(function () { res('timeout'); }, 6000); });
+      return Promise.race([Promise.resolve().then(function () { return w.c.use(name); }), timeout]).then(function (ns) {
+        clearTimeout(timer);
+        if (ns && ns !== 'timeout') return ns;
+        notes.push(w.where + ': ' + (ns === 'timeout' ? '응답 없음' : name + ' 못 씀'));
+        return tryAt(i + 1);
+      }, function (err) { clearTimeout(timer); notes.push(w.where + ': ' + ((err && (err.message || err.code)) || '오류')); return tryAt(i + 1); });
+    };
+    return tryAt(0);
   }
-  /* Claude 에게 보내기: 아티팩트의 db 문서 devtool/patch 에 수정본을 넣는다 (Claude 가 바로 읽음) */
+  /* Claude 에게 보내기: 아티팩트의 db 문서 devtool/patch 에 수정본을 넣고, 다시 읽어 확인한다 (Claude 가 바로 읽음) */
   function sendToClaude() {
-    var p = fullPatch(), text = JSON.stringify(p);
+    var p = fullPatch(), text = JSON.stringify(p), notes = [];
     if (text.length > 240000) return Promise.reject(new Error('수정본이 너무 큽니다 (' + Math.round(text.length / 1024) + 'KB). ‘복사’로 대화창에 붙여 넣어 주세요.'));
-    return cap('db').then(function (db) {
-      if (!db) throw new Error('이 화면에서는 보낼 수 없습니다 — 아래 ‘복사’를 눌러 Claude 대화창에 붙여 넣어 주세요');
-      return db.doc('devtool/patch').set({ json: text, saved: p.saved, count: localCount() });
+    return cap('db', notes).then(function (db) {
+      if (!db) throw new Error('저장소에 닿지 못했습니다 (' + (notes.join(' · ') || '쓸 수 있는 곳 없음') + ')');
+      var ref = db.doc('devtool/patch');
+      return ref.set({ json: text, saved: p.saved, count: localCount() }).then(function () { return ref.get(); }).then(function (snap) {
+        var got = snap && (typeof snap.data === 'function' ? snap.data() : snap.data);
+        if (!got || got.saved !== p.saved) throw new Error('저장한 뒤 다시 읽었는데 수정본이 보이지 않습니다');
+      }, function (err) { throw new Error('저장소에 쓰지 못했습니다: ' + ((err && (err.code || err.message)) || err)); });
     });
   }
   function download() {
@@ -1350,7 +1378,13 @@ var DEV_TOOL = (function () {
         }, text: '📁 iljechiha 폴더에 저장' }) : null,
         canSend ? h('button', { type: 'button', class: 'ijd-btn main', tip: '수정본을 이 게임(claude.ai 판)의 저장소에 넣어 둡니다. Claude 가 바로 읽어 게임 파일에 반영할 수 있습니다.', onclick: function () {
           toast('보내는 중…');
-          sendToClaude().then(function () { toast('Claude 에게 보냈습니다. 대화창에 “스토리 고친 거 적용해줘”라고 하세요.'); }, function (err) { toast('보내기 실패: ' + ((err && (err.message || err.code)) || err) + ' — 아래 ‘복사’를 쓰세요.', true); });
+          sendToClaude().then(function () { toast('Claude 에게 보냈습니다. 대화창에 “스토리 고친 거 적용해줘”라고 하세요.'); }, function (err) {
+            /* 못 보냈으면 수정본을 바로 클립보드에 담아 둔다 — 대화창에 붙여 넣으면 된다 */
+            var why = (err && (err.message || err.code)) || String(err);
+            var copied = function () { toast('보내기 실패: ' + why + ' — 대신 수정본을 복사해 두었습니다. Claude 대화창에 붙여 넣어 주세요.', true); };
+            var notCopied = function () { toast('보내기 실패: ' + why + ' — 아래 ‘복사’를 눌러 대화창에 붙여 넣어 주세요.', true); };
+            if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(copied, notCopied); else notCopied();
+          });
         }, text: '✉ Claude 에게 보내기' }) : null,
         h('button', { type: 'button', class: 'ijd-btn', onclick: function () {
           download().then(function (r) { toast(r && r.status === 'delivered' ? '보냈습니다.' : 'patch.json 을 받았습니다. iljechiha\\stories 폴더에 넣어 주세요.'); },
