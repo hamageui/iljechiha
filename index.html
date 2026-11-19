@@ -8,13 +8,13 @@
 <title>일제치하</title>
 <script src="support.js?v=a098be6b14"></script>
 <!-- 데이터: core · combat · world · events · cities · stories · devtool -->
-<script src="data/core.js?v=d30f4d473c"></script>
+<script src="data/core.js?v=dd7d711aeb"></script>
 <script src="data/combat.js?v=16a1c5abf3"></script>
-<script src="data/world.js?v=3ff0ed463e"></script>
-<script src="data/events.js?v=401b715b94"></script>
-<script src="data/cities.js?v=6a494ae60e"></script>
+<script src="data/world.js?v=777e5162ff"></script>
+<script src="data/events.js?v=2693d913c2"></script>
+<script src="data/cities.js?v=11df61c415"></script>
 <script src="data/stories.js?v=b10fbb0187"></script>
-<script src="data/devtool.js?v=a72fec94ae"></script>
+<script src="data/devtool.js?v=012f912e1e"></script>
 </head>
 <body>
 <x-dc>
@@ -362,6 +362,39 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 </div>
 </sc-if>
 
+<sc-if value="{{isShop}}" hint-placeholder-val="{{ false }}">
+<div class="{{L.asideClass}}" style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 13px; letter-spacing: 0.3em; color: {{accent}}; font-weight: 700">상점 · 한 달에 한 번</div>
+<h2 style="margin: 0; font-family: 'Song Myung', serif; font-weight: 400; font-size: {{L.h2}}">{{shop.title}}</h2>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap">
+<span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 15px; font-weight: 700; background: #EDE3CD; padding: 8px 12px">{{shop.money}}</span>
+<button class="choice" type="button" onClick="{{shop.leave}}" style="min-height: 44px; padding: 10px 20px; background: #1E1B16; color: #F6EFDF; border: none; font-family: 'Nanum Myeongjo', serif; font-size: 15px; font-weight: 800">가게를 나선다</button>
+</div>
+</div>
+<sc-if value="{{shop.hasText}}" hint-placeholder-val="{{ true }}"><div style="font-size: 14.5px; line-height: 1.8; color: #3A342B; white-space: pre-line">{{shop.text}}</div></sc-if>
+<sc-if value="{{shop.hasMsg}}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size: 14px; line-height: 1.7; color: {{shop.msgColor}}; border-left: 3px solid {{shop.msgColor}}; padding: 6px 12px; background: #FBF7EE; white-space: pre-line">{{shop.msg}}</div></sc-if>
+<sc-for list="{{shop.groups}}" as="sg" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #1E1B16; padding-top: 12px">
+<span style="font-size: 15px; font-weight: 700">{{sg.label}}</span>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px">
+<sc-for list="{{sg.items}}" as="si" hint-placeholder-count="3">
+<div style="background: #FBF7EE; border: 1.5px solid {{si.border}}; padding: 10px 12px; display: flex; flex-direction: column; gap: 5px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px"><span style="font-size: 15.5px; font-weight: 800">{{si.name}}</span><span style="font-family: 'Nanum Gothic Coding', monospace; font-size: 14px; font-weight: 700; color: #7E5A12; white-space: nowrap">{{si.price}}</span></div>
+<span style="font-size: 13px; line-height: 1.5; color: #7E5A12; font-weight: 700">◇ {{si.effect}}</span>
+<sc-if value="{{si.hasDesc}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12.5px; line-height: 1.55; color: #3A342B">{{si.desc}}</span></sc-if>
+<sc-if value="{{si.hasHave}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #2C4A5C; font-weight: 700">{{si.have}}</span></sc-if>
+<button class="choice" type="button" disabled="{{si.off}}" onClick="{{si.buy}}" style="margin-top: auto; align-self: stretch; min-height: 40px; padding: 6px 12px; background: {{si.btnBg}}; color: {{si.btnFg}}; border: 1.5px solid #1E1B16; font-family: 'Nanum Myeongjo', serif; font-size: 13.5px; font-weight: 800">{{si.btn}}</button>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
 <sc-if value="{{isInventory}}" hint-placeholder-val="{{ false }}">
 <div class="{{L.asideClass}}" style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 18px">
 <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap">
@@ -585,6 +618,7 @@ a{color:#9E2B20}a:hover{color:#6E1C14}
 <sc-if value="{{cb.field.held}}" hint-placeholder-val="{{ false }}"><span onMouseEnter="{{T.held.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.held.tap}}" style="cursor: help; font-size: 13px; background: #9E2B20; color: #F6EFDF; padding: 3px 8px; font-weight: 700">{{cb.field.heldText}}</span></sc-if>
 <sc-if value="{{cb.field.surrounded}}" hint-placeholder-val="{{ false }}"><span onMouseEnter="{{T.surround.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.surround.tap}}" style="cursor: help; font-size: 13px; background: #1E1B16; color: #E3B04B; padding: 3px 8px; font-weight: 700">포위됨 · 적 명중 +10 · 도주 어려움</span></sc-if>
 <sc-if value="{{cb.field.veilOn}}" hint-placeholder-val="{{ false }}"><span onMouseEnter="{{T.veilOn.in}}" onMouseLeave="{{tipOut}}" onClick="{{T.veilOn.tap}}" style="cursor: help; font-size: 13px; background: #EDE3CD; color: #5B5246; border: 1px dashed #5B5246; padding: 3px 8px; font-weight: 700">{{cb.field.veilText}}</span></sc-if>
+<sc-for list="{{cb.field.gearChips}}" as="gc" hint-placeholder-count="0"><span onMouseEnter="{{gc.tipIn}}" onMouseLeave="{{tipOut}}" onClick="{{gc.tipTap}}" style="cursor: help; font-size: 13px; border: 1px solid {{gc.c}}; color: {{gc.c}}; padding: 3px 8px; font-weight: 700">{{gc.text}}</span></sc-for>
 </div>
 </div>
 <sc-if value="{{infoMode}}" hint-placeholder-val="{{ false }}"><div style="margin-top: -8px; padding: 6px 10px; background: #2C4A5C; color: #F6EFDF; font-size: 13px">설명 모드 — 궁금한 것을 누르면 설명 카드가 뜬다. 버튼을 눌러도 행동하지 않는다.</div></sc-if>
@@ -1542,7 +1576,8 @@ class Component extends DCLogic {
   /* loc 이 지금 도시 안인가 (loc 이 없으면 어디서나) */
   inCity(d, loc) { return !loc || cityOf(loc) === this.curCity(d); }
   /* 행동 탭: 바로 하는 행동이거나, 장소가 지금 도시 안일 때만 */
-  placeOpen(pl, p) { return !!pl && pl.open(p) && (!!pl.direct || cityOf(pl.loc(p)) === ((p && p.city) || START_CITY)); }
+  /* 장기 이야기(q_…)는 '갈 곳' 목록에 띄우지 않는다 — 때가 되면 불시에 찾아온다 */
+  placeOpen(pl, p) { return !!pl && !/^q_/.test(pl.id) && pl.open(p) && (!!pl.direct || cityOf(pl.loc(p)) === ((p && p.city) || START_CITY)); }
   /* 도시를 옮긴다: 지금 감시도는 남겨 두고, 새 도시의 감시도를 불러온다 */
   moveCity(d, id) {
     var p = d.player, cur = this.curCity(d);
@@ -1576,6 +1611,11 @@ class Component extends DCLogic {
     if (gp && this.placeOpen(gp, d.player) && gp.direct) { d.loc = gp.loc(d.player); gp.direct(this, d); return; }
     if (gp && this.placeOpen(gp, d.player)) {
       var sv = gp.event(this, d);
+      if (sv && sv.screen === 'shop') {
+        d.loc = gp.loc(d.player); d.event = null; d.shopView = { city: sv.city, msg: '', tone: '' }; d.screen = 'shop';
+        this.log(d, TIMES[d.time] + ' · ' + LOCS[d.loc].name + ' — ' + sv.title, 'sys');
+        return;
+      }
       d.loc = gp.loc(d.player); d.event = sv; d.screen = 'event';
       this.log(d, TIMES[d.time] + ' · ' + LOCS[d.loc].name + ' — ' + sv.title, 'sys');
       return;
@@ -1591,7 +1631,7 @@ class Component extends DCLogic {
         this.log(d, TIMES[d.time] + ' · ' + LOCS[d.loc].name + ' — ' + qev.title, 'sys');
         return;
       }
-      if (!(qp.quests && qp.quests[qid]) && this.inCity(d, QUEST_EVENTS[Q.start].loc || Q.loc) && (!Q.years || (y >= Q.years[0] && y <= Q.years[1])) && Math.random() < Q.startChance) {
+      if (!(qp.quests && qp.quests[qid]) && this.inCity(d, QUEST_EVENTS[Q.start].loc || Q.loc) && (!Q.years || (y >= Q.years[0] && y <= Q.years[1])) && (!Q.need || this.condOk(qp, Q.need, d)) && Math.random() < Q.startChance) {
         var sev = Object.assign({ id: Q.start, quest: qid }, QUEST_EVENTS[Q.start]);
         qp.quests = Object.assign({}, qp.quests || {}); qp.quests[qid] = { stage: 'started', due: 0 };
         d.loc = sev.loc || Q.loc || this.pick(this.cityStreets(d)); d.event = sev; d.screen = 'event';
@@ -2144,6 +2184,10 @@ class Component extends DCLogic {
       arrOf(out.item).forEach(function (it) { its[it] = (its[it] || 0) + 1; parts.push('얻음: ' + itemName(it)); });
       arrOf(out.unitem).forEach(function (it) { if (its[it]) { delete its[it]; parts.push('잃음: ' + itemName(it)); } });
       d.player.items = its;
+      /* 방어력(armor)·쓸 횟수(uses)가 있는 물건: 남은 값을 따로 기억한다 (새로 생기면 가득, 잃으면 지움) */
+      var gl = Object.assign({}, d.player.gearLeft || {});
+      Object.keys(ITEMS).forEach(function (id) { var I = ITEMS[id], full = I.armor || I.uses; if (!full) return; if (its[id] && gl[id] == null) gl[id] = full; if (!its[id]) delete gl[id]; });
+      d.player.gearLeft = gl;
     }
     /* 재고: 사고 나면 품절 — RESTOCK.weeks ± spread 주 뒤 보충 */
     if (opt && opt.stock && good) {
@@ -2365,6 +2409,12 @@ class Component extends DCLogic {
       official: OFFICIALS.indexOf(foes[0].id) >= 0 };
     this.ensureArena(d.combat, G.startSpan);
     this.syncTarget(d.combat);
+    /* 전투 물건: 안경은 전투가 시작될 때 쓰고 사라진다 (이번 전투 명중 +) */
+    d.combat.hitBonus = 0; d.combat.nextHit = 0; d.combat.umbrella = 0; d.combat.pburn = 0;
+    if (hasItem(d.player, 'glasses')) {
+      d.combat.hitBonus = GEAR.glasses.hit; this.useUp(d, 'glasses', 1);
+      this.log(d, '대모테 안경을 고쳐 썼다 — 이번 전투 명중 +' + GEAR.glasses.hit + '. (싸움이 끝나면 깨져 버린다)', 'good');
+    }
     d.screen = 'combat'; d.cbTab = 'skill'; d.tip = null; d.foeCard = null;
     var names = foes.map(function (f) { return f.name; }).join(', ');
     this.log(d, '전투 개시 — ' + names + ' · ' + A.name + (foes.length > 1 ? (form === 'surround' ? ' · 앞뒤로 포위당했다!' : ' · 한쪽에서 몰려온다') : '') + ' · 거리 ' + this.fmtM(this.distOf(d.combat)), 'foe');
@@ -2429,7 +2479,7 @@ class Component extends DCLogic {
     Object.keys(W).forEach(function (k) { tot += W[k]; });
     var r = Math.random() * tot;
     Object.keys(W).some(function (k) { r -= W[k]; if (r <= 0) { pick = k; return true; } return false; });
-    return Object.assign({ id: id, uid: uid, maxHp: E.hp, stun: 0, prone: false, bleed: 0, bleedDmg: 0, blind: 0, weak: 0, aim: 0, out: false, inCover: false },
+    return Object.assign({ id: id, uid: uid, maxHp: E.hp, stun: 0, prone: false, bleed: 0, bleedDmg: 0, burn: 0, blind: 0, weak: 0, aim: 0, out: false, inCover: false },
       E, { t: T, x: x, intent: null, pers: pick, morale: PERSONALITY[pick].morale + (T.morale || 0) });
   }
   /* ───── 거리 전투 도우미 ───── */
@@ -2695,7 +2745,8 @@ class Component extends DCLogic {
     var coverPen = (!melee && this.coverFaces(c, e) ? TACTIC.cover : 0) + (c.crouch ? TACTIC.crouch : 0);
     if (e.aim > 0 && this.coverFaces(c, e)) coverPen = Math.round(coverPen / 2);
     var sur = this.surrounded(c) ? TACTIC.surroundHit : 0;
-    return this.tgt(e.hit + (e.aim || 0) + (e.backup ? TACTIC.backup.hit : 0) + sur - p.agi / 5 - coverPen - pen - rangePen - this.veilPen(c, c.px, e.x));
+    var umb = c.umbrella > 0 && !melee ? GEAR.umbrella.hit : 0;
+    return this.tgt(e.hit + (e.aim || 0) + (e.backup ? TACTIC.backup.hit : 0) + sur - p.agi / 5 - coverPen - pen - rangePen - umb - this.veilPen(c, c.px, e.x));
   }
   /* 적 이동: 원하는 거리까지 speed 만큼 (나를 지나치지 않는다) */
   foeMove(c, e, want) {
@@ -2716,10 +2767,47 @@ class Component extends DCLogic {
     var t = this.enemyHitChance(c, p, e);
     if (this.check(t).success) {
       c.held = e.uid; c.inCover = false; c.heldTurns = 0;
-      p.hp -= 1;
+      this.hurtPlayer(d, 1);
       if (p.hp <= 0 && e.mode === 'capture') { p.hp = 1; c.arrestBy = e.uid; c.knockedOut = true; }
       this.log(d, e.name + '에게 멱살을 잡혔다! 체력 -1 · 움직일 수 없다 · 다음 공격은 피할 수 없다', 'bad');
     } else this.log(d, e.name + '의 손을 뿌리치듯 피했다.', 'sys');
+  }
+  /* 방어력: 가진 외투·조끼(ITEMS 의 armor)가 남은 만큼 피해를 먼저 막는다 · 다 닳은 옷은 사라진다 */
+  armorLeft(p) {
+    var gl = (p && p.gearLeft) || {};
+    return Object.keys(ITEMS).filter(function (id) { return ITEMS[id].armor && hasItem(p, id); }).reduce(function (a, id) { return a + Math.max(0, gl[id] == null ? ITEMS[id].armor : gl[id]); }, 0);
+  }
+  hurtPlayer(d, dmg) {
+    var p = d.player, left = dmg, absorbed = 0, broke = [];
+    var ids = Object.keys(ITEMS).filter(function (id) { return ITEMS[id].armor && hasItem(p, id); });
+    if (ids.length) {
+      var gl = Object.assign({}, p.gearLeft || {}), its = Object.assign({}, p.items || {});
+      ids.forEach(function (id) {
+        if (left <= 0) return;
+        var have = gl[id] == null ? ITEMS[id].armor : gl[id], take = Math.min(left, have);
+        gl[id] = have - take; left -= take; absorbed += take;
+        if (gl[id] <= 0) { delete gl[id]; delete its[id]; broke.push(ITEMS[id].name); }
+      });
+      p.gearLeft = gl; p.items = its;
+    }
+    p.hp -= left;
+    var bn = broke.join('·');
+    return { absorbed: absorbed, hp: left, broke: broke.length ? bn + josaIGa(bn) + ' 다 해져서 못 쓰게 됐다.' : '' };
+  }
+  /* 전투 물건 하나(n개) 쓰기 · 횟수 물건(uses)은 남은 횟수를 깎고 다 쓰면 사라진다 */
+  useUp(d, id, n) {
+    var p = d.player, its = Object.assign({}, p.items || {}), I = ITEMS[id] || {};
+    if (I.uses) {
+      var gl = Object.assign({}, p.gearLeft || {});
+      gl[id] = (gl[id] == null ? I.uses : gl[id]) - (n || 1);
+      if (gl[id] <= 0) { delete gl[id]; delete its[id]; }
+      p.gearLeft = gl;
+    } else {
+      its[id] = (its[id] || 0) - (n || 1);
+      if (its[id] <= 0) delete its[id];
+    }
+    p.items = its;
+    return !its[id];
   }
   foeAttack(d, e, soft) {
     var c = d.combat, p = d.player;
@@ -2729,10 +2817,11 @@ class Component extends DCLogic {
     if (forced && !soft) { c.held = null; }
     if (forced || this.check(t).success) {
       var dmg = Math.max(1, this.rollSpec(e.dmg) + (e.backup ? TACTIC.backup.dmg : 0) - (soft ? STANCE.capture.softDmg : 0));
-      p.hp -= dmg;
+      var hr = this.hurtPlayer(d, dmg); p = d.player;
       /* 생포 태세의 공격으로 쓰러지면 죽지 않고 끌려간다 */
       if (soft && p.hp <= 0) { p.hp = 1; c.arrestBy = e.uid; c.knockedOut = true; }
-      this.log(d, e.name + '의 공격 — ' + (forced ? '붙잡힌 채 그대로 맞았다' : '명중') + ', 체력 -' + dmg, 'foe');
+      this.log(d, e.name + '의 공격 — ' + (forced ? '붙잡힌 채 그대로 맞았다' : '명중') + ', ' + (hr.absorbed ? '방어력 -' + hr.absorbed + (hr.hp ? ' · 체력 -' + hr.hp : ' (체력은 무사)') : '체력 -' + dmg), 'foe');
+      if (hr.broke) this.log(d, hr.broke, 'bad');
       if (melee && c.inCover) { c.inCover = false; this.log(d, e.name + josaIGa(e.name) + ' 엄폐물 뒤로 파고들어 나를 끌어냈다 — 엄폐가 풀렸다.', 'bad'); }
     } else this.log(d, e.name + '의 공격 — 빗나감' + (!melee && this.coverFaces(c, e) ? ' (엄폐물에 맞았다)' : ''), 'sys');
     e.aim = 0;
@@ -2902,6 +2991,36 @@ class Component extends DCLogic {
       var dc = this.draft(); dc.combat.crouch = true;
       this.log(dc, '몸을 낮췄다. (적이 한 번 움직이는 동안)', 'sys');
       this.spendAp(dc, 1); this.commit(dc);
+    } else if (kind === 'match' || kind === 'pepper') {
+      /* 성냥·고춧가루: 표적이 가까이 있어야 한다 · 정확 판정 · 쓰면 하나 줄어든다 */
+      var G0 = GEAR[kind];
+      if (!hasItem(p, kind) || !e || this.distOf(c0) > G0.reach + 0.01) return;
+      this.roll(kind === 'match' ? '성냥' : '고춧가루', this.gearChance(c0, p, e, kind), function (d, res) {
+        var en = d.combat.enemy, cc = d.combat;
+        cc.attacked = true; self.escalate(cc, STANCE.attack);
+        self.useUp(d, kind, 1);
+        if (kind === 'match') {
+          if (res.success) { en.burn = (en.burn || 0) + GEAR.match.burn; self.log(d, '성냥을 그어 ' + en.name + '에게 던졌다 — 옷자락에 불이 붙었다! 화상 ' + en.burn, 'good'); }
+          else if (res.fumble) { cc.pburn = (cc.pburn || 0) + GEAR.match.fumbleBurn; self.log(d, '성냥불이 내 소매로 옮겨붙었다! 화상 ' + cc.pburn, 'bad'); }
+          else self.log(d, '던진 성냥이 바람에 꺼져 버렸다.', 'sys');
+        } else {
+          if (res.success) { en.blind = Math.max(en.blind || 0, GEAR.pepper.blind); self.log(d, en.name + '의 얼굴에 고춧가루를 뿌렸다 — 눈을 감싸 쥔다! 눈 멂 ' + en.blind + '합', 'good'); }
+          else self.log(d, '고춧가루가 바람에 흩날려 허공으로 사라졌다.', 'sys');
+        }
+        self.spendAp(d, 1);
+      });
+    } else if (kind === 'umbrella') {
+      if (!hasItem(p, 'umbrella') || c0.umbrella > 0) return;
+      var du = this.draft(); du.combat.umbrella = GEAR.umbrella.turns;
+      var gone = this.useUp(du, 'umbrella', 1);
+      this.log(du, '박쥐우산을 활짝 펼쳤다 — ' + GEAR.umbrella.turns + '합 동안 적의 사격 명중 -' + GEAR.umbrella.hit + (gone ? ' (살이 부러졌다 — 이번이 마지막이다)' : ''), 'good');
+      this.spendAp(du, 1); this.commit(du);
+    } else if (kind === 'jintan') {
+      if (!hasItem(p, 'jintan') || c0.nextHit > 0) return;
+      var dj = this.draft(); dj.combat.nextHit = GEAR.jintan.hit; dj.combat.shaken = 0; dj.combat.shakenNext = false;
+      this.useUp(dj, 'jintan', 1);
+      this.log(dj, '은단을 한 줌 털어 넣었다. 화한 기운에 정신이 번쩍 든다 — 다음 공격 명중 +' + GEAR.jintan.hit, 'good');
+      this.spendAp(dj, 1); this.commit(dj);
     } else if (kind === 'medkit') {
       if (p.medkit < 1) return;
       var d2 = this.draft(), pct = this.rollSpec({ n: 2, s: 6, b: 0 }) * 5;
@@ -3006,6 +3125,8 @@ class Component extends DCLogic {
     if (sd === 'jpciv') return 0;
     return ((sd === 'jp' ? p.jp : p.kr) || 0) / ALIGN.talkDiv;
   }
+  /* 성냥·고춧가루 판정: 정확 + mod − 회피의 절반 (안경은 더한다) */
+  gearChance(c, p, e, kind) { return this.tgt((p.acc || 0) + GEAR[kind].mod - (e.evade || 0) / 2 + (c.hitBonus || 0)); }
   breakChance(c, p) {
     var hf = (c.foes || []).filter(function (f) { return f.uid === c.held; })[0];
     return this.tgt(p.str + TACTIC.breakMod - (hf ? hf.hit / 5 : 10));
@@ -3022,6 +3143,13 @@ class Component extends DCLogic {
   enemyTurn(d) {
     var self = this, c = d.combat, p = d.player;
     c.shaken = 0; c.offer = null;
+    /* 내 옷에 붙은 불: 매 합 그 값만큼 피해, 1씩 저절로 준다 (방어력으로 막지 못한다) */
+    if (c.pburn > 0) {
+      p.hp -= c.pburn;
+      this.log(d, '옷에 붙은 불이 살을 태운다. 체력 -' + c.pburn + (c.pburn > 1 ? ' (불길이 잦아든다)' : ' (불이 꺼졌다)'), 'bad');
+      c.pburn--;
+      if (p.hp <= 0) return;
+    }
     /* 가까운 적부터 차례로 */
     var order = this.alive(c).sort(function (a, b) { return self.distOf(c, a) - self.distOf(c, b); });
     for (var i = 0; i < order.length; i++) {
@@ -3030,6 +3158,22 @@ class Component extends DCLogic {
         e.hp -= e.bleedDmg; e.bleed--;
         this.log(d, e.name + '의 상처에서 피가 흐른다. 체력 -' + e.bleedDmg, 'good');
         if (e.hp <= 0) { this.log(d, e.name + josaIGa(e.name) + ' 쓰러졌다.', 'good'); continue; }
+      }
+      if (e.burn > 0) {
+        e.hp -= e.burn;
+        this.log(d, e.name + '의 옷자락에 붙은 불이 살을 태운다. 체력 -' + e.burn, 'good');
+        if (e.hp <= 0) { this.log(d, e.name + josaIGa(e.name) + ' 쓰러졌다.', 'good'); continue; }
+      }
+      /* 불 끄기: 불붙은 적은 스스로(patSelf), 근처(allyReach m)의 동료는 patAlly 확률로 이번 차례를 써서 화상을 1 줄인다 */
+      if (!(e.stun > 0) && !e.climb && c.held !== e.uid && !(e.grabbed > 0)) {
+        var bm = e.burn > 0 ? e : this.alive(c).filter(function (f) { return f !== e && f.burn > 0 && Math.abs(f.x - e.x) <= GEAR.burn.allyReach; })[0];
+        if (bm && Math.random() < (bm === e ? GEAR.burn.patSelf : GEAR.burn.patAlly)) {
+          bm.burn--;
+          this.log(d, (bm === e ? e.name + josaIGa(e.name) + ' 옷자락을 두드려 불을 끈다' : e.name + josaIGa(e.name) + ' 달려들어 ' + bm.name + '의 옷에 붙은 불을 두드린다') + ' — 화상 ' + (bm.burn + 1) + ' → ' + bm.burn, 'foe');
+          if (e.blind > 0) e.blind--;
+          if (e.weak > 0) e.weak--;
+          continue;
+        }
       }
       /* 태세가 바뀌면 이번 차례 행동도 새로 정한다 */
       if (this.stanceTick(d, e)) e.intent = this.planIntent(c, p, e);
@@ -3142,6 +3286,7 @@ class Component extends DCLogic {
     Object.keys(c.cd).forEach(function (k) { if (c.cd[k] > 0) c.cd[k]--; });
     this.obstacleTick(d);
     c.round++; c.crouch = false;
+    if (c.umbrella > 0) { c.umbrella--; if (!c.umbrella) this.log(d, '우산을 접었다.', 'sys'); }
     c.shaken = c.shakenNext ? TACTIC.shaken : 0; c.shakenNext = false;
     this.planAll(c, p);
   }
@@ -3201,7 +3346,7 @@ class Component extends DCLogic {
     var rm = c && c.px !== undefined && sk.group === 'gun' ? this.rangeMod(w, this.distOf(c)) : { hit: 0 };
     var fc = c && e.inCover && sk.group === 'gun' ? TACTIC.foeCover : 0;
     var vp = c && c.px !== undefined && e && e.x !== undefined ? this.veilPen(c, c.px, e.x) : 0;
-    return this.tgt(p[sk.stat] + (sk.mod || 0) + (w ? w.hit : 0) + rm.hit - (sk.noEvade ? 0 : e.evade) + (e.prone ? 20 : 0) - fc - vp - (c && c.shaken ? c.shaken : 0));
+    return this.tgt(p[sk.stat] + (sk.mod || 0) + (w ? w.hit : 0) + rm.hit - (sk.noEvade ? 0 : e.evade) + (e.prone ? 20 : 0) - fc - vp - (c && c.shaken ? c.shaken : 0) + (c && c.hitBonus || 0) + (c && c.nextHit || 0));
   }
   /* ───── 무기 ───── */
   equipOf(p) {
@@ -3418,7 +3563,7 @@ class Component extends DCLogic {
     var apCost = this.skillAp(sk, p);
     this.roll(sk.name, this.tgt(this.skillTarget(sk, p, s.combat.enemy, s.combat) + grade.bonus), function (d, res) {
       var en = d.combat.enemy, cc = d.combat;
-      cc.attacked = true;
+      cc.attacked = true; cc.nextHit = 0;
       self.escalate(cc, sk.group === 'gun' ? STANCE.shot : STANCE.attack);
       /* 잡아 둔 적: 이번 공격은 반드시 맞는다 (잡기 자체로 다시 잡는 경우는 제외) */
       if (en.grabbed > 0 && id !== 'grab') {
@@ -3576,7 +3721,7 @@ class Component extends DCLogic {
   combatSkills(p) { return DEFAULT_SKILLS.concat(this.loadoutOf(p)); }
   canOpenInventory() {
     var s = this.state;
-    return !!s.player && !s.rolling && !s.qte && ['loc', 'event', 'outcome'].indexOf(s.screen) >= 0;
+    return !!s.player && !s.rolling && !s.qte && ['loc', 'event', 'outcome', 'shop'].indexOf(s.screen) >= 0;
   }
   openInventory(tab) { if (!this.canOpenInventory()) return; this.setState({ screen: 'inventory', invTab: tab === 'skills' ? 'skills' : 'items', invReturn: this.state.screen, invMsg: '' }); }
   setInvTab(tab) { this.setState({ invTab: tab, invMsg: '' }); }
@@ -3585,6 +3730,76 @@ class Component extends DCLogic {
     var s = this.state; if (['inventory', 'places'].indexOf(s.screen) < 0) return;
     if (tab === 'act') this.setState({ screen: 'places' });
     else this.setState({ screen: 'inventory', invTab: tab, invMsg: '' });
+  }
+  /* ───── 상점 진열장: 물건을 눌러서 산다 (SHOP.always · SHOP.gear · 이달의 물건) ───── */
+  shopList(d) {
+    var p = d.player, city = (d.shopView && d.shopView.city) || p.city || START_CITY;
+    var mk = function (it, group, once) { return { it: it, group: group, once: once }; };
+    return SHOP.always.map(function (it) { return mk(it, 'life', false); })
+      .concat((SHOP.gear || []).map(function (it) { return mk(it, 'gear', false); }))
+      .concat(shopStock(city, d.date).map(function (it) { return mk(it, 'month', true); }));
+  }
+  shopBlock(d, row) {
+    var p = d.player, it = row.it;
+    if (row.once && p.flags && p.flags['shopbuy:' + it.id]) return '이번에 이미 샀다';
+    if (it.show && !this.condOk(p, it.show, d)) return '이미 가지고 있다';
+    if ((p.money || 0) < it.price) return '돈이 모자란다';
+    return '';
+  }
+  buyShop(id) {
+    var s = this.state; if (s.screen !== 'shop' || !s.shopView) return;
+    var self = this, d = this.draft(), row = this.shopList(d).filter(function (r) { return r.it.id === id; })[0];
+    if (!row) return;
+    var why = this.shopBlock(d, row);
+    if (why) { d.shopView = Object.assign({}, d.shopView, { msg: why, tone: 'bad' }); this.setState(d); return; }
+    var it = row.it, S = SHOPS[d.shopView.city] || shopOf(d.player);
+    var opt = { label: it.label, cost: { money: it.price } }, out = { text: it.text, fx: it.fx, item: it.item, flag: row.once ? 'shopbuy:' + it.id : undefined };
+    var view = d.shopView;
+    this.resolveOpt(d, { id: 'shop_' + view.city, title: S.name, kind: 'shop' }, opt, out, true);
+    var sum = d.outcome ? d.outcome.summary : '';
+    d.outcome = null; d.screen = 'shop';
+    d.shopView = Object.assign({}, view, { msg: it.text + (sum ? '\n(' + sum + ')' : ''), tone: 'good' });
+    this.commit(d);
+  }
+  leaveShop() {
+    var d = this.draft(), S = SHOPS[(d.shopView && d.shopView.city) || d.player.city] || shopOf(d.player);
+    d.shopView = null;
+    d.outcome = { title: S.name, text: S.bye, summary: '', fight: null };
+    d.screen = 'outcome';
+    this.commit(d);
+  }
+  /* 물건 효과를 짧은 말로 */
+  shopEffect(it) {
+    var fx = it.fx || {}, out = [];
+    Object.keys(fx).forEach(function (k) {
+      var v = fx[k], sg = v > 0 ? '+' : '';
+      if (k === 'hp') out.push('체력 ' + sg + v); else if (k === 'medkit') out.push('구급약 ' + sg + v + '개');
+      else if (STAT_LABEL[k]) out.push(STAT_LABEL[k] + ' ' + sg + v); else out.push(k + ' ' + sg + v);
+    });
+    var ids = it.item == null ? [] : (Array.isArray(it.item) ? it.item : [it.item]);
+    if (ids.length && ITEMS[ids[0]]) out.push(ITEMS[ids[0]].short + (ids.length > 1 ? ' · ' + ids.length + '개' : ''));
+    return out.join(' · ');
+  }
+  shopVals() {
+    var self = this, s = this.state;
+    var empty = { title: '', text: '', money: '', msg: '', msgColor: '#5B5246', hasMsg: false, groups: [], leave: function () {} };
+    if (s.screen !== 'shop' || !s.shopView || !s.player) return empty;
+    var p = s.player, S = SHOPS[s.shopView.city] || shopOf(p), gl = p.gearLeft || {};
+    var rows = this.shopList(s), GN = { life: '생필품 · 약', gear: '전투 물건', month: '이달의 물건 · 한 번 들를 때 하나씩' };
+    var groups = ['life', 'gear', 'month'].map(function (g) {
+      return { label: GN[g], items: rows.filter(function (r) { return r.group === g; }).map(function (r) {
+        var it = r.it, why = self.shopBlock(s, r), ids = it.item == null ? [] : (Array.isArray(it.item) ? it.item : [it.item]), iid = ids[0];
+        var I = iid && ITEMS[iid], have = '';
+        if (it.id === 'medkit') have = '가진 것 ' + (p.medkit || 0) + '개';
+        else if (I && hasItem(p, iid)) have = I.armor ? '입고 있음 · 방어력 ' + (gl[iid] == null ? I.armor : gl[iid]) + '/' + I.armor : I.uses ? '가지고 있음 · ' + (gl[iid] == null ? I.uses : gl[iid]) + '번 남음' : '가진 것 ' + p.items[iid] + '개';
+        return { name: it.label, price: it.price + '원', effect: self.shopEffect(it), desc: I ? I.desc : '', hasDesc: !!I, have: have, hasHave: !!have,
+          off: !!why, why: why, btn: why || '사기 · ' + it.price + '원', btnBg: why ? '#EDE3CD' : '#1E1B16', btnFg: why ? '#8A7E6A' : '#F6EFDF', border: why ? '#B9AB8E' : '#7E5A12',
+          buy: function () { self.buyShop(it.id); } };
+      }) };
+    }).filter(function (g) { return g.items.length; });
+    var v = s.shopView;
+    return { title: S.name, text: v.msg ? '' : S.text, hasText: !v.msg, money: '소지금 ' + (p.money || 0) + '원', msg: v.msg, hasMsg: !!v.msg,
+      msgColor: v.tone === 'bad' ? '#9E2B20' : '#3F5E2F', groups: groups, leave: function () { self.leaveShop(); } };
   }
   closeInventory() { this.setState({ screen: this.state.invReturn || 'loc', invMsg: '' }); }
   /* 기술 카드: 가진 개수보다 덜 장착했고 칸이 남으면 하나 더 챙기고, 아니면 하나를 내려놓는다 */
@@ -3662,7 +3877,9 @@ class Component extends DCLogic {
     ];
     /* 증명서·물건 (ITEMS) */
     var docs = Object.keys(p.items || {}).filter(function (id) { return p.items[id] && ITEMS[id]; }).map(function (id) {
-      var it = ITEMS[id]; return { name: it.name + (p.items[id] > 1 ? ' ×' + p.items[id] : ''), desc: it.desc, effect: it.effect, kind: it.kind === 'doc' ? '증명서' : '물건' };
+      var it = ITEMS[id], gl = p.gearLeft || {}, left = gl[id] == null ? (it.armor || it.uses) : gl[id];
+      var extra = it.armor ? ' · 방어력 ' + left + '/' + it.armor : it.uses ? ' · ' + left + '/' + it.uses + '번 남음' : (p.items[id] > 1 ? ' ×' + p.items[id] : '');
+      return { name: it.name + extra, desc: it.desc, effect: it.effect, kind: it.kind === 'doc' ? '증명서' : it.kind === 'gear' ? '전투 물건' : '물건' };
     }).concat(Object.keys(p.pending || {}).filter(function (id) { return ITEMS[id]; }).map(function (id) {
       return { name: ITEMS[id].name, desc: '대서소에 신청해 둔 서류. 관청이 받아 줄지는 아직 모른다.', effect: '결과를 기다리는 중 · 몇 주 뒤 기별이 온다', kind: '신청 중' };
     }));
@@ -3971,7 +4188,7 @@ class Component extends DCLogic {
       canStash: !o.fight };
 
     var cbv = { cardOn: false, cardL: 'auto', cardR: 'auto', cardTop: 6, cardClose: function () {}, arrowL: { off: true, op: 0.35, tip: '', go: function () {} }, arrowR: { off: true, op: 0.35, tip: '', go: function () {} }, tabs: [], tabSkill: false, tabMove: false, tabAct: false, noActions: false, detail: false, detailText: '', toggleDetail: function () {}, stepText: '', name: '', title: '', desc: '', hp: 0, maxHp: 1, hpPct: 0, statLine: '', round: 0, guard: false, actions: [], groups: [], status: [], hasStatus: false,
-      field: { feedMine: [], feedFoe: [], feedMineLabel: '', vFoes: [], offL: [], offR: [], walls: [], vTicks: [], vCovers: [], vVeils: [], veilOn: false, veilText: '', name: '', dist: '', px: 0, persText: '', readLv: '', shaken: false, offerOn: false, foeCoverOn: false, foes: [], foeList: [], multi: false, surrounded: false, held: false, heldText: '', vExits: [], covers: [], ticks: [], ap: [], apText: '', attacksText: '', coverText: '', hasCover: false, alarmOn: false, alarmText: '', intent: '', hitText: '', moves: [] } };
+      field: { gearChips: [], feedMine: [], feedFoe: [], feedMineLabel: '', vFoes: [], offL: [], offR: [], walls: [], vTicks: [], vCovers: [], vVeils: [], veilOn: false, veilText: '', name: '', dist: '', px: 0, persText: '', readLv: '', shaken: false, offerOn: false, foeCoverOn: false, foes: [], foeList: [], multi: false, surrounded: false, held: false, heldText: '', vExits: [], covers: [], ticks: [], ap: [], apText: '', attacksText: '', coverText: '', hasCover: false, alarmOn: false, alarmText: '', intent: '', hitText: '', moves: [] } };
     if (s.combat && p) {
       var e = s.combat.enemy, cmb = s.combat;
       var groups = SKILL_GROUPS.map(function (g) {
@@ -4007,6 +4224,7 @@ class Component extends DCLogic {
       if (e.inCover) status.push({ tipIn: tipH('foeCover').in, tipTap: tipH('foeCover').tap, text: '엄폐 중 · 내 사격 명중 -' + TACTIC.foeCover + ' · 근접 공격으로 끌어낼 수 있다' });
       if (e.grabbed > 0) status.push({ tipIn: tipH('grab').in, tipTap: tipH('grab').tap, text: '붙잡힘 · 다음 공격 필중 · ' + e.grabbed + '합 안에' });
       if (e.bleed > 0) status.push({ tipIn: tipH('bleed').in, tipTap: tipH('bleed').tap, text: '출혈 ' + e.bleed + '합 · 매 합 -' + e.bleedDmg });
+      if (e.burn > 0) status.push({ tipIn: tipH('burn').in, tipTap: tipH('burn').tap, text: '화상 ' + e.burn + ' · 매 합 -' + e.burn });
       if (e.blind > 0) status.push({ tipIn: tipH('blind').in, tipTap: tipH('blind').tap, text: '눈 멂 ' + e.blind + '합 · 명중 -30' });
       if (e.weak > 0) status.push({ tipIn: tipH('weak').in, tipTap: tipH('weak').tap, text: '위축 ' + e.weak + '합 · 명중 -20' });
       var cvHere = this.coverAt(cmb, cmb.px);
@@ -4017,6 +4235,16 @@ class Component extends DCLogic {
         { label: '항복한다', tag: (cmb.official || this.alive(cmb).some(function (f) { return OFFICIALS.indexOf(f.id) >= 0; }) ? '불법 소지품을 빼앗긴다' : '돈의 절반을 털린다') + ' · 전투 종료', k: 'surrender', hide: !cmb.offer },
         { label: '구급약', tag: '최대 체력의 (2d6×5)% · 남은 ' + p.medkit + '개 · 행동력 1', k: 'medkit', hide: p.medkit < 1 || p.hp >= p.maxHp, off: false }
       ];
+      /* 전투 물건 (합법 상점) — 가진 것만 · 사거리 밖이면 비활성 */
+      var dNow = this.distOf(cmb), gl = p.gearLeft || {};
+      [['match', '성냥을 그어 던진다', '화상 ' + GEAR.match.burn + ' · 남은 ' + ((p.items || {}).match || 0) + '개비'],
+       ['pepper', '고춧가루를 뿌린다', '눈 멂 ' + GEAR.pepper.blind + '합 · 남은 ' + ((p.items || {}).pepper || 0) + '봉지']].forEach(function (g) {
+        if (!hasItem(p, g[0])) return;
+        var far = dNow > GEAR[g[0]].reach + 0.01;
+        acts.push({ label: g[1], tag: (far ? '표적이 ' + GEAR[g[0]].reach + 'm 밖 · ' : '정확 판정 · ') + g[2] + ' · 행동력 1', k: g[0], t: far ? undefined : self.gearChance(cmb, p, e, g[0]), off: far });
+      });
+      if (hasItem(p, 'umbrella')) acts.push({ label: '박쥐우산을 펼친다', tag: GEAR.umbrella.turns + '합 동안 적 사격 명중 -' + GEAR.umbrella.hit + ' · 남은 ' + (gl.umbrella == null ? GEAR.umbrella.uses : gl.umbrella) + '번 · 행동력 1', k: 'umbrella', hide: cmb.umbrella > 0 });
+      if (hasItem(p, 'jintan')) acts.push({ label: '은단을 먹는다', tag: '기가 눌린 것을 풀고 다음 공격 명중 +' + GEAR.jintan.hit + ' · 남은 ' + p.items.jintan + '봉 · 행동력 1', k: 'jintan', hide: cmb.nextHit > 0 });
       var nAlive = this.alive(cmb).length;
       if (hasItem(p, 'tokko_badge') && !cmb.attacked) {
         var offA = this.alive(cmb).some(function (f) { return self.isOfficial(f); }), bch = offA ? 1 : this.badgeChance(cmb);
@@ -4111,6 +4339,15 @@ class Component extends DCLogic {
         alarmOn: cmb.alarm !== null, alarmText: cmb.alarm !== null ? '증원까지 ' + cmb.alarm + '합' : '',
         intent: e.intent ? e.intent.text : '', persText: e.intent && e.intent.read && e.intent.read.pers ? e.intent.read.pers : '',
         readLv: e.intent && e.intent.read ? ['읽지 못함', '흐릿한 기색', '훤히 읽힌다'][e.intent.read.lv] : '',
+        gearChips: (function () {
+          var out = [], ar = self.armorLeft(p), mk = function (key, text, col) { out.push({ text: text, c: col, tipIn: tipH(key).in, tipTap: tipH(key).tap }); };
+          if (ar > 0) mk('armor', '방어력 ' + ar, '#2C4A5C');
+          if (cmb.hitBonus > 0) mk('glassesOn', '안경 · 명중 +' + cmb.hitBonus, '#3F5E2F');
+          if (cmb.nextHit > 0) mk('nextHit', '다음 공격 명중 +' + cmb.nextHit, '#3F5E2F');
+          if (cmb.umbrella > 0) mk('umbrellaOn', '우산 · 적 사격 -' + GEAR.umbrella.hit + ' · ' + cmb.umbrella + '합', '#2C4A5C');
+          if (cmb.pburn > 0) mk('pburn', '내 옷에 불 · 매 합 -' + cmb.pburn, '#9E2B20');
+          return out;
+        })(),
         shaken: !!cmb.shaken, offerOn: !!cmb.offer, hitText: showOdds ? '나를 맞힐 확률 ' + (Math.round(this.enemyHitChance(cmb, p, e) * 10) / 10) + '%' : '',
         moves: moves.map(function (m) { return { label: m.label, short: cmb.held ? '붙잡혀 못 움직인다' : m.short, tag: cmb.held ? '붙잡혀 움직일 수 없다' : m.tag, disabled: (rolling || !!m.off || !!cmb.held) && !s.infoMode, choose: guard(m.tip || 'move:' + m.k, function () { self.move(m.k); }), tipIn: tipH(m.tip || 'move:' + m.k).in }; }),
         held: !!cmb.held, heldText: cmb.held ? '붙잡힘 · ' + ((cmb.foes.filter(function (f) { return f.uid === cmb.held; })[0] || {}).name || '적') + '의 다음 공격 필중 · 이동 불가' : '',
@@ -4138,7 +4375,7 @@ class Component extends DCLogic {
         statLine: (showOdds ? '명중률 ' + e.hit + '% · 회피 ' + e.evade + ' · ' : '') + '피해 ' + this.specLabel(e.dmg) + ' · ' + (e.t.style === 'gun' ? '총 · 선호 거리 ' + e.t.pref + 'm' : '근접 · ' + e.t.reach + 'm'),
         actions: acts.filter(function (a) { return !a.hide; }).map(function (a) {
           var has = showOdds && a.t !== undefined;
-          var apm = /행동력 (\d)/.exec(a.tag || ''); var short = a.k === 'surrender' ? '전투 종료 · ' + a.tag.split(' · ')[0] : (a.k === 'badge' ? '증표 · 전투 종료 · ' : a.k === 'talk' || a.k === 'plea' ? '지능 판정 · ' : a.k === 'demand' ? '근력·지능 + 운 · ' : a.k === 'break' ? '근력 판정 · ' : a.k === 'medkit' ? '체력 회복 · ' : a.k === 'cover' ? '적 명중 -' + TACTIC.cover + '% · ' : '') + (apm ? '행동력 ' + apm[1] : '');
+          var apm = /행동력 (\d)/.exec(a.tag || ''); var short = a.k === 'surrender' ? '전투 종료 · ' + a.tag.split(' · ')[0] : (a.k === 'badge' ? '증표 · 전투 종료 · ' : a.k === 'talk' || a.k === 'plea' ? '지능 판정 · ' : a.k === 'demand' ? '근력·지능 + 운 · ' : a.k === 'break' ? '근력 판정 · ' : a.k === 'medkit' ? '체력 회복 · ' : a.k === 'match' ? (a.off ? '사거리 밖 · ' : '화상 ' + GEAR.match.burn + ' · ') : a.k === 'pepper' ? (a.off ? '사거리 밖 · ' : '눈 멂 ' + GEAR.pepper.blind + '합 · ') : a.k === 'umbrella' ? '적 사격 -' + GEAR.umbrella.hit + ' · ' : a.k === 'jintan' ? '다음 공격 +' + GEAR.jintan.hit + ' · ' : a.k === 'cover' ? '적 명중 -' + TACTIC.cover + '% · ' : '') + (apm ? '행동력 ' + apm[1] : '');
           return { label: a.label, short: short, tag: a.tag, hasChance: has, chanceText: has ? odds(a.t) : '', disabled: (rolling || !!s.qte || !!a.off) && !s.infoMode, choose: guard('act:' + a.k, function () { self.act(a.k); }), tipIn: tipH('act:' + a.k).in };
         }) };
     }
@@ -4200,6 +4437,7 @@ class Component extends DCLogic {
       isLoc: s.screen === 'loc', isEvent: s.screen === 'event', isOutcome: s.screen === 'outcome',
       isCombat: s.screen === 'combat', isEnd: s.screen === 'end', isOrigin: s.screen === 'origin',
       isInventory: s.screen === 'inventory', inv: this.inventoryVals(),
+      isShop: s.screen === 'shop', shop: this.shopVals(),
       isPlaces: s.screen === 'places', places: this.placesVals(), openPlaces: function () { self.openPlaces(); }, closePlaces: function () { self.closePlaces(); },
       invLocked: !this.canOpenInventory(), openInventory: function () { self.openInventory('items'); }, openSkills: function () { self.openInventory('skills'); },
       invTabItems: s.invTab !== 'skills', invTabSkills: s.invTab === 'skills',

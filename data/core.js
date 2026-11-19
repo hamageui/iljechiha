@@ -180,6 +180,55 @@ var ITEMS = {
     effect: '검문에서 내보이면 즉시 통과(감시도 -1) · 관헌·왈패와의 전투를 시작하자마자 끝낼 수 있음 · 쓸 때마다 민족 타협도가 내려감' }
 };
 ['residence', 'travel_pass', 'peddler', 'gun_permit'].forEach(function (id) { if (ITEMS[id]) ITEMS[id].effect += ' · 몸수색 때 위조로 의심받아 빼앗길 수 있음'; });
+/* ───── 전투 물건 (합법 상점 · 덕흥상회·평안상회·남선상회에서 판다) ─────
+   kind 'gear' = 전투에서 쓰는 물건. 수치는 GEAR 에서 고친다.
+   방어력(armor): 전투에서 받는 피해를 체력보다 먼저 막는다 · 닳은 만큼은 돌아오지 않고 게임 내내 남은 값이 기억된다(p.gearLeft) · 다 닳으면 물건이 사라진다
+   화상(burn): 매 합 화상 값만큼 피해 · 적이 입으면 저나 가까운 동료가 한 합을 써서 1씩 끈다 · 내가 입으면 매 합 1씩 저절로 준다
+   uses: 몇 번 쓰면 망가지는 물건(남은 횟수도 p.gearLeft) */
+var GEAR = {
+  armor: { coat: 5, vest: 3 },
+  glasses: { hit: 5 },                         /* 다음 전투 명중 +5 · 전투가 시작될 때 쓰고 사라진다 */
+  match: { burn: 3, reach: 2, mod: 20, fumbleBurn: 2 },   /* 표적 2m 안 · 정확 + 20 판정 · 대실패면 내 옷에 화상 2 */
+  pepper: { blind: 2, reach: 2, mod: 20 },     /* 눈 멂 2합 (그 적 명중 -30) */
+  umbrella: { uses: 3, turns: 2, hit: 15 },    /* 펼치면 2합 동안 적 사격 명중 -15 · 세 번 쓰면 망가진다 */
+  jintan: { hit: 15 },                         /* 기가 눌린 것을 털고 다음 공격 명중 +15 */
+  burn: { patSelf: 0.35, patAlly: 0.5, allyReach: 3 }
+};
+Object.assign(ITEMS, {
+  coat: { name: '모직 외투', kind: 'gear', armor: GEAR.armor.coat, short: '전투 방어력 ' + GEAR.armor.coat,
+    desc: '깃이 넓은 검정 모직 외투. 두툼한 천이 주먹이나 곤봉 정도는 한 겹 걸러 준다.',
+    effect: '전투에서 방어력 ' + GEAR.armor.coat + ' — 받는 피해를 체력보다 먼저 막는다 · 닳은 만큼은 돌아오지 않는다 · 다 닳으면 해져서 못 입는다' },
+  vest: { name: '솜누비 조끼', kind: 'gear', armor: GEAR.armor.vest, short: '전투 방어력 ' + GEAR.armor.vest,
+    desc: '솜을 두툼하게 넣어 누빈 조끼. 저고리 안에 받쳐 입으면 겉으로는 티가 나지 않는다.',
+    effect: '전투에서 방어력 ' + GEAR.armor.vest + ' — 받는 피해를 체력보다 먼저 막는다 · 닳은 만큼은 돌아오지 않는다 · 다 닳으면 솜이 터져 못 입는다' },
+  glasses: { name: '대모테 안경', kind: 'gear', short: '다음 전투 명중 +' + GEAR.glasses.hit,
+    desc: '거북 등껍질 무늬 테를 두른 둥근 안경. 쓰면 멀리 있는 것이 또렷해진다. 다만 알이 얇아 쉽게 깨진다.',
+    effect: '다음 전투에서 내 명중 +' + GEAR.glasses.hit + ' · 전투가 시작될 때 쓰고, 그 싸움에서 깨져 사라진다 (한 번)' },
+  match: { name: '성냥', kind: 'gear', short: '근거리 적에게 화상 ' + GEAR.match.burn,
+    desc: '인천 성냥공장 상표가 찍힌 성냥. 한 갑에 굵은 개비 세 개를 따로 챙겼다.',
+    effect: '전투: ' + GEAR.match.reach + 'm 안의 표적에게 불붙은 성냥을 던져 화상 ' + GEAR.match.burn + ' (행동력 1 · 정확 판정) · 화상은 매 합 그 값만큼 피해, 적은 저나 동료가 한 합을 써서 1씩 끈다 · 대실패하면 내 옷에 불이 옮겨붙는다 · 한 개비씩 쓴다' },
+  pepper: { name: '고춧가루 봉지', kind: 'gear', short: '근거리 적 눈 멂 ' + GEAR.pepper.blind + '합',
+    desc: '장터에서 산 고춧가루를 한지 봉지에 나눠 담았다. 손끝만 대도 눈이 맵다.',
+    effect: '전투: ' + GEAR.pepper.reach + 'm 안의 표적 얼굴에 뿌려 눈 멂 ' + GEAR.pepper.blind + '합 — 그 적 명중 -30 (행동력 1 · 정확 판정) · 한 봉지씩 쓴다' },
+  umbrella: { name: '박쥐우산', kind: 'gear', uses: GEAR.umbrella.uses, short: '펼치면 적 사격 명중 -' + GEAR.umbrella.hit,
+    desc: '검은 무명을 씌운 서양식 접는 우산. 펼치면 몸통이 거의 가려진다. 총알을 막지는 못하지만 겨누기는 어렵게 한다.',
+    effect: '전투: 펼치면 ' + GEAR.umbrella.turns + '합 동안 적의 사격 명중 -' + GEAR.umbrella.hit + ' (근접 공격에는 소용없음 · 행동력 1) · ' + GEAR.umbrella.uses + '번 펼치면 살이 부러진다' },
+  jintan: { name: '은단', kind: 'gear', short: '다음 공격 명중 +' + GEAR.jintan.hit,
+    desc: '은박을 입힌 작은 환약. 한 줌 입에 털어 넣으면 화한 박하 기운이 머리끝까지 오른다.',
+    effect: '전투: 기가 눌린 것을 털어 내고 다음 공격 명중 +' + GEAR.jintan.hit + ' (행동력 1) · 한 봉씩 쓴다' }
+});
+Object.assign(GLOSSARY, {
+  'act:match':    { kind: '물건', title: '성냥', text: ['불붙은 성냥을 표적에게 던진다. 표적이 ' + GEAR.match.reach + 'm 안에 있어야 한다. 행동력 1.', '정확 판정에 성공하면 화상 ' + GEAR.match.burn + '. 대실패하면 내 옷에 불이 옮겨붙는다.'], rel: ['burn', 'pburn'] },
+  'act:pepper':   { kind: '물건', title: '고춧가루', text: ['표적 얼굴에 고춧가루를 뿌린다. 표적이 ' + GEAR.pepper.reach + 'm 안에 있어야 한다. 행동력 1.', '정확 판정에 성공하면 눈 멂 ' + GEAR.pepper.blind + '합 (그 적 명중 -30).'], rel: ['blind'] },
+  'act:umbrella': { kind: '물건', title: '박쥐우산', text: ['우산을 펼쳐 몸을 가린다. 행동력 1.', GEAR.umbrella.turns + '합 동안 적의 사격 명중 -' + GEAR.umbrella.hit + '. 근접 공격에는 소용없다.', GEAR.umbrella.uses + '번 펼치면 망가진다.'], rel: ['umbrellaOn'] },
+  'act:jintan':   { kind: '물건', title: '은단', text: ['은단을 입에 털어 넣는다. 행동력 1.', '기가 눌린 것이 풀리고, 다음 공격 명중 +' + GEAR.jintan.hit + '.'], rel: ['shaken', 'nextHit'] },
+  burn:       { kind: '효과', title: '화상', text: ['매 합 화상 값만큼 피해를 입는다.', '적은 저 스스로나 ' + GEAR.burn.allyReach + 'm 안의 동료가 한 합을 써서 1씩 끈다. 끄지 않으면 줄지 않는다.'], rel: ['act:match'] },
+  pburn:      { kind: '상태', title: '내 옷에 불', text: ['매 합 화상 값만큼 체력을 잃는다.', '매 합 1씩 저절로 준다.'], rel: ['burn'] },
+  armor:      { kind: '상태', title: '방어력', text: ['외투·조끼가 받는 피해를 체력보다 먼저 막는다.', '닳은 방어력은 돌아오지 않는다. 다 닳으면 그 옷은 사라진다.', '화상 피해는 막지 못한다.'], rel: [] },
+  umbrellaOn: { kind: '상태', title: '우산을 펼침', text: ['적의 사격 명중 -' + GEAR.umbrella.hit + '.', '표시된 합이 지나면 접힌다.'], rel: ['act:umbrella'] },
+  glassesOn:  { kind: '상태', title: '안경', text: ['이번 전투 내내 내 명중 +' + GEAR.glasses.hit + '.'], rel: [] },
+  nextHit:    { kind: '상태', title: '정신이 번쩍', text: ['다음 공격 하나의 명중 +' + GEAR.jintan.hit + '.'], rel: ['act:jintan'] }
+});
 function josaEulReul(w) { w = String(w || ''); var c = w.charCodeAt(w.length - 1) - 0xAC00; return (c >= 0 && c <= 11171 && c % 28) ? '을' : '를'; }
 function hasItem(p, id) { return !!(p && p.items && p.items[id]); }
 function itemName(id) { return (ITEMS[id] && ITEMS[id].name) || id; }
@@ -270,7 +319,7 @@ var SCORE = {
   per: { weeks: 8, money: 1, kills: 20, medkit: 10, weapons: 25, ammo: 2, quests: 150, questEnds: 40, docs: 15 },
   label: { weeks: '살아낸 주', money: '소지금', kills: '쓰러뜨린 적', medkit: '구급약', weapons: '무기 종류', ammo: '탄환', quests: '성공한 장기 이야기', questEnds: '그 밖에 끝난 장기 이야기', docs: '증명서' },
   unit: { weeks: '주', money: '원', kills: '명', medkit: '개', weapons: '종', ammo: '발', quests: '개', questEnds: '개', docs: '장' },
-  success: ['end_success', 'end_freed', 'end_letter'],
+  success: ['end_success', 'end_freed', 'end_letter', 'end_rise', 'end_saved'],
   tiers: [150, 400, 800, 1400, 2200, 3200]
 };
 /* 재고 보충: 선택지에 stock: '이름' 이 있으면 사고 나서 품절 — weeks ± spread 주 뒤 다시 들어온다 (물건마다 따로)

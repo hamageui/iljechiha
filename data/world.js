@@ -69,7 +69,7 @@ var LIE_LOW_TEXT = ['셋방 문을 걸어 잠그고 숨을 죽였다. 골목을 
   '하루 종일 장독대 뒤에서 짚신을 삼았다. 바깥 일에는 귀를 막았다.', '모자를 눌러쓰고 조용히 지냈다. 눈에 띄지 않는 것도 기술이다.'];
 /* ───── 상시 상점 ─────
    도시마다 하나, '행동' 목록에 늘 있다. 이용은 한 달에 한 번 (p.shopMonth = 'y-m').
-   합법적인 물건만: 생필품·회복(늘) + 능력치 물건(이달의 물건 SHOP.monthlyCount 개, 도시·달마다 바뀜 · 한 번 들를 때 하나씩)
+   합법적인 물건만: 생필품·회복(늘) + 전투 물건(늘 · SHOP.gear) + 능력치 물건(이달의 물건 SHOP.monthlyCount 개, 도시·달마다 바뀜 · 한 번 들를 때 하나씩)
    한 번 들르면 여러 개를 살 수 있다 (사고 나면 '계속' → 다시 가게 안). */
 var SHOP = {
   monthlyCount: 2,
@@ -77,6 +77,16 @@ var SHOP = {
     { id: 'meal', label: '국밥 한 그릇', price: 1, fx: { hp: 3 }, text: '가게 한쪽 평상에서 국밥 한 그릇을 비웠다. 속이 뜨끈해진다.' },
     { id: 'medkit', label: '구급약 (고약 · 붕대)', price: 3, fx: { medkit: 1 }, text: '고약 한 덩이와 무명 붕대를 기름종이에 싸서 받았다.' },
     { id: 'tonic', label: '달인 한약 한 첩', price: 5, fx: { hp: 8 }, text: '주인이 뒷방 약탕기에서 막 달인 한약을 사발에 따라 준다. 쓴맛이 혀끝에 남지만 몸이 한결 가볍다.' }
+  ],
+  /* 전투 물건 (늘 판다 · core.js 의 GEAR·ITEMS) — item: 얻는 물건(배열이면 여러 개) · show: 보이는 조건 (외투·조끼·안경·우산은 이미 있으면 안 보인다) */
+  gear: [
+    { id: 'match', label: '성냥 한 갑 (세 개비)', price: 1, item: ['match', 'match', 'match'], text: '주인이 성냥갑을 흔들어 보이고 건넨다. 굵은 개비 셋을 따로 골라 기름종이에 쌌다.' },
+    { id: 'pepper', label: '고춧가루 한 봉지', price: 2, item: 'pepper', text: '고춧가루를 한지 봉지에 담아 노끈으로 묶었다. 손끝이 벌써 맵다.' },
+    { id: 'jintan', label: '은단 한 봉', price: 2, item: 'jintan', text: '은박을 입힌 은단 한 봉. 주인이 “정신 번쩍 들 때 좋소” 하며 웃는다.' },
+    { id: 'glasses', label: '대모테 안경', price: 5, item: 'glasses', show: { noItems: ['glasses'] }, text: '거울 앞에서 안경을 써 보았다. 간판 글씨가 갑자기 또렷하다. 알이 얇아 조심해야겠다.' },
+    { id: 'umbrella', label: '박쥐우산', price: 5, item: 'umbrella', show: { noItems: ['umbrella'] }, text: '검은 박쥐우산을 펴 보았다. 살 여덟 개가 팽팽하다. 접으면 지팡이처럼 들고 다닐 수 있다.' },
+    { id: 'vest', label: '솜누비 조끼', price: 8, item: 'vest', show: { noItems: ['vest'] }, text: '솜을 두툼하게 누빈 조끼를 저고리 안에 받쳐 입었다. 겉으로는 티가 나지 않는다.' },
+    { id: 'coat', label: '모직 외투', price: 14, item: 'coat', show: { noItems: ['coat'] }, text: '깃이 넓은 검정 모직 외투. 걸쳐 보니 어깨가 묵직하다. 주인이 “이 겨울은 거뜬하겠소” 하며 깃을 세워 준다.' }
   ],
   monthly: [
     { id: 'novel', label: '언문 소설책', price: 5, fx: { int: 1 }, text: '손때 묻은 언문 소설을 한 권 샀다. 며칠 밤을 등잔 밑에서 읽었다.' },
@@ -114,13 +124,15 @@ function shopEvent(self, d) {
   Object.keys(p.flags).forEach(function (k) { if (k.indexOf('shopbuy:') === 0) delete p.flags[k]; });
   var opt = function (it, once) {
     var o = { label: it.label + (once ? ' · 이달의 물건' : ''), cost: { money: it.price },
-      ok: { text: it.text, fx: it.fx, step: 'main' } };
+      ok: { text: it.text, fx: it.fx, item: it.item, step: 'main' } };
+    if (it.show) o.show = it.show;
     if (once) { o.show = { noFlags: ['shopbuy:' + it.id] }; o.ok.flag = 'shopbuy:' + it.id; }
     return o;
   };
-  var opts = SHOP.always.map(function (it) { return opt(it, false); }).concat(stock.map(function (it) { return opt(it, true); }));
+  var opts = SHOP.always.map(function (it) { return opt(it, false); }).concat((SHOP.gear || []).map(function (it) { return opt(it, false); }), stock.map(function (it) { return opt(it, true); }));
   opts.push({ label: '가게를 나선다', ok: { text: S.bye } });
-  return { id: 'shop_' + city, title: S.name, kind: 'shop', text: S.text, options: opts,
+  /* screen: 'shop' → 선택지 대신 진열장 화면(눌러서 산다). options 는 개발자 탭 시험용으로 남겨 둔다 */
+  return { id: 'shop_' + city, title: S.name, kind: 'shop', screen: 'shop', city: city, text: S.text, options: opts,
     steps: { main: { title: S.name, text: S.again, options: opts } } };
 }
 /* ───── 대서소: 증명서를 떼는 곳 (도시마다 관청 앞) ─────
